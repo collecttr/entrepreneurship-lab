@@ -59,7 +59,7 @@ export function DashboardPage() {
             className="pointer-events-none absolute inset-0 opacity-90"
             style={{
               background:
-                'linear-gradient(120deg, rgba(15,107,109,0.16) 0%, transparent 45%), linear-gradient(220deg, rgba(201,136,42,0.12) 0%, transparent 40%)',
+                'linear-gradient(120deg, rgba(0,0,0,0.06) 0%, transparent 45%), linear-gradient(220deg, rgba(0,0,0,0.03) 0%, transparent 40%)',
             }}
           />
           <div className="relative">
@@ -101,9 +101,9 @@ export function DashboardPage() {
           </div>
           <p className="mt-3 text-sm leading-relaxed text-slate">{currentWeek.summary_ru}</p>
           <p className="mt-3 text-xs text-slate">
-            Unlock до недели {settings.current_unlocked_week} · цель {settings.hours_per_week_target}{' '}
-            мин/нед · AI spend lock:{' '}
-            {settings.ai_spend_lock ? 'включён (AI выкл)' : 'выключен'}
+            Открыто до недели {settings.current_unlocked_week} · цель {settings.hours_per_week_target}{' '}
+            мин/нед · блокировка AI:{' '}
+            {settings.ai_spend_lock ? 'включена (платный AI выкл)' : 'выключена'}
             <DemoLabel show={isDemoData} />
           </p>
           <Link to="/program" className="mt-4 inline-block text-sm font-semibold text-teal hover:underline">
@@ -242,12 +242,19 @@ export function DashboardPage() {
             Рекомендации на завтра
             <DemoLabel show={isDemoData} />
           </h3>
-          <p className="mt-1 text-xs text-slate">Rule-based (без AI) · spend lock по умолчанию ON</p>
+          <p className="mt-1 text-xs text-slate">
+            По правилам (без платного AI) · блокировка AI по умолчанию ON
+          </p>
           <ul className="mt-3 space-y-2">
             {data.recommendationsTomorrow.map((r) => (
               <li key={r.id} className="rounded-2xl bg-teal-soft/40 px-3 py-2.5 text-sm">
                 <p className="font-medium text-ink">{r.title}</p>
                 <p className="text-xs text-slate">{r.reason}</p>
+                {r.href ? (
+                  <Link to={r.href} className="mt-1 inline-block text-xs font-semibold text-teal">
+                    Открыть →
+                  </Link>
+                ) : null}
               </li>
             ))}
           </ul>

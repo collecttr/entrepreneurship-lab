@@ -97,7 +97,7 @@ export function WeekPage() {
                   </a>
                   <span className="text-xs text-slate">{s.provider}</span>
                   <span className="rounded bg-mist px-1.5 text-[10px] font-semibold uppercase">
-                    {link.is_mandatory ? 'обязательно' : 'optional'}
+                    {link.is_mandatory ? 'обязательно' : 'по желанию'}
                   </span>
                   <span className="text-xs text-slate">{link.study_minutes_planned} мин</span>
                 </div>

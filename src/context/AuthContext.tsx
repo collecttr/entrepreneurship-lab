@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { DEMO_USERS } from '@/lib/demo-data'
+import { refreshUnlockedWeekFromSupabase } from '@/lib/progress-store'
 import { isDemoAuth, supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
@@ -116,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
 
+      void refreshUnlockedWeekFromSupabase()
       if (!cancelled) setLoading(false)
 
       return () => {

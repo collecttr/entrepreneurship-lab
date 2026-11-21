@@ -1,7 +1,8 @@
 import { DEMO_USERS } from '@/lib/demo-data'
-import { isDemoAuth } from '@/lib/supabase'
+import { isDemoAuth, supabase, supabaseConfigured } from '@/lib/supabase'
 
 const CHANNEL = 'elab-collab-v1'
+const useLiveCollab = () => Boolean(supabaseConfigured && !isDemoAuth && supabase)
 const MSG_KEY = 'elab_messages'
 const DISC_KEY = 'elab_discussions'
 const POST_KEY = 'elab_discussion_posts'
@@ -85,6 +86,36 @@ function broadcast(event: CollabEvent) {
   window.dispatchEvent(new CustomEvent('elab-collab', { detail: event }))
 }
 
+async function hydrateMessagesFromSupabase() {
+  if (!useLiveCollab() || !supabase) return
+  const { data, error } = await supabase
+    .from('messages')
+    .select('id,sender_id,body_md,created_at,read_at,attachment_name,attachment_stub')
+    .order('created_at', { ascending: true })
+  if (error) {
+    console.warn('messages hydrate skipped:', error.message)
+    return
+  }
+  if (data) {
+    writeJson(MSG_KEY, data as ChatMessage[])
+    broadcast({ type: 'messages' })
+  }
+}
+
+async function hydrateForumFromSupabase() {
+  if (!useLiveCollab() || !supabase) return
+  const [disc, posts] = await Promise.all([
+    supabase.from('discussions').select('*').order('updated_at', { ascending: false }),
+    supabase.from('discussion_posts').select('*').order('created_at', { ascending: true }),
+  ])
+  if (disc.error) console.warn('discussions hydrate:', disc.error.message)
+  else if (disc.data) writeJson(DISC_KEY, disc.data as Discussion[])
+  if (posts.error) console.warn('posts hydrate:', posts.error.message)
+  else if (posts.data) writeJson(POST_KEY, posts.data as DiscussionPost[])
+  broadcast({ type: 'discussions' })
+  broadcast({ type: 'posts' })
+}
+
 export function subscribeCollab(onChange: (event: CollabEvent) => void): () => void {
   const onCustom = (e: Event) => onChange((e as CustomEvent<CollabEvent>).detail)
   const onStorage = (e: StorageEvent) => {
@@ -105,16 +136,41 @@ export function subscribeCollab(onChange: (event: CollabEvent) => void): () => v
   window.addEventListener('elab-collab', onCustom)
   window.addEventListener('storage', onStorage)
   const poll = window.setInterval(() => onChange({ type: 'messages' }), 4000)
+
+  let removeRealtime: (() => void) | null = null
+  const live = supabase
+  if (useLiveCollab() && live) {
+    void hydrateMessagesFromSupabase()
+    void hydrateForumFromSupabase()
+    const channel = live
+      .channel('elab-collab-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+        void hydrateMessagesFromSupabase().then(() => onChange({ type: 'messages' }))
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'discussions' }, () => {
+        void hydrateForumFromSupabase().then(() => onChange({ type: 'discussions' }))
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'discussion_posts' }, () => {
+        void hydrateForumFromSupabase().then(() => onChange({ type: 'posts' }))
+      })
+      .subscribe()
+    removeRealtime = () => {
+      void live.removeChannel(channel)
+    }
+  }
+
   return () => {
     window.removeEventListener('elab-collab', onCustom)
     window.removeEventListener('storage', onStorage)
     window.clearInterval(poll)
     bc?.close()
+    removeRealtime?.()
   }
 }
 
 export function demoTransportLabel(): string {
-  if (!isDemoAuth) return 'Supabase Realtime (если publication включена)'
+  if (useLiveCollab()) return 'Supabase Realtime (чат/форум) · при сбое — локальный кэш'
+  if (!isDemoAuth) return 'Supabase настроен, но демо-флаг/клиент недоступен — localStorage fallback'
   return 'Демо-синхронизация: localStorage + BroadcastChannel / polling (не production Realtime)'
 }
 
@@ -149,6 +205,21 @@ export function sendMessage(
   all.push(msg)
   writeJson(MSG_KEY, all)
   broadcast({ type: 'messages' })
+  if (useLiveCollab() && supabase) {
+    void supabase
+      .from('messages')
+      .insert({
+        id: msg.id,
+        sender_id: msg.sender_id,
+        body_md: msg.body_md,
+        created_at: msg.created_at,
+        attachment_name: msg.attachment_name,
+        attachment_stub: msg.attachment_stub,
+      })
+      .then(({ error }) => {
+        if (error) console.warn('messages insert:', error.message)
+      })
+  }
   return msg
 }
 
@@ -216,6 +287,24 @@ export function createDiscussion(input: {
   all.unshift(d)
   writeJson(DISC_KEY, all)
   broadcast({ type: 'discussions' })
+  if (useLiveCollab() && supabase) {
+    void supabase
+      .from('discussions')
+      .insert({
+        id: d.id,
+        week_number: d.week_number,
+        title: d.title,
+        description_md: d.description_md,
+        kind: d.kind,
+        author_id: d.author_id,
+        is_resolved: d.is_resolved,
+        created_at: d.created_at,
+        updated_at: d.updated_at,
+      })
+      .then(({ error }) => {
+        if (error) console.warn('discussions insert:', error.message)
+      })
+  }
   return d
 }
 
@@ -225,6 +314,15 @@ export function setDiscussionResolved(id: string, resolved: boolean) {
   )
   writeJson(DISC_KEY, all)
   broadcast({ type: 'discussions' })
+  if (useLiveCollab() && supabase) {
+    void supabase
+      .from('discussions')
+      .update({ is_resolved: resolved, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) console.warn('discussions resolve:', error.message)
+      })
+  }
 }
 
 export function listPosts(discussionId: string): DiscussionPost[] {
@@ -260,6 +358,23 @@ export function addPost(input: {
   writeJson(DISC_KEY, discs)
   broadcast({ type: 'posts' })
   broadcast({ type: 'discussions' })
+  if (useLiveCollab() && supabase) {
+    void supabase
+      .from('discussion_posts')
+      .insert({
+        id: post.id,
+        discussion_id: post.discussion_id,
+        author_id: post.author_id,
+        body_md: post.body_md,
+        parent_id: post.parent_id,
+        quote_md: post.quote_md,
+        attachment_name: post.attachment_name,
+        created_at: post.created_at,
+      })
+      .then(({ error }) => {
+        if (error) console.warn('discussion_posts insert:', error.message)
+      })
+  }
   return post
 }
 

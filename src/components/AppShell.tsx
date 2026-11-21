@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { subscribeCollab, unreadCount } from '@/lib/collab-store'
+import { AiDownBanner } from './AiDownBanner'
 import { DemoBanner } from './DemoBanner'
 
 const NAV = [
@@ -48,6 +49,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen">
       <DemoBanner />
+      <AiDownBanner />
       <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-7xl gap-0 md:gap-6 md:px-4 md:py-4">
         <aside
           className={`fixed inset-y-0 left-0 z-40 w-72 transform surface transition md:static md:translate-x-0 md:rounded-2xl ${

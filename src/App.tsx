@@ -20,6 +20,7 @@ import { DocumentsPage } from '@/pages/DocumentsPage'
 import { DocumentDetailPage } from '@/pages/DocumentDetailPage'
 import { AiPage } from '@/pages/AiPage'
 import { AiTrainerPage } from '@/pages/AiTrainerPage'
+import { ExamPage } from '@/pages/ExamPage'
 import { NotFoundPage } from '@/pages/stubs'
 
 const queryClient = new QueryClient()
@@ -41,6 +42,7 @@ export default function App() {
                 <Route path="/assignments" element={<AssignmentsPage />} />
                 <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
+                <Route path="/exams/:id" element={<ExamPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/forum" element={<ForumPage />} />
                 <Route path="/forum/:discussionId" element={<ForumTopicPage />} />

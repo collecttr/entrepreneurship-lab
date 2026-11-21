@@ -410,11 +410,14 @@ export function examineAdaptive(userId: string, input: { notes: string }): Exami
     ],
     strengths: done ? ['Есть отчёт о выполнении'] : [],
     gaps: done ? [] : ['Опишите, что сделали (не лозунг)'],
-    next_actions: items.map((i) => `${i.skill}: ${i.exercise}${i.replaces_optional_work ? ' (замена optional)' : ' (optional)'}`),
+    next_actions: items.map(
+      (i) =>
+        `${i.skill}: ${i.exercise}${i.replaces_optional_work ? ' (замена необязательной работы)' : ' (по желанию)'}`,
+    ),
     reply_md: items
       .map(
         (i, idx) =>
-          `${idx + 1}. **${i.skill}** ${i.replaces_optional_work ? '· замена optional work' : '· optional'}\n${i.exercise}`,
+          `${idx + 1}. **${i.skill}** ${i.replaces_optional_work ? '· замена необязательной работы' : '· по желанию'}\n${i.exercise}`,
       )
       .join('\n\n'),
   })

@@ -1,16 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { WEEKS } from '@/data/curriculum'
 import { isSpendLockOn } from '@/lib/ai-config'
-import { getUnlockedWeek, setUnlockedWeek } from '@/lib/progress-store'
+import {
+  getUnlockedWeek,
+  refreshUnlockedWeekFromSupabase,
+  setUnlockedWeek,
+} from '@/lib/progress-store'
+import { isDemoAuth, supabaseConfigured } from '@/lib/supabase'
 
 export function AdminPage() {
   const [unlocked, setUnlocked] = useState(getUnlockedWeek())
   const [saved, setSaved] = useState<string | null>(null)
 
+  useEffect(() => {
+    void refreshUnlockedWeekFromSupabase().then(setUnlocked)
+  }, [])
+
   function unlockTo(week: number) {
     setUnlockedWeek(week)
     setUnlocked(week)
-    setSaved(`Открыто до недели ${week}`)
+    setSaved(
+      supabaseConfigured && !isDemoAuth
+        ? `Открыто до недели ${week} (синхронизация с program_settings)`
+        : `Открыто до недели ${week} (локально; после Supabase — общий unlock)`,
+    )
   }
 
   return (
@@ -19,13 +32,13 @@ export function AdminPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Админ</p>
         <h1 className="mt-2 font-display text-3xl text-ink">Управление программой</h1>
         <p className="mt-2 text-sm text-slate">
-          Progressive unlock: learners видят недели ≤ текущего значения. Сейчас открыто до недели{' '}
+          Постепенное открытие: участники видят недели ≤ текущего значения. Сейчас открыто до недели{' '}
           <strong className="text-ink">{unlocked}</strong>.
         </p>
       </header>
 
       <section className="surface rounded-3xl p-5">
-        <h2 className="font-display text-xl">Unlock недели</h2>
+        <h2 className="font-display text-xl">Открытие недель</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {[1, 2, 3, 4, 8, 12, 16, 20, 24, 26].map((w) => (
             <button
@@ -69,11 +82,15 @@ export function AdminPage() {
       </section>
 
       <section className="surface rounded-3xl p-5">
-        <h2 className="font-display text-xl">AI spend lock</h2>
+        <h2 className="font-display text-xl">Блокировка платного AI</h2>
         <p className="mt-2 text-sm text-slate">
-          Сейчас: <strong className="text-ink">{isSpendLockOn() ? 'ON (платный AI заблокирован)' : 'OFF'}</strong>.
-          Локальные экзаменаторы работают всегда. Снятие lock — только через env
-          (`VITE_AI_SPEND_LOCK=false` + `VITE_AI_LIVE_UNLOCK=true`) и server secrets; ключ провайдера не в клиенте.
+          Сейчас:{' '}
+          <strong className="text-ink">
+            {isSpendLockOn() ? 'ON (платный AI заблокирован)' : 'OFF'}
+          </strong>
+          . Локальные экзаменаторы работают всегда. Снятие блокировки — только через env (
+          `VITE_AI_SPEND_LOCK=false` + `VITE_AI_LIVE_UNLOCK=true`) и серверные секреты; ключ провайдера
+          не в клиенте.
         </p>
       </section>
 

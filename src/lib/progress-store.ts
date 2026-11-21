@@ -1,10 +1,12 @@
 import { WEEKS, type AssignmentDef } from '@/data/curriculum'
 import { SKILLS } from '@/data/skills'
+import { isDemoAuth, supabase, supabaseConfigured } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
 const UNLOCK_KEY = 'elab_unlocked_week'
 const SUBMISSIONS_KEY = 'elab_submissions'
 const SKILL_KEY = 'elab_skill_progress'
+const EVIDENCE_KEY = 'elab_skill_evidence'
 
 export type SubmissionStatus = 'draft' | 'submitted' | 'returned' | 'graded'
 
@@ -24,6 +26,16 @@ export interface SkillScore {
   score_ema: number
   evidence_count: number
   last_updated: string
+}
+
+export interface SkillEvidence {
+  id: string
+  user_id: string
+  skill_id: string
+  source: 'assignment' | 'trainer' | 'exam'
+  label: string
+  signal: number
+  at: string
 }
 
 function readJson<T>(key: string, fallback: T): T {
@@ -46,7 +58,42 @@ export function getUnlockedWeek(): number {
 }
 
 export function setUnlockedWeek(week: number) {
-  localStorage.setItem(UNLOCK_KEY, String(Math.max(1, Math.min(26, week))))
+  const next = Math.max(1, Math.min(26, week))
+  localStorage.setItem(UNLOCK_KEY, String(next))
+  window.dispatchEvent(new CustomEvent('elab-unlock', { detail: { week: next } }))
+  void syncUnlockedWeekToSupabase(next)
+}
+
+/** Pull unlock from program_settings when Supabase is live; keep local cache. */
+export async function refreshUnlockedWeekFromSupabase(): Promise<number> {
+  if (isDemoAuth || !supabaseConfigured || !supabase) return getUnlockedWeek()
+  try {
+    const { data, error } = await supabase
+      .from('program_settings')
+      .select('current_unlocked_week')
+      .eq('id', 1)
+      .maybeSingle()
+    if (error) throw error
+    if (data?.current_unlocked_week) {
+      const next = Math.max(1, Math.min(26, Number(data.current_unlocked_week)))
+      localStorage.setItem(UNLOCK_KEY, String(next))
+      return next
+    }
+  } catch (err) {
+    console.warn('unlock refresh skipped:', err)
+  }
+  return getUnlockedWeek()
+}
+
+async function syncUnlockedWeekToSupabase(week: number) {
+  if (isDemoAuth || !supabaseConfigured || !supabase) return
+  try {
+    await supabase
+      .from('program_settings')
+      .upsert({ id: 1, current_unlocked_week: week, updated_at: new Date().toISOString() })
+  } catch (err) {
+    console.warn('unlock sync skipped:', err)
+  }
 }
 
 export function isWeekUnlocked(weekNumber: number, unlocked = getUnlockedWeek()): boolean {
@@ -114,11 +161,19 @@ export function submitAssignment(
     row.submitted_at = now
   }
   writeJson(SUBMISSIONS_KEY, all)
-  bumpSkills(authorId, assignment.skill_slugs)
+  bumpSkills(authorId, assignment.skill_slugs, 55, {
+    source: 'assignment',
+    label: `Сдача ${assignment.code}`,
+  })
   return row
 }
 
-function bumpSkills(authorId: string, skillSlugs: string[], signal = 55) {
+function bumpSkills(
+  authorId: string,
+  skillSlugs: string[],
+  signal = 55,
+  evidence?: { source: SkillEvidence['source']; label: string },
+) {
   const map = readJson<Record<string, SkillScore[]>>(SKILL_KEY, {})
   const list = map[authorId] ?? SKILLS.map((s) => ({
     skill_id: s.id,
@@ -127,6 +182,8 @@ function bumpSkills(authorId: string, skillSlugs: string[], signal = 55) {
     last_updated: new Date().toISOString().slice(0, 10),
   }))
   const clamped = Math.max(0, Math.min(100, signal))
+  const now = new Date().toISOString()
+  const evidenceLog = readJson<SkillEvidence[]>(EVIDENCE_KEY, [])
   for (const slug of skillSlugs) {
     const skill = SKILLS.find((s) => s.slug === slug)
     if (!skill) continue
@@ -134,15 +191,37 @@ function bumpSkills(authorId: string, skillSlugs: string[], signal = 55) {
     if (!row) continue
     row.evidence_count += 1
     row.score_ema = Math.min(100, Math.round(row.score_ema * 0.7 + clamped * 0.3))
-    row.last_updated = new Date().toISOString().slice(0, 10)
+    row.last_updated = now.slice(0, 10)
+    if (evidence) {
+      evidenceLog.unshift({
+        id: crypto.randomUUID(),
+        user_id: authorId,
+        skill_id: skill.id,
+        source: evidence.source,
+        label: evidence.label,
+        signal: clamped,
+        at: now,
+      })
+    }
   }
   map[authorId] = list
   writeJson(SKILL_KEY, map)
+  if (evidence) {
+    writeJson(EVIDENCE_KEY, evidenceLog.slice(0, 200))
+  }
 }
 
 /** Update skill EMA from local examiner / sim scores (not page views). */
 export function applyTrainerSkillBump(authorId: string, skillSlugs: string[], score0to100: number) {
-  bumpSkills(authorId, skillSlugs, score0to100)
+  bumpSkills(authorId, skillSlugs, score0to100, {
+    source: 'trainer',
+    label: `Тренировка · сигнал ${Math.round(score0to100)}`,
+  })
+}
+
+export function listSkillEvidence(userId: string, skillId?: string): SkillEvidence[] {
+  const all = readJson<SkillEvidence[]>(EVIDENCE_KEY, []).filter((e) => e.user_id === userId)
+  return skillId ? all.filter((e) => e.skill_id === skillId) : all
 }
 
 export function getSkillProgress(authorId: string): SkillScore[] {

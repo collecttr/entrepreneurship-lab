@@ -104,7 +104,7 @@ export function ChatPage() {
                   <p className="whitespace-pre-wrap">{m.body_md}</p>
                   {m.attachment_stub && m.attachment_name && (
                     <p className={`mt-1 text-xs ${mine ? 'text-on-accent/80' : 'text-slate'}`}>
-                      📎 {m.attachment_name} (stub — private storage на этапе 5)
+                      📎 {m.attachment_name} (имя файла; сам файл — через Документы / signed URL)
                     </p>
                   )}
                   <p className={`mt-1 text-[10px] ${mine ? 'text-on-accent/70' : 'text-slate'}`}>
@@ -121,7 +121,7 @@ export function ChatPage() {
         <form onSubmit={onSend} className="shrink-0 border-t border-ink/5 p-3 md:p-4">
           {attachName && (
             <p className="mb-2 text-xs text-slate">
-              Вложение (stub): {attachName}{' '}
+              Вложение (имя): {attachName}{' '}
               <button type="button" className="text-teal" onClick={() => setAttachName(null)}>
                 убрать
               </button>

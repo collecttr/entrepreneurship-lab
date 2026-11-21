@@ -8,8 +8,8 @@ export function DemoBanner() {
       <strong className="font-semibold">Демо-режим.</strong>{' '}
       {supabaseConfigured
         ? 'VITE_DEMO_AUTH=true — локальная сессия без реального Supabase Auth.'
-        : 'Supabase URL/ключ не заданы. Вход через allowlist демо-аккаунтов. Чат/форум: localStorage + BroadcastChannel (не production Realtime). Два аккаунта — две вкладки.'}{' '}
-      Для боевого режима заполните .env (см. .env.example).
+        : 'Supabase URL/ключ не заданы в Vercel env. Вход через allowlist демо-аккаунтов. Чат/форум: localStorage + BroadcastChannel. Два аккаунта — две вкладки.'}{' '}
+      Боевой режим: задайте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в Vercel (см. runbook) — не в чате.
     </div>
   )
 }

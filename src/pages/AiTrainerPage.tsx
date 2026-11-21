@@ -229,7 +229,8 @@ export function AiTrainerPage() {
             {adaptivePreview.map((a) => (
               <li key={a.skill}>
                 <strong className="text-ink">{a.skill}</strong>
-                {a.replaces_optional_work ? ' · замена optional' : ' · optional'}: {a.exercise}
+                {a.replaces_optional_work ? ' · замена необязательной работы' : ' · по желанию'}:{' '}
+                {a.exercise}
               </li>
             ))}
           </ul>

@@ -122,17 +122,26 @@ function buildFromCurriculum(profile: Profile): DashboardData {
       {
         id: 'rec-overdue',
         title: overdue[0] ? `Закрыть ${overdue[0].title}` : 'Сдать текущее задание слота',
-        reason: overdue[0] ? 'Правило: просроченные черновики первыми' : 'Правило: текущая unlocked неделя',
+        reason: overdue[0]
+          ? 'Правило: просроченные черновики первыми'
+          : 'Правило: текущая открытая неделя',
+        href: overdue[0]
+          ? `/assignments/${overdue[0].title}`
+          : tasksToday[0]
+            ? `/assignments/${tasksToday[0].id}`
+            : '/assignments',
       },
       {
         id: 'rec-weak',
-        title: `Практика: ${weakSkills[0]?.title_ru ?? 'навык'}`,
-        reason: `Слабый навык (${weakSkills[0]?.score_ema ?? 0})`,
+        title: `Адаптивная практика: ${weakSkills[0]?.title_ru ?? 'навык'}`,
+        reason: `Слабый навык (${weakSkills[0]?.score_ema ?? 0}) — короткое упражнение`,
+        href: '/ai/adaptive',
       },
       {
         id: 'rec-source',
         title: 'Обязательный источник текущей недели',
         reason: week.sources.find((s) => s.is_mandatory)?.source_id ?? 'источник',
+        href: '/library',
       },
     ],
     calendarDays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((label, i) => ({

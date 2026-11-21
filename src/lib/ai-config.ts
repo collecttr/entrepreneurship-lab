@@ -73,7 +73,7 @@ export const TRAINERS: TrainerMeta[] = [
   {
     slug: 'adaptive',
     title_ru: 'Адаптивные упражнения',
-    blurb_ru: 'Короткие задания по слабым навыкам (optional / замена optional work).',
+    blurb_ru: 'Короткие задания по слабым навыкам (по желанию / замена необязательной работы).',
     skills: ['entrepreneurial'],
   },
 ]
@@ -109,17 +109,17 @@ export function examinerBanner(): { tone: 'ok' | 'warn'; text: string } {
   if (mode === 'local_examiner') {
     return {
       tone: 'ok',
-      text: 'Локальный экзаменатор (rule-based). Live AI не вызывается. Spend lock = ON.',
+      text: 'Локальный экзаменатор (по правилам). Платный AI не вызывается. Блокировка расходов = ON.',
     }
   }
   if (mode === 'live_blocked') {
     return {
       tone: 'warn',
-      text: 'Режим без платного AI: spend lock включён. Провайдер помечен как настроенный, но вызовы заблокированы. Работает локальный экзаменатор.',
+      text: 'Режим без платного AI: блокировка включена. Провайдер помечен как настроенный, но вызовы заблокированы. Работает локальный экзаменатор.',
     }
   }
   return {
     tone: 'warn',
-    text: 'Live AI theoretically unlocked — в этом MVP клиент всё равно использует локальный экзаменатор; proxy Functions появятся при деплое секретов.',
+    text: 'Платный AI теоретически разблокирован — в этом MVP клиент всё равно использует локальный экзаменатор; серверный proxy появится после секретов.',
   }
 }

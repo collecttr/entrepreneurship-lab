@@ -53,6 +53,7 @@ export interface RecommendationItem {
   id: string
   title: string
   reason: string
+  href?: string
 }
 
 export interface ActivityItem {

@@ -159,7 +159,46 @@ export async function createDocumentWithUpload(input: {
   writeJson(GROUPS_KEY, [group, ...listDocumentGroups()])
   writeJson(FILES_KEY, [...readJson<DocumentFileMeta[]>(FILES_KEY, []), fileMeta])
   broadcast()
+  await syncDocumentMetaToSupabase(group, fileMeta)
   return group
+}
+
+async function syncDocumentMetaToSupabase(group: DocumentGroup, fileMeta: DocumentFileMeta) {
+  if (isDemoAuth || !supabaseConfigured || !supabase) return
+  try {
+    const { error: gErr } = await supabase.from('document_groups').upsert({
+      id: group.id,
+      owner_id: group.owner_id,
+      title: group.title,
+      description_md: group.description_md,
+      category: group.category,
+      week_number: group.week_number,
+      assignment_code: group.assignment_code,
+      source_notes: group.source_notes,
+      created_at: group.created_at,
+      updated_at: group.updated_at,
+    })
+    if (gErr) throw gErr
+    const { error: fErr } = await supabase.from('document_files').upsert({
+      id: fileMeta.id,
+      document_group_id: fileMeta.document_group_id,
+      owner_id: fileMeta.owner_id,
+      path: fileMeta.path,
+      filename: fileMeta.filename,
+      mime: fileMeta.mime,
+      size_bytes: fileMeta.size_bytes,
+      version: fileMeta.version,
+      created_at: fileMeta.created_at,
+    })
+    if (fErr) throw fErr
+    await supabase.from('document_evaluations').upsert({
+      document_group_id: group.id,
+      ai_status: 'pending_ai',
+      updated_at: group.updated_at,
+    })
+  } catch (err) {
+    console.warn('document meta sync skipped:', err)
+  }
 }
 
 export async function uploadNewVersion(groupId: string, ownerId: string, file: File): Promise<DocumentFileMeta> {
@@ -209,7 +248,9 @@ export async function uploadNewVersion(groupId: string, ownerId: string, file: F
       : g,
   )
   writeJson(GROUPS_KEY, groups)
+  const updated = groups.find((g) => g.id === groupId)
   broadcast()
+  if (updated) await syncDocumentMetaToSupabase(updated, fileMeta)
   return fileMeta
 }
 
