@@ -1,8 +1,19 @@
 import { Link } from 'react-router-dom'
 import { buildAdaptiveExercises } from '@/ai/examiners'
-import { SKILLS } from '@/data/skills'
+import { SKILLS, type SkillCategory } from '@/data/skills'
 import { useAuth } from '@/context/AuthContext'
 import { getSkillProgress, listSkillEvidence } from '@/lib/progress-store'
+
+const CATEGORY_RU: Record<SkillCategory, string> = {
+  sales: 'продажи',
+  negotiation: 'переговоры',
+  presentation: 'презентации',
+  psychology: 'психология',
+  entrepreneurial: 'предпринимательство',
+  marketing: 'маркетинг',
+  ops: 'операции',
+  speaking: 'выступления',
+}
 
 function Bar({ value }: { value: number }) {
   return (
@@ -26,8 +37,8 @@ export function SkillsPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Навыки</p>
         <h1 className="mt-2 font-display text-3xl text-ink">Карта навыков</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate">
-          Оценки обновляются только по доказательствам: сдачи заданий и локальные тренажёры (EMA). Не
-          по просмотрам страниц. Платный AI не требуется.
+          Баллы растут только от сдач и тренажёров (скользящая оценка: недавние результаты весят
+          сильнее). Просмотр страниц не считается. Платный AI не нужен.
         </p>
       </header>
 
@@ -78,7 +89,7 @@ export function SkillsPage() {
 
       <section className="surface rounded-3xl p-5">
         <h2 className="font-display text-xl text-ink">Журнал доказательств</h2>
-        <p className="mt-1 text-sm text-slate">Последние события, которые сдвинули EMA.</p>
+        <p className="mt-1 text-sm text-slate">Последние сдачи и тренажёры, которые изменили оценку.</p>
         {evidence.length === 0 ? (
           <p className="mt-3 text-sm text-slate">Пока пусто — сдайте задание или пройдите тренажёр.</p>
         ) : (
@@ -111,12 +122,14 @@ export function SkillsPage() {
           const skillEvidence = listSkillEvidence(profile.id, skill.id).slice(0, 3)
           return (
             <article key={skill.id} className="surface rounded-3xl p-5">
-              <p className="text-xs uppercase tracking-wide text-teal">{skill.category}</p>
+              <p className="text-xs uppercase tracking-wide text-teal">
+                {CATEGORY_RU[skill.category] ?? skill.category}
+              </p>
               <h3 className="mt-1 font-display text-xl text-ink">{skill.title_ru}</h3>
               <p className="mt-2 text-sm text-slate">{skill.description_ru}</p>
               <div className="mt-4">
                 <div className="mb-1 flex justify-between text-xs text-slate">
-                  <span>EMA</span>
+                  <span>Скользящая оценка</span>
                   <span>
                     {s?.score_ema ?? 0} · доказательств {s?.evidence_count ?? 0}
                   </span>

@@ -46,7 +46,7 @@ export function DashboardPage() {
   }
 
   if (!data) {
-    return <p className="text-slate">Загружаем дашборд…</p>
+    return <p className="text-slate">Загружаем обзор…</p>
   }
 
   const { profile: p, settings, currentWeek, isDemoData } = data
@@ -69,7 +69,7 @@ export function DashboardPage() {
             </h1>
             <p className="mt-2 text-sm text-slate">
               {p.email} · {p.role === 'admin' ? 'админ' : 'участник'}
-              {p.participant_slot ? ` · слот ${p.participant_slot}` : ''} · {p.timezone}
+              {p.participant_slot ? ` · вариант заданий ${p.participant_slot}` : ''} · {p.timezone}
             </p>
           </div>
         </div>
@@ -102,8 +102,8 @@ export function DashboardPage() {
           <p className="mt-3 text-sm leading-relaxed text-slate">{currentWeek.summary_ru}</p>
           <p className="mt-3 text-xs text-slate">
             Открыто до недели {settings.current_unlocked_week} · цель {settings.hours_per_week_target}{' '}
-            мин/нед · блокировка AI:{' '}
-            {settings.ai_spend_lock ? 'включена (платный AI выкл)' : 'выключена'}
+            мин/нед · платный AI:{' '}
+            {settings.ai_spend_lock ? 'отключён' : 'разрешён'}
             <DemoLabel show={isDemoData} />
           </p>
           <Link to="/program" className="mt-4 inline-block text-sm font-semibold text-teal hover:underline">
@@ -242,9 +242,7 @@ export function DashboardPage() {
             Рекомендации на завтра
             <DemoLabel show={isDemoData} />
           </h3>
-          <p className="mt-1 text-xs text-slate">
-            По правилам (без платного AI) · блокировка AI по умолчанию ON
-          </p>
+          <p className="mt-1 text-xs text-slate">По правилам курса · без платного AI</p>
           <ul className="mt-3 space-y-2">
             {data.recommendationsTomorrow.map((r) => (
               <li key={r.id} className="rounded-2xl bg-teal-soft/40 px-3 py-2.5 text-sm">

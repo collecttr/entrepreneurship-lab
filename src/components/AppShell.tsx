@@ -20,7 +20,7 @@ import { AiDownBanner } from './AiDownBanner'
 import { DemoBanner } from './DemoBanner'
 
 const NAV = [
-  { to: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'Обзор', icon: LayoutDashboard },
   { to: '/program', label: 'Программа', icon: BookOpen },
   { to: '/library', label: 'Библиотека', icon: Library },
   { to: '/assignments', label: 'Задания', icon: FileText },
@@ -28,7 +28,7 @@ const NAV = [
   { to: '/chat', label: 'Чат', icon: MessageSquare, chat: true },
   { to: '/forum', label: 'Форум', icon: MessagesSquare },
   { to: '/documents', label: 'Документы', icon: FileText },
-  { to: '/ai', label: 'AI-тренеры', icon: Bot },
+  { to: '/ai', label: 'Тренажёры', icon: Bot },
   { to: '/admin', label: 'Админ', icon: Shield, adminOnly: true },
 ]
 
@@ -96,7 +96,7 @@ export function AppShell() {
                 <p className="font-medium text-ink">{profile?.display_name}</p>
                 <p className="text-xs text-slate">
                   {profile?.role === 'admin' ? 'Админ' : 'Участник'}
-                  {profile?.participant_slot ? ` · слот ${profile.participant_slot}` : ''}
+                  {profile?.participant_slot ? ` · вариант заданий ${profile.participant_slot}` : ''}
                 </p>
               </div>
               <button

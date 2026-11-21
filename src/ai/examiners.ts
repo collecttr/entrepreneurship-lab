@@ -80,9 +80,21 @@ export function examineSales(
     title: `Продажи · ${input.clientType} · неделя ${week.week_number}`,
     overall,
     rubrics: [
-      { id: 'diag', label: 'Диагностика', score: diagnosis, max: 25, note: 'Вопросы о боли/контексте' },
-      { id: 'cta', label: 'Следующий шаг', score: nextStep, max: 25, note: 'Явный CTA' },
-      { id: 'discipline', label: 'Не питч первым', score: noPitchFirst, max: 20, note: week.sales_drill_ru.slice(0, 80) },
+      { id: 'diag', label: 'Диагностика', score: diagnosis, max: 25, note: 'Вопросы о боли и контексте клиента' },
+      {
+        id: 'cta',
+        label: 'Следующий шаг',
+        score: nextStep,
+        max: 25,
+        note: 'Явная договорённость: встреча, дата или пилот (CTA)',
+      },
+      {
+        id: 'discipline',
+        label: 'Не начинать с презентации продукта',
+        score: noPitchFirst,
+        max: 20,
+        note: week.sales_drill_ru.slice(0, 80),
+      },
       { id: 'substance', label: 'Содержательность', score: Math.min(len, 20), max: 20, note: 'Длина и конкретика' },
     ],
     strengths: [
@@ -91,11 +103,11 @@ export function examineSales(
     ].filter(Boolean),
     gaps: [
       diagnosis < 15 ? 'Мало вопросов о боли клиента' : '',
-      nextStep < 15 ? 'Нет конкретного CTA (встреча/дата/пилот)' : '',
+      nextStep < 15 ? 'Нет конкретного следующего шага (встреча / дата / пилот)' : '',
       ...week.error_watchlist.slice(0, 2),
     ].filter(Boolean),
-    next_actions: [week.sales_drill_ru, `Симуляция недели: ${week.simulation_ru}`],
-    reply_md: `Контекст недели: **${week.title_ru}**.\n\nСценарий: ${week.simulation_ru}\n\nDrill: ${week.sales_drill_ru}`,
+    next_actions: [week.sales_drill_ru, `Сценарий недели: ${week.simulation_ru}`],
+    reply_md: `Контекст недели: **${week.title_ru}**.\n\nСценарий: ${week.simulation_ru}\n\nПрактика продаж: ${week.sales_drill_ru}`,
   })
 }
 
@@ -126,18 +138,33 @@ export function examineNegotiation(
     title: `Переговоры · процесс · неделя ${week.week_number}`,
     overall,
     rubrics: [
-      { id: 'prep', label: 'Подготовка (BATNA/интересы)', score: Math.min(prep, 65), max: 65, note: 'Оценка процесса, не только исхода' },
-      { id: 'process', label: 'Обмен vs уступка', score: Math.min(process, 35), max: 35, note: 'Есть ли пакет if/then' },
+      {
+        id: 'prep',
+        label: 'Подготовка (запасной план и интересы)',
+        score: Math.min(prep, 65),
+        max: 65,
+        note: 'Оцениваем ход подготовки, не только «кто выиграл»',
+      },
+      {
+        id: 'process',
+        label: 'Обмен вместо односторонней уступки',
+        score: Math.min(process, 35),
+        max: 35,
+        note: 'Есть ли пакет «если…, то…»',
+      },
     ],
-    strengths: [input.batna.trim() ? 'BATNA зафиксирована' : ''].filter(Boolean),
+    strengths: [input.batna.trim() ? 'Запасной план (BATNA) зафиксирован' : ''].filter(Boolean),
     gaps: [
-      input.batna.trim().length < 10 ? 'BATNA слишком слабая/пустая' : '',
+      input.batna.trim().length < 10 ? 'Запасной план (BATNA) слишком слабый или пустой' : '',
       !input.roundNotes.toLowerCase().includes('обмен') &&
       !input.roundNotes.toLowerCase().includes('если')
         ? 'В раунде мало обмена — риск односторонних уступок'
         : '',
     ].filter(Boolean),
-    next_actions: ['Допишите 2 опции win-win до следующего раунда', week.simulation_ru],
+    next_actions: [
+      'Допишите 2 варианта взаимной выгоды до следующего раунда',
+      week.simulation_ru,
+    ],
     reply_md: `Кейс недели: ${week.case_ru}`,
   })
 }
@@ -160,17 +187,29 @@ export function examinePresentation(
     overall,
     rubrics: [
       { id: 'problem', label: 'Проблема аудитории', score: Math.min(20, scoreText(t, ['проблема', 'боль'], 20)), max: 20, note: '' },
-      { id: 'proof', label: 'Proof', score: Math.min(20, scoreText(t, ['доказ', 'кейс', 'цифр'], 20)), max: 20, note: '' },
-      { id: 'ask', label: 'Ask', score: Math.min(25, scoreText(t, ['ask', 'прошу', 'встреч', 'пилот'], 25)), max: 25, note: 'Конкретный следующий шаг' },
+      {
+        id: 'proof',
+        label: 'Доказательства',
+        score: Math.min(20, scoreText(t, ['доказ', 'кейс', 'цифр'], 20)),
+        max: 20,
+        note: 'Факты, кейсы, цифры (proof)',
+      },
+      {
+        id: 'ask',
+        label: 'Просьба о следующем шаге',
+        score: Math.min(25, scoreText(t, ['ask', 'прошу', 'встреч', 'пилот'], 25)),
+        max: 25,
+        note: 'Конкретный ask: встреча, пилот, решение',
+      },
       { id: 'flow', label: 'Связность', score: Math.min(35, lengthBonus(t, 120, 400)), max: 35, note: '' },
     ],
     strengths: [],
     gaps: [
-      !/(ask|прошу|давайте|встреч|пилот)/i.test(t) ? 'Нет явного ask' : '',
+      !/(ask|прошу|давайте|встреч|пилот)/i.test(t) ? 'Нет явной просьбы о следующем шаге' : '',
       /^мы\s/i.test(t.trim()) ? 'Начало с «мы…» — начните с проблемы слушателя' : '',
     ].filter(Boolean),
-    next_actions: ['Сократите до 5 минут', 'Один ask в конце'],
-    reply_md: `Симуляция недели: ${week.simulation_ru}`,
+    next_actions: ['Сократите до 5 минут', 'Одна чёткая просьба в конце'],
+    reply_md: `Сценарий недели: ${week.simulation_ru}`,
   })
 }
 
@@ -264,7 +303,7 @@ export function examineWriting(
   const overall = Math.min(100, structure + argument + clarity)
 
   return finish(userId, 'writing-evaluator', ['presentation', 'entrepreneurial'], {
-    title: 'Оценка текста (локальный экзаменатор)',
+    title: 'Оценка текста',
     overall,
     rubrics: [
       { id: 'structure', label: 'Структура', score: structure, max: 30, note: 'Заголовки/пункты/вывод' },
@@ -275,10 +314,10 @@ export function examineWriting(
     strengths: structure >= 20 ? ['Видна структура'] : [],
     gaps: [
       argument < 15 ? 'Мало опоры на факты/примеры' : '',
-      'Полная перепись текста не делается — правьте сами по findings',
+      'Полную перепись текста не делаем — правьте сами по замечаниям',
     ].filter(Boolean),
     next_actions: ['Сократите на 20%', 'Добавьте один проверяемый факт'],
-    reply_md: `${versionNote}\n\nFindings только категорийные. Источники не изобретаются.`,
+    reply_md: `${versionNote}\n\nЗамечания по категориям (структура / аргументы / ясность). Источники не выдумываем.`,
   })
 }
 
@@ -313,11 +352,11 @@ export function examineVoice(
     ],
     strengths: [],
     gaps: [
-      'Анализ высоты тона / темпа / просодии не выполняется — нет честного free STT/prosody в этом контуре',
+      'Высоту тона и темп речи здесь не оцениваем — только текст стенограммы',
       fillerHits.length ? 'Сократите слова-паразиты на следующем прогоне' : '',
     ].filter(Boolean),
-    next_actions: ['Запишите снова и вставьте транскрипт', 'Пауза 1 сек вместо «эээ»'],
-    reply_md: 'Локальный экзаменатор анализирует только текст транскрипта (структура + fillers).',
+    next_actions: ['Запишите снова и вставьте стенограмму', 'Пауза 1 сек вместо «эээ»'],
+    reply_md: 'Разбор только по тексту стенограммы: структура и слова-паразиты.',
   })
 }
 
@@ -338,7 +377,7 @@ export function examineSkillMap(userId: string): ExaminerResult {
         label: meta?.title_ru ?? w.skill_id,
         score: w.score_ema,
         max: 100,
-        note: `evidence ${w.evidence_count}`,
+        note: `доказательств: ${w.evidence_count}`,
       }
     }),
     strengths: strong.map((s) => {
@@ -353,7 +392,8 @@ export function examineSkillMap(userId: string): ExaminerResult {
       'Запустите симулятор по самому слабому навыку',
       'Откройте адаптивные упражнения',
     ],
-    reply_md: 'Пояснение rule-based по EMA. AI-обогащение текста отключено (spend lock).',
+    reply_md:
+      'Пояснение по скользящей оценке навыков (среднее с учётом недавних сдач). Платный AI не используется.',
   })
 }
 
@@ -370,14 +410,14 @@ export function buildAdaptiveExercises(userId: string): {
     const meta = SKILLS.find((s) => s.id === w.skill_id)
     const slug = meta?.slug ?? 'entrepreneurial'
     const exercises: Record<string, string> = {
-      sales: `Сделайте 3 касания с явным CTA по drill: ${week.sales_drill_ru}`,
-      negotiation: `Заполните BATNA + 2 опции обмена для кейса: ${week.case_ru.slice(0, 120)}`,
-      presentation: `Сожмите питч до 90 секунд: проблема → proof → ask (неделя ${week.week_number})`,
-      psychology: `Выпишите 3 стейкхолдеров и их интересы по кейсу недели`,
+      sales: `Сделайте 3 касания с явной договорённостью о следующем шаге. Практика: ${week.sales_drill_ru}`,
+      negotiation: `Запишите запасной план (BATNA) и 2 варианта обмена для кейса: ${week.case_ru.slice(0, 120)}`,
+      presentation: `Сожмите выступление до 90 секунд: проблема → доказательства → просьба (неделя ${week.week_number})`,
+      psychology: `Выпишите 3 заинтересованных лиц и их интересы по кейсу недели`,
       entrepreneurial: `Сформулируйте одну проверяемую гипотезу по: ${week.problem_ru.slice(0, 100)}`,
-      marketing: `Одно сообщение для beachhead + канал на 48 часов`,
-      ops: `Нарисуйте 5 шагов от yes до first value`,
-      speaking: `Проговорите ответ на возражение 60 сек и вставьте транскрипт в Voice Practice`,
+      marketing: `Одно сообщение для первого узкого сегмента + канал на 48 часов`,
+      ops: `Нарисуйте 5 шагов от «да» клиента до первой пользы`,
+      speaking: `Проговорите ответ на возражение 60 сек и вставьте стенограмму в «Практику речи»`,
     }
     return {
       optional: true,

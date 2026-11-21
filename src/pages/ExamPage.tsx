@@ -44,7 +44,9 @@ export function ExamPage() {
     e.preventDefault()
     if (!profile || !exam) return
     if (body.trim().length < 80) {
-      setError('Опишите пакет аттестации подробнее (минимум ~80 символов): артефакты, доказательства, ask.')
+      setError(
+        'Опишите пакет аттестации подробнее (минимум ~80 символов): что сдаёте, доказательства и что просите на защите.',
+      )
       return
     }
     submitExamAttempt(profile.id, exam.id, body)
@@ -105,8 +107,8 @@ export function ExamPage() {
       <section className="surface rounded-3xl p-5">
         <h2 className="font-display text-xl text-ink">Связанные задания недели</h2>
         <p className="mt-1 text-sm text-slate">
-          Аттестация опирается на dual A/B и совместное задание этой недели. Сдайте их до защиты, где
-          возможно.
+          Аттестация опирается на ваши задания варианта A или B и совместное задание недели. Сдайте их
+          до защиты, где возможно.
         </p>
         <ul className="mt-3 space-y-2">
           {linked.map((a) => {
@@ -119,7 +121,8 @@ export function ExamPage() {
                 <div>
                   <p className="font-medium text-ink">{a.title_ru}</p>
                   <p className="text-xs text-slate">
-                    {a.code} · слот {a.participant_slot} ·{' '}
+                    {a.code} · вариант{' '}
+                    {a.participant_slot === 'both' ? 'совместное' : a.participant_slot} ·{' '}
                     {sub?.status === 'submitted' || sub?.status === 'graded'
                       ? 'сдано'
                       : sub?.status === 'draft'
@@ -139,8 +142,8 @@ export function ExamPage() {
       <section className="surface rounded-3xl p-5">
         <h2 className="font-display text-xl text-ink">Пакет / защита</h2>
         <p className="mt-1 text-sm text-slate">
-          Опишите артефакты, доказательства разговоров/экспериментов и план защиты. Оценка — ручная /
-          peer; AI не подменяет аттестацию (spend lock ON).
+          Опишите материалы, доказательства разговоров или экспериментов и план защиты. Оценивает
+          человек (преподаватель или напарник) — AI аттестацию не заменяет.
         </p>
         <form className="mt-4 space-y-3" onSubmit={onSubmit}>
           <textarea
@@ -149,7 +152,7 @@ export function ExamPage() {
             disabled={lockedStatus}
             rows={12}
             className="w-full rounded-2xl border border-ink/10 bg-paper px-4 py-3 text-sm text-ink outline-none focus:border-ink/30 disabled:opacity-70"
-            placeholder="Структура: 1) что сдаёте 2) доказательства 3) слабые места 4) ask на защите"
+            placeholder="1) что сдаёте 2) доказательства 3) слабые места 4) что просите на защите"
           />
           {error && <p className="text-sm text-danger">{error}</p>}
           {saved && <p className="text-sm text-ok">{saved}</p>}

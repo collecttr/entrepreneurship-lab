@@ -169,9 +169,9 @@ export function subscribeCollab(onChange: (event: CollabEvent) => void): () => v
 }
 
 export function demoTransportLabel(): string {
-  if (useLiveCollab()) return 'Supabase Realtime (чат/форум) · при сбое — локальный кэш'
-  if (!isDemoAuth) return 'Supabase настроен, но демо-флаг/клиент недоступен — localStorage fallback'
-  return 'Демо-синхронизация: localStorage + BroadcastChannel / polling (не production Realtime)'
+  if (useLiveCollab()) return 'Живая синхронизация чата и форума · при сбое — копия в браузере'
+  if (!isDemoAuth) return 'Сервер настроен, но демо-вход недоступен — сообщения хранятся в браузере'
+  return 'Демо: сообщения хранятся в браузере и синхронизируются между вкладками'
 }
 
 function peerId(myId: string): string {

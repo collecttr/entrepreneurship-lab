@@ -15,9 +15,12 @@ export function AssignmentsPage() {
     <div className="space-y-5">
       <header className="surface rounded-3xl p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Задания</p>
-        <h1 className="mt-2 font-display text-3xl text-ink">Сдачи по слоту {profile.participant_slot ?? '—'}</h1>
+        <h1 className="mt-2 font-display text-3xl text-ink">
+          Сдачи · вариант {profile.participant_slot ?? '—'}
+        </h1>
         <p className="mt-2 text-sm text-slate">
-          Прогресс = статусы submitted/graded. Dual A/B + совместные. Закрытые недели скрыты до unlock.
+          У каждого участника свой вариант заданий (A или B) плюс совместные. Закрытые недели появятся,
+          когда админ их откроет. В прогресс входят только сданные и оценённые работы.
         </p>
         <p className="mt-3 text-sm text-ink">
           Открыто без сдачи: <strong>{overdue.length}</strong> · сдано: <strong>{done.length}</strong>
@@ -34,7 +37,17 @@ export function AssignmentsPage() {
                   {assignment.code} · {assignment.title_ru}
                 </p>
                 <p className="text-xs text-slate">
-                  Неделя {week} · слот {assignment.participant_slot} · {submission?.status ?? 'не начато'}
+                  Неделя {week} · вариант{' '}
+                  {assignment.participant_slot === 'both' ? 'совместное' : assignment.participant_slot} ·{' '}
+                  {submission?.status === 'submitted'
+                    ? 'сдано'
+                    : submission?.status === 'graded'
+                      ? 'оценено'
+                      : submission?.status === 'draft'
+                        ? 'черновик'
+                        : submission?.status === 'returned'
+                          ? 'возвращено'
+                          : 'не начато'}
                 </p>
               </div>
               <Link to={`/assignments/${assignment.code}`} className="font-semibold text-teal">
@@ -55,7 +68,13 @@ export function AssignmentsPage() {
                 {assignment.code} · {assignment.title_ru}
               </p>
               <p className="text-xs text-slate">
-                Неделя {week} · {submission?.status} · {submission?.submitted_at?.slice(0, 10)}
+                Неделя {week} ·{' '}
+                {submission?.status === 'graded'
+                  ? 'оценено'
+                  : submission?.status === 'submitted'
+                    ? 'сдано'
+                    : submission?.status ?? '—'}{' '}
+                · {submission?.submitted_at?.slice(0, 10)}
               </p>
             </li>
           ))}

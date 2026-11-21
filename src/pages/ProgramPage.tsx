@@ -72,7 +72,7 @@ export function ProgramPage() {
                         <p className="text-xs text-slate">Неделя {w.week_number}</p>
                         <p className="font-medium text-ink">{w.title_ru}</p>
                         <p className="mt-1 text-xs text-slate">
-                          ~{mins} мин · слот {slot}
+                          ~{mins} мин · вариант {slot}
                         </p>
                       </div>
                       <span className="shrink-0 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate">

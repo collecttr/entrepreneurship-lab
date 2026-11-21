@@ -45,10 +45,10 @@ export function LibraryPage() {
     <div className="space-y-5">
       <header className="surface rounded-3xl p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Библиотека</p>
-        <h1 className="mt-2 font-display text-3xl text-ink">Verified free sources</h1>
+        <h1 className="mt-2 font-display text-3xl text-ink">Проверенные бесплатные источники</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate">
-          Только официальные бесплатные материалы (MIT OCW, YC, HubSpot Academy, OpenStax, Harvard PON,
-          Strategyzer, SBA). Платные книги — optional, без файлов и пиратских ссылок.
+          Только официальные бесплатные материалы (MIT OCW, Y Combinator, HubSpot Academy, OpenStax,
+          Harvard PON, Strategyzer, SBA). Платные книги — по желанию, без файлов и пиратских ссылок.
         </p>
       </header>
 

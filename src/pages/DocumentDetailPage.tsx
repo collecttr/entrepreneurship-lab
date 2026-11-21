@@ -26,11 +26,11 @@ import {
 function aiStatusLabel(status: DocumentGroup['ai_status']): string {
   switch (status) {
     case 'pending_ai':
-      return 'ожидает AI'
+      return 'ожидает AI-проверку'
     case 'manual_only':
-      return 'ручная оценка (AI выкл / spend lock)'
+      return 'только ручная оценка (платный AI отключён)'
     case 'completed':
-      return 'AI завершил'
+      return 'AI-проверка завершена'
     default:
       return 'нет оценки'
   }
@@ -198,7 +198,7 @@ export function DocumentDetailPage() {
                 onClick={() => void onDownload(f)}
                 className="rounded-xl border border-ink/10 px-3 py-1.5 text-xs font-semibold text-teal"
               >
-                Скачать (signed/demo)
+                Скачать
               </button>
             </li>
           ))}
@@ -210,7 +210,7 @@ export function DocumentDetailPage() {
         <p className="rounded-xl bg-mist px-3 py-2 text-sm text-ink">
           AI: <strong>{aiStatusLabel(group.ai_status)}</strong>
           {group.ai_status === 'pending_ai' &&
-            ' — spend lock включён / AI не вызывался. Оценка не генерируется заглушкой.'}
+            ' — платный AI отключён, автоматическая оценка не создаётся. Поставьте балл вручную.'}
         </p>
         {group.manual_score != null && (
           <p className="text-sm text-slate">
@@ -220,7 +220,7 @@ export function DocumentDetailPage() {
         )}
         {(profile.role === 'admin' || isOwner) && (
           <form onSubmit={onManual} className="space-y-2 border-t border-ink/5 pt-3">
-            <p className="text-xs text-slate">Ручная оценка (stub до этапа AI)</p>
+            <p className="text-xs text-slate">Ручная оценка (пока без автоматической AI-проверки)</p>
             <input
               type="number"
               min={0}

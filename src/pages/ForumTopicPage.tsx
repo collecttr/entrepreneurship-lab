@@ -106,7 +106,7 @@ export function ForumTopicPage() {
             )}
             <p className="mt-2 whitespace-pre-wrap text-sm text-ink">{p.body_md}</p>
             {p.attachment_name && (
-              <p className="mt-1 text-xs text-slate">📎 {p.attachment_name} (stub)</p>
+              <p className="mt-1 text-xs text-slate">📎 {p.attachment_name} (имя файла)</p>
             )}
             <button
               type="button"
@@ -142,7 +142,7 @@ export function ForumTopicPage() {
         />
         <div className="flex flex-wrap gap-2">
           <label className="cursor-pointer rounded-xl border border-ink/10 px-3 py-2 text-sm text-slate">
-            Вложение (stub)
+            Вложение (только имя файла)
             <input
               type="file"
               className="hidden"

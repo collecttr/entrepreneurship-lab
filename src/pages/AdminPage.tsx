@@ -22,7 +22,7 @@ export function AdminPage() {
     setSaved(
       supabaseConfigured && !isDemoAuth
         ? `Открыто до недели ${week} (синхронизация с program_settings)`
-        : `Открыто до недели ${week} (локально; после Supabase — общий unlock)`,
+        : `Открыто до недели ${week} (в этом браузере; на сервере — общий доступ для всех)`,
     )
   }
 

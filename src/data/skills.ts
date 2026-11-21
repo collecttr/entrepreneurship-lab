@@ -29,7 +29,8 @@ export const SKILLS: SkillDef[] = [
     slug: 'negotiation',
     title_ru: 'Переговоры',
     category: 'negotiation',
-    description_ru: 'Интересы, BATNA, опции, соглашение без уступок «в пустоту».',
+    description_ru:
+      'Интересы, запасной план (BATNA), варианты обмена — соглашение без уступок «в пустоту».',
   },
   {
     id: 'skill-presentation',
@@ -43,7 +44,7 @@ export const SKILLS: SkillDef[] = [
     slug: 'psychology',
     title_ru: 'Психология покупателя',
     category: 'psychology',
-    description_ru: 'Мотивы, возражения, карта ЛПР и влияния.',
+    description_ru: 'Мотивы, возражения, карта лиц, принимающих решение (ЛПР), и влияния.',
   },
   {
     id: 'skill-entrepreneurial',

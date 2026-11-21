@@ -171,7 +171,7 @@ export function buildDemoDashboard(profile: Profile): DashboardData {
       {
         id: 'rec3',
         title: 'Источник недели 1 (обязательный)',
-        reason: 'Следующий mandatory source',
+        reason: 'Следующий обязательный источник недели',
       },
     ],
     calendarDays: [

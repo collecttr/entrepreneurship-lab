@@ -28,7 +28,9 @@ export function WeekPage() {
     return (
       <div className="surface rounded-3xl p-6">
         <h1 className="font-display text-2xl">Неделя {n} закрыта</h1>
-        <p className="mt-2 text-slate">Админ ещё не открыл эту неделю (сейчас unlock до {unlocked}).</p>
+        <p className="mt-2 text-slate">
+          Админ ещё не открыл эту неделю (сейчас доступны недели 1–{unlocked}).
+        </p>
         <Link to="/program" className="mt-4 inline-block font-semibold text-teal">
           ← К программе
         </Link>
@@ -49,7 +51,7 @@ export function WeekPage() {
         </p>
         <h1 className="mt-2 font-display text-3xl text-ink">{week.title_ru}</h1>
         <p className="mt-2 text-sm text-slate">
-          Обязательная нагрузка слота {slot}: <strong className="text-ink">{mins} мин</strong> / 240
+          Обязательная нагрузка (вариант {slot}): <strong className="text-ink">{mins} мин</strong> / 240
           {mins > 240 && <span className="text-danger"> — превышение!</span>}
         </p>
         <Link to="/program" className="mt-3 inline-block text-sm font-semibold text-teal">
@@ -191,7 +193,7 @@ export function WeekPage() {
         </ul>
       </Section>
 
-      <Section title="Error watchlist">
+      <Section title="Типичные ошибки недели">
         <ul className="list-disc space-y-1 pl-5 text-danger">
           {week.error_watchlist.map((e) => (
             <li key={e}>{e}</li>
@@ -200,7 +202,7 @@ export function WeekPage() {
       </Section>
 
       <p className="text-xs text-slate">
-        Ваше основное задание слота: <strong>{own.code}</strong> — {own.title_ru}
+        Ваше основное задание (вариант {slot}): <strong>{own.code}</strong> — {own.title_ru}
       </p>
     </div>
   )

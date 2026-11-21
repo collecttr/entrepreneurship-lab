@@ -8,12 +8,12 @@ export function AiDownBanner() {
 
   return (
     <div className="border-b border-ink/10 bg-mist/80 px-4 py-2 text-center text-[13px] text-ink">
-      <strong className="font-semibold">Режим без платного AI.</strong> {banner.text}{' '}
+      <strong className="font-semibold">Платный AI отключён.</strong> {banner.text}{' '}
       <Link to="/ai" className="font-semibold underline underline-offset-2">
-        Локальные экзаменаторы
+        Тренажёры
       </Link>
       {' · '}
-      задания, чат, документы и карта навыков работают.
+      задания, чат, документы и карта навыков работают как обычно.
     </div>
   )
 }
