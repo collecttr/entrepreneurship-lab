@@ -1,16 +1,22 @@
 import type { ReactNode } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { HowtoCollapse } from '@/components/HowtoCollapse'
 import { getModule, getWeek, mandatoryMinutesForSlot } from '@/data/curriculum'
 import { getInterview } from '@/data/interviews'
 import {
   ASSESSMENT_FAIL_RETELL_RU,
+  FEEDBACK_EVIDENCE_SUMMARY_RU,
   INTERVIEW_EXTRACT_RULE_RU,
+  INTERVIEW_EXTRACT_SUMMARY_RU,
   RESEARCH_FORMAT_STEPS_RU,
+  RESEARCH_FORMAT_SUMMARY_RU,
   SOURCE_EXTRACT_RULE_RU,
+  SOURCE_EXTRACT_SUMMARY_RU,
 } from '@/data/research-method'
 import { getSource } from '@/data/sources'
 import {
   STUDY_GUIDE_STEPS_RU,
+  STUDY_GUIDE_SUMMARY_RU,
   STUDY_GUIDE_TITLE_RU,
   STUDY_MINUTES_CAP,
 } from '@/data/study-guide'
@@ -85,22 +91,26 @@ export function WeekPage() {
       </header>
 
       <Section title={STUDY_GUIDE_TITLE_RU}>
-        <ol className="list-decimal space-y-2 pl-5 text-ink">
-          {STUDY_GUIDE_STEPS_RU.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
+        <HowtoCollapse summary={STUDY_GUIDE_SUMMARY_RU}>
+          <ol className="list-decimal space-y-2 pl-5 text-ink">
+            {STUDY_GUIDE_STEPS_RU.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </HowtoCollapse>
         <p className="mt-3 rounded-xl bg-mist/80 px-3 py-2 text-ink">{ASSESSMENT_FAIL_RETELL_RU}</p>
       </Section>
 
       <Section title="Формат исследования (9 шагов)">
-        <ol className="list-decimal space-y-2 pl-5 text-ink">
-          {RESEARCH_FORMAT_STEPS_RU.map((s) => (
-            <li key={s.id}>
-              <strong>{s.title_ru}.</strong> {s.hint_ru}
-            </li>
-          ))}
-        </ol>
+        <HowtoCollapse summary={RESEARCH_FORMAT_SUMMARY_RU}>
+          <ol className="list-decimal space-y-2 pl-5 text-ink">
+            {RESEARCH_FORMAT_STEPS_RU.map((s) => (
+              <li key={s.id}>
+                <strong>{s.title_ru}.</strong> {s.hint_ru}
+              </li>
+            ))}
+          </ol>
+        </HowtoCollapse>
       </Section>
 
       <Section title="1. Исследовательский вопрос">
@@ -164,7 +174,9 @@ export function WeekPage() {
       </Section>
 
       <Section title="3. Рекомендуемые источники (доказательная база)">
-        <p className="mb-3 text-slate">{SOURCE_EXTRACT_RULE_RU}</p>
+        <HowtoCollapse summary={SOURCE_EXTRACT_SUMMARY_RU} className="mb-3">
+          <p>{SOURCE_EXTRACT_RULE_RU}</p>
+        </HowtoCollapse>
         <ul className="space-y-3">
           {week.sources.map((link) => {
             const s = getSource(link.source_id)
@@ -187,21 +199,27 @@ export function WeekPage() {
                   <span className="text-xs text-slate">{link.study_minutes_planned} мин</span>
                 </div>
                 <p className="mt-1 text-ink">
-                  <strong>Зачем читать (для вопроса недели):</strong> {s.why_ru}
+                  <strong>Зачем:</strong> {s.why_ru}
                 </p>
-                <p>
-                  <strong className="text-ink">Что извлечь:</strong> {s.understand_ru}
-                </p>
-                <p>
-                  <strong className="text-ink">Что смотреть в материале:</strong> {s.parts_ru}
-                </p>
-                {s.questions_ru.length > 0 && (
-                  <ul className="mt-1 list-disc pl-5">
-                    {s.questions_ru.map((q) => (
-                      <li key={q}>{q}</li>
-                    ))}
-                  </ul>
-                )}
+                <HowtoCollapse
+                  className="mt-1"
+                  summary={
+                    <>
+                      <strong className="text-ink">Что извлечь:</strong> {s.understand_ru}
+                    </>
+                  }
+                >
+                  <p>
+                    <strong className="text-ink">Что смотреть в материале:</strong> {s.parts_ru}
+                  </p>
+                  {s.questions_ru.length > 0 && (
+                    <ul className="mt-1 list-disc pl-5 text-ink">
+                      {s.questions_ru.map((q) => (
+                        <li key={q}>{q}</li>
+                      ))}
+                    </ul>
+                  )}
+                </HowtoCollapse>
               </li>
             )
           })}
@@ -216,7 +234,9 @@ export function WeekPage() {
 
       {interviews.length > 0 && (
         <Section title="Интервью как доказательства (не биографии)">
-          <p className="mb-3 text-slate">{INTERVIEW_EXTRACT_RULE_RU}</p>
+          <HowtoCollapse summary={INTERVIEW_EXTRACT_SUMMARY_RU} className="mb-3">
+            <p>{INTERVIEW_EXTRACT_RULE_RU}</p>
+          </HowtoCollapse>
           <p className="mb-3 text-slate">
             Не всё обязательно. Best-fit под вопрос недели; остальное — в{' '}
             <Link to="/library?tab=interviews" className="font-semibold text-teal hover:underline">
@@ -240,22 +260,32 @@ export function WeekPage() {
                     {i.person} · {i.role_ru} · {i.company}
                     {i.duration_minutes != null ? ` · ~${i.duration_minutes} мин` : ''}
                   </p>
-                  <p className="mt-2 text-ink">
-                    <strong>Зачем:</strong> {i.why_read_ru}
-                  </p>
-                  <p className="mt-1 text-ink">
-                    <strong>Что извлечь:</strong> {i.extract_ru}
-                  </p>
-                  <ul className="mt-1 list-disc pl-5">
-                    {i.analysis_questions_ru.map((q) => (
-                      <li key={q}>{q}</li>
-                    ))}
-                  </ul>
-                  {i.timestamps.length > 0 && (
-                    <p className="mt-2 text-xs text-slate">
-                      Таймкоды: {i.timestamps.map((t) => `${t.at} ${t.label_ru}`).join(' · ')}
+                  <HowtoCollapse
+                    className="mt-2"
+                    summary={
+                      <>
+                        <strong>Зачем:</strong> {i.topics.slice(0, 3).join(', ')}. Итог:{' '}
+                        {i.practical_task_ru}
+                      </>
+                    }
+                  >
+                    <p className="text-ink">
+                      <strong>Зачем (подробно):</strong> {i.why_read_ru}
                     </p>
-                  )}
+                    <p className="mt-1 text-ink">
+                      <strong>Что извлечь:</strong> {i.extract_ru}
+                    </p>
+                    <ul className="mt-1 list-disc pl-5 text-ink">
+                      {i.analysis_questions_ru.map((q) => (
+                        <li key={q}>{q}</li>
+                      ))}
+                    </ul>
+                    {i.timestamps.length > 0 && (
+                      <p className="mt-2 text-xs text-slate">
+                        Таймкоды: {i.timestamps.map((t) => `${t.at} ${t.label_ru}`).join(' · ')}
+                      </p>
+                    )}
+                  </HowtoCollapse>
                 </li>
               ) : null,
             )}
@@ -361,7 +391,12 @@ export function WeekPage() {
             </li>
           ))}
         </ul>
-        <p className="mt-3 rounded-xl bg-mist/80 px-3 py-2 text-ink">{week.feedback_guide_ru}</p>
+        <HowtoCollapse
+          className="mt-3 rounded-xl bg-mist/80 px-3 py-2"
+          summary={FEEDBACK_EVIDENCE_SUMMARY_RU}
+        >
+          <p className="text-ink">{week.feedback_guide_ru}</p>
+        </HowtoCollapse>
       </Section>
 
       <Section title="Рефлексия">

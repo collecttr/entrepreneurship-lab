@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom'
 import { EXAMS, MODULES, WEEKS, mandatoryMinutesForSlot } from '@/data/curriculum'
-import { PROGRAM_STUDY_INTRO_RU, STUDY_GUIDE_STEPS_RU, STUDY_GUIDE_TITLE_RU } from '@/data/study-guide'
+import {
+  PROGRAM_STUDY_INTRO_RU,
+  STUDY_GUIDE_STEPS_RU,
+  STUDY_GUIDE_SUMMARY_RU,
+  STUDY_GUIDE_TITLE_RU,
+} from '@/data/study-guide'
+import { HowtoCollapse } from '@/components/HowtoCollapse'
 import { useAuth } from '@/context/AuthContext'
 import { examKindLabel } from '@/lib/exam-store'
 import { getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
@@ -24,11 +30,13 @@ export function ProgramPage() {
 
       <section className="surface rounded-3xl p-5">
         <h2 className="font-display text-xl text-ink">{STUDY_GUIDE_TITLE_RU}</h2>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-ink">
-          {STUDY_GUIDE_STEPS_RU.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
+        <HowtoCollapse summary={STUDY_GUIDE_SUMMARY_RU} className="mt-3">
+          <ol className="list-decimal space-y-2 pl-5 text-ink">
+            {STUDY_GUIDE_STEPS_RU.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </HowtoCollapse>
         <Link to="/library" className="mt-3 inline-block text-sm font-semibold text-teal hover:underline">
           Библиотека (источники и интервью как доказательства) →
         </Link>

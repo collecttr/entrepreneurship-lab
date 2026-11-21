@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { HowtoCollapse } from '@/components/HowtoCollapse'
 import { LIBRARY_SOURCES, type SourceProvider } from '@/data/sources'
 import { WEEKS } from '@/data/curriculum'
 import {
@@ -9,9 +10,16 @@ import {
 } from '@/data/interviews'
 import {
   INTERVIEW_EXTRACT_RULE_RU,
+  INTERVIEW_EXTRACT_SUMMARY_RU,
   SOURCE_EXTRACT_RULE_RU,
+  SOURCE_EXTRACT_SUMMARY_RU,
 } from '@/data/research-method'
-import { LIBRARY_STUDY_INTRO_RU, STUDY_GUIDE_STEPS_RU, STUDY_GUIDE_TITLE_RU } from '@/data/study-guide'
+import {
+  LIBRARY_STUDY_INTRO_RU,
+  STUDY_GUIDE_STEPS_RU,
+  STUDY_GUIDE_SUMMARY_RU,
+  STUDY_GUIDE_TITLE_RU,
+} from '@/data/study-guide'
 
 const PROVIDERS: Array<SourceProvider | 'Все'> = [
   'Все',
@@ -100,9 +108,12 @@ export function LibraryPage() {
           Только реальные открытые ссылки.
         </p>
         <p className="mt-2 max-w-2xl text-sm text-ink">{LIBRARY_STUDY_INTRO_RU}</p>
-        <p className="mt-2 max-w-2xl text-sm text-ink">
-          {tab === 'interviews' ? INTERVIEW_EXTRACT_RULE_RU : SOURCE_EXTRACT_RULE_RU}
-        </p>
+        <HowtoCollapse
+          className="mt-2 max-w-2xl"
+          summary={tab === 'interviews' ? INTERVIEW_EXTRACT_SUMMARY_RU : SOURCE_EXTRACT_SUMMARY_RU}
+        >
+          <p>{tab === 'interviews' ? INTERVIEW_EXTRACT_RULE_RU : SOURCE_EXTRACT_RULE_RU}</p>
+        </HowtoCollapse>
       </header>
 
       <div className="flex flex-wrap gap-2">
@@ -128,11 +139,13 @@ export function LibraryPage() {
 
       <section className="surface rounded-3xl p-5 md:p-6">
         <h2 className="font-display text-xl text-ink">{STUDY_GUIDE_TITLE_RU}</h2>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-ink">
-          {STUDY_GUIDE_STEPS_RU.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
+        <HowtoCollapse summary={STUDY_GUIDE_SUMMARY_RU} className="mt-3">
+          <ol className="list-decimal space-y-2 pl-5 text-ink">
+            {STUDY_GUIDE_STEPS_RU.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </HowtoCollapse>
       </section>
 
       <div className="surface flex flex-col gap-3 rounded-3xl p-4 md:flex-row md:items-center">
@@ -203,19 +216,28 @@ export function LibraryPage() {
                   </div>
                 </div>
               <p className="mt-3 text-sm text-ink">
-                <strong>Зачем читать:</strong> {s.why_ru}
+                <strong>Зачем:</strong> {s.why_ru}
               </p>
-              <p className="mt-1 text-sm text-ink">
-                <strong>Что извлечь:</strong> {s.understand_ru}
-              </p>
+              <HowtoCollapse
+                className="mt-1"
+                summary={
+                  <>
+                    <strong className="text-ink">Что извлечь:</strong> {s.understand_ru}
+                  </>
+                }
+              >
+                <p className="text-ink">
+                  <strong>Что смотреть:</strong> {s.parts_ru}
+                </p>
+                {s.questions_ru.length > 0 && (
+                  <ul className="mt-2 list-disc pl-5 text-ink">
+                    {s.questions_ru.map((aq) => (
+                      <li key={aq}>{aq}</li>
+                    ))}
+                  </ul>
+                )}
+              </HowtoCollapse>
               <p className="mt-1 text-sm text-slate">{s.license_note}</p>
-              {s.questions_ru.length > 0 && (
-                <ul className="mt-2 list-disc pl-5 text-sm text-slate">
-                  {s.questions_ru.map((aq) => (
-                    <li key={aq}>{aq}</li>
-                  ))}
-                </ul>
-              )}
               <a
                 href={s.url}
                 target="_blank"
@@ -263,22 +285,32 @@ export function LibraryPage() {
                 <strong>{i.person}</strong> — {i.role_ru}, {i.company}
               </p>
               <p className="mt-1 text-sm text-slate">Темы: {i.topics.join(', ')}</p>
-              <p className="mt-2 text-sm text-ink">
-                <strong>Зачем:</strong> {i.why_read_ru}
-              </p>
-              <p className="mt-1 text-sm text-ink">
-                <strong>Что извлечь:</strong> {i.extract_ru}
-              </p>
-              <ul className="mt-2 list-disc pl-5 text-sm text-slate">
-                {i.analysis_questions_ru.map((aq) => (
-                  <li key={aq}>{aq}</li>
-                ))}
-              </ul>
-              {i.timestamps.length > 0 && (
-                <p className="mt-2 text-xs text-slate">
-                  Таймкоды: {i.timestamps.map((t) => `${t.at} — ${t.label_ru}`).join(' · ')}
+              <HowtoCollapse
+                className="mt-2"
+                summary={
+                  <>
+                    <strong className="text-ink">Зачем / что извлечь:</strong> {i.topics.slice(0, 3).join(', ')}.
+                    Итог: {i.practical_task_ru}
+                  </>
+                }
+              >
+                <p className="text-ink">
+                  <strong>Зачем:</strong> {i.why_read_ru}
                 </p>
-              )}
+                <p className="mt-1 text-ink">
+                  <strong>Что извлечь:</strong> {i.extract_ru}
+                </p>
+                <ul className="mt-2 list-disc pl-5 text-ink">
+                  {i.analysis_questions_ru.map((aq) => (
+                    <li key={aq}>{aq}</li>
+                  ))}
+                </ul>
+                {i.timestamps.length > 0 && (
+                  <p className="mt-2 text-xs text-slate">
+                    Таймкоды: {i.timestamps.map((t) => `${t.at} — ${t.label_ru}`).join(' · ')}
+                  </p>
+                )}
+              </HowtoCollapse>
               <a
                 href={i.url}
                 target="_blank"
