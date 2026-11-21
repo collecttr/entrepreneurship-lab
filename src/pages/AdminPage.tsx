@@ -33,7 +33,7 @@ export function AdminPage() {
               type="button"
               onClick={() => unlockTo(w)}
               className={`rounded-xl px-3 py-2 text-sm font-semibold ${
-                unlocked === w ? 'bg-teal text-white' : 'bg-mist text-ink hover:bg-teal-soft'
+                unlocked === w ? 'bg-teal text-on-accent' : 'bg-mist text-ink hover:bg-teal-soft'
               }`}
             >
               До {w}

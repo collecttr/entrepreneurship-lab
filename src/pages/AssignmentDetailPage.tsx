@@ -94,7 +94,7 @@ export function AssignmentDetailPage() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={12}
-            className="w-full rounded-xl border border-ink/10 bg-white/80 px-3 py-2 font-mono text-sm outline-none ring-teal focus:ring-2"
+            className="w-full rounded-xl border border-ink/10 bg-white/80 px-3 py-2 font-mono text-sm outline-none ring-ink focus:ring-2"
             disabled={!slotOk}
           />
         </label>
@@ -111,7 +111,7 @@ export function AssignmentDetailPage() {
           <button
             type="submit"
             disabled={!slotOk}
-            className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep disabled:opacity-50"
+            className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50"
           >
             Сдать
           </button>

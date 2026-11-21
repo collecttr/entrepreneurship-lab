@@ -80,7 +80,7 @@ export function ChatPage() {
         </h1>
         <p className="mt-2 text-xs text-slate">{demoTransportLabel()}</p>
         {isDemoAuth && (
-          <p className="mt-1 text-xs text-amber-soft/90 rounded-xl bg-amber-soft/50 px-2 py-1 text-ink">
+          <p className="mt-1 text-xs rounded-xl bg-mist px-2 py-1 text-ink border border-ink/10">
             Демо: откройте второй аккаунт во второй вкладке (sessionStorage). Сообщения общие в localStorage.
             {unread > 0 ? ` Непрочитанных до открытия: ${unread}.` : ''}
           </p>
@@ -98,16 +98,16 @@ export function ChatPage() {
               <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm md:max-w-[70%] ${
-                    mine ? 'bg-teal text-white' : 'bg-mist text-ink'
+                    mine ? 'bg-teal text-on-accent' : 'bg-mist text-ink'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{m.body_md}</p>
                   {m.attachment_stub && m.attachment_name && (
-                    <p className={`mt-1 text-xs ${mine ? 'text-white/80' : 'text-slate'}`}>
+                    <p className={`mt-1 text-xs ${mine ? 'text-on-accent/80' : 'text-slate'}`}>
                       📎 {m.attachment_name} (stub — private storage на этапе 5)
                     </p>
                   )}
-                  <p className={`mt-1 text-[10px] ${mine ? 'text-white/70' : 'text-slate'}`}>
+                  <p className={`mt-1 text-[10px] ${mine ? 'text-on-accent/70' : 'text-slate'}`}>
                     {formatTime(m.created_at)}
                     {m.read_at && mine ? ' · прочитано' : ''}
                   </p>
@@ -133,7 +133,7 @@ export function ChatPage() {
               onChange={(e) => setText(e.target.value)}
               rows={2}
               placeholder="Сообщение партнёру…"
-              className="min-h-[2.75rem] flex-1 rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm outline-none ring-teal focus:ring-2"
+              className="min-h-[2.75rem] flex-1 rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm outline-none ring-ink focus:ring-2"
             />
             <div className="flex gap-2">
               <label className="cursor-pointer rounded-xl border border-ink/10 px-3 py-2 text-sm text-slate hover:bg-mist">
@@ -150,7 +150,7 @@ export function ChatPage() {
               </label>
               <button
                 type="submit"
-                className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep"
+                className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep"
               >
                 Отправить
               </button>

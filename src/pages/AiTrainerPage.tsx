@@ -239,7 +239,7 @@ export function AiTrainerPage() {
           <p className="text-sm text-slate">Нажмите «Разобрать» — пояснение gaps по текущей карте навыков.</p>
         )}
 
-        <button type="submit" className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-deep">
+        <button type="submit" className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep">
           {slug === 'skill-map' ? 'Разобрать карту' : 'Проверить локальным экзаменатором'}
         </button>
       </form>

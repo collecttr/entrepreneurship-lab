@@ -100,7 +100,7 @@ export function ForumTopicPage() {
               {p.parent_id ? ' · ответ' : ''}
             </p>
             {p.quote_md && (
-              <blockquote className="mt-2 border-l-2 border-teal/40 pl-3 text-sm text-slate italic">
+              <blockquote className="mt-2 border-l-2 border-ink/25 pl-3 text-sm text-slate italic">
                 {p.quote_md}
               </blockquote>
             )}
@@ -154,7 +154,7 @@ export function ForumTopicPage() {
             />
           </label>
           {attach && <span className="text-xs text-slate self-center">{attach}</span>}
-          <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white">
+          <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
             Отправить
           </button>
         </div>

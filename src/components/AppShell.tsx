@@ -73,7 +73,7 @@ export function AppShell() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-xl px-3 py-[10px] text-[15px] ${
                       isActive
-                        ? 'bg-teal text-white shadow-sm'
+                        ? 'bg-teal text-on-accent shadow-sm'
                         : 'text-ink-soft hover:bg-mist'
                     }`
                   }
@@ -81,7 +81,7 @@ export function AppShell() {
                   <Icon size={18} strokeWidth={1.75} />
                   <span className="flex-1">{label}</span>
                   {chat && unread > 0 && (
-                    <span className="rounded-full bg-amber px-1.5 py-0.5 text-[10px] font-bold text-ink">
+                    <span className="rounded-full bg-mist px-1.5 py-0.5 text-[10px] font-bold text-ink border border-ink/10">
                       {unread}
                     </span>
                   )}

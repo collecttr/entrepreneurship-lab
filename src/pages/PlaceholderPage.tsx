@@ -17,7 +17,7 @@ export function PlaceholderPage({ title, stage, description }: Props) {
       </p>
       <Link
         to="/dashboard"
-        className="mt-6 inline-flex rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-deep"
+        className="mt-6 inline-flex rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
       >
         Вернуться на дашборд
       </Link>

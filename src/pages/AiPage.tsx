@@ -35,7 +35,7 @@ export function AiPage() {
           <Link
             key={t.slug}
             to={`/ai/${t.slug}`}
-            className="surface block rounded-3xl p-5 transition hover:border-teal/30"
+            className="surface block rounded-3xl p-5 transition hover:border-ink/20"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-teal">локальный экзаменатор</p>
             <h2 className="mt-1 font-display text-xl text-ink">{t.title_ru}</h2>

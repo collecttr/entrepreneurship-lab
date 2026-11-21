@@ -78,7 +78,7 @@ export function ForumPage() {
         <button
           type="button"
           onClick={() => setShowNew((v) => !v)}
-          className="mt-4 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep"
+          className="mt-4 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep"
         >
           {showNew ? 'Закрыть форму' : 'Новая тема'}
         </button>
@@ -121,7 +121,7 @@ export function ForumPage() {
               placeholder="Неделя (опц.)"
               className="w-36 rounded-xl border border-ink/10 px-3 py-2 text-sm"
             />
-            <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white">
+            <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
               Создать
             </button>
           </div>

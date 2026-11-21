@@ -50,7 +50,7 @@ export function ProgramPage() {
                   <div
                     key={w.week_number}
                     className={`rounded-2xl border px-3 py-3 ${
-                      open ? 'border-teal/20 bg-teal-soft/30' : 'border-ink/5 bg-mist/50 opacity-80'
+                      open ? 'border-ink/15 bg-teal-soft/30' : 'border-ink/5 bg-mist/50 opacity-80'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">

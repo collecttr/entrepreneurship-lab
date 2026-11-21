@@ -48,7 +48,7 @@ export function AssignmentComments({ assignmentCode, authorId }: Props) {
               {authorName(c.author_id)} · {new Date(c.created_at).toLocaleString('ru-RU')}
             </p>
             {c.quote_md && (
-              <blockquote className="mt-1 border-l-2 border-teal/30 pl-2 text-xs italic text-slate">
+              <blockquote className="mt-1 border-l-2 border-ink/20 pl-2 text-xs italic text-slate">
                 {c.quote_md}
               </blockquote>
             )}
@@ -81,7 +81,7 @@ export function AssignmentComments({ assignmentCode, authorId }: Props) {
           placeholder="Комментарий…"
           required
         />
-        <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white">
+        <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
           Отправить комментарий
         </button>
       </form>

@@ -101,7 +101,7 @@ node scripts/bootstrap-users.mjs
 
 ## 6. UI / тема
 
-Apple-comfort: системный шрифт (`-apple-system` / SF Pro stack), мягкие нейтрали + system blue (`#0071e3`), calm transitions, dark mode через `prefers-color-scheme`. Русский UI. Без purple-AI клише.
+Apple-comfort: системный шрифт (`-apple-system` / SF Pro stack), монохром (чёрный `#1d1d1f` / белый / серый `#86868b` `#f5f5f7`), без blue+gold, calm transitions, dark mode через `prefers-color-scheme`. Русский UI.
 
 ## 7. Известные ограничения демо
 

@@ -61,7 +61,7 @@ export function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-teal/40 focus:ring-2 focus:ring-teal/25"
+                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
               />
             </label>
             <label className="block text-sm">
@@ -72,7 +72,7 @@ export function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-teal/40 focus:ring-2 focus:ring-teal/25"
+                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
               />
             </label>
 
@@ -85,14 +85,14 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={submitting || loading}
-              className="w-full rounded-xl bg-teal px-4 py-3.5 text-[15px] font-semibold text-white hover:bg-teal-deep active:scale-[0.99] disabled:opacity-60"
+              className="w-full rounded-xl bg-teal px-4 py-3.5 text-[15px] font-semibold text-on-accent hover:bg-teal-deep active:scale-[0.99] disabled:opacity-60"
             >
               {submitting ? 'Входим…' : 'Войти'}
             </button>
           </form>
 
           {isDemo && (
-            <div className="mt-5 rounded-2xl border border-amber/40 bg-amber-soft/50 p-3 text-xs leading-relaxed text-ink-soft">
+            <div className="mt-5 rounded-2xl border border-ink/15 bg-amber-soft/50 p-3 text-xs leading-relaxed text-ink-soft">
               <p className="font-semibold text-ink">Демо-аккаунты (allowlist):</p>
               <ul className="mt-2 space-y-1">
                 {DEMO_USERS.map((u) => (

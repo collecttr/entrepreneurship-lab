@@ -164,7 +164,7 @@ export function DocumentDetailPage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-display text-xl text-ink">Версии</h2>
           {isOwner && (
-            <label className="cursor-pointer rounded-xl bg-teal px-3 py-2 text-sm font-semibold text-white">
+            <label className="cursor-pointer rounded-xl bg-teal px-3 py-2 text-sm font-semibold text-on-accent">
               Новая версия
               <input
                 type="file"
@@ -253,7 +253,7 @@ export function DocumentDetailPage() {
                 {authorName(c.author_id)} · {new Date(c.created_at).toLocaleString('ru-RU')}
               </p>
               {c.quote_md && (
-                <blockquote className="mt-1 border-l-2 border-teal/30 pl-2 text-xs italic text-slate">
+                <blockquote className="mt-1 border-l-2 border-ink/20 pl-2 text-xs italic text-slate">
                   {c.quote_md}
                 </blockquote>
               )}
@@ -286,7 +286,7 @@ export function DocumentDetailPage() {
             className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
             placeholder="Комментарий к документу…"
           />
-          <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white">
+          <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
             Отправить
           </button>
         </form>

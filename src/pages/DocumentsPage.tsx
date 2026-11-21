@@ -102,7 +102,7 @@ export function DocumentsPage() {
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="mt-4 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep"
+          className="mt-4 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep"
         >
           {showForm ? 'Закрыть форму' : 'Загрузить документ'}
         </button>
@@ -193,7 +193,7 @@ export function DocumentsPage() {
           <button
             type="submit"
             disabled={busy}
-            className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent disabled:opacity-50"
           >
             {busy ? 'Загрузка…' : 'Сохранить приватно'}
           </button>
