@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!match) {
         return {
           error:
-            'Неверный email или пароль. В демо-режиме доступны только два allowlist-аккаунта (см. подсказку на форме).',
+            'Неверный email или пароль. В демо-режиме войти могут только два аккаунта из списка допуска (см. подсказку на форме).',
         }
       }
       writeDemoSession(match.profile)
@@ -159,10 +159,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     })
     if (error) {
+      const msg = error.message.toLowerCase()
+      if (msg.includes('invalid login') || msg.includes('invalid credentials')) {
+        return {
+          error:
+            'Неверный email или пароль. Если аккаунт ещё не создан администратором, входа не будет — публичной регистрации нет.',
+        }
+      }
+      if (msg.includes('email not confirmed')) {
+        return { error: 'Email ещё не подтверждён. Обратитесь к администратору.' }
+      }
       return { error: error.message }
     }
     if (!data.user) {
-      return { error: 'Вход не удался' }
+      return { error: 'Вход не удался. Попробуйте ещё раз.' }
     }
 
     // Allowlist check via RPC / profiles presence
@@ -177,7 +187,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if (!allowed) {
       await supabase.auth.signOut()
-      return { error: 'Этот email не в списке допущенных участников.' }
+      return {
+        error:
+          'Этот email не в списке допущенных участников. Публичной регистрации нет — попросите администратора добавить вас в список допуска.',
+      }
     }
 
     const p = await loadProfileFromSupabase(data.user.id, data.user.email ?? normalized)

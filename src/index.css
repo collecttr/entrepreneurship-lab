@@ -90,6 +90,21 @@
     font: inherit;
   }
 
+  /* Readable fields in light + dark: never rely on color-scheme alone */
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']),
+  textarea,
+  select {
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    caret-color: var(--color-ink);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-slate);
+    opacity: 1;
+  }
+
   button,
   a,
   .surface {
@@ -126,11 +141,29 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
+  /* Explicit field chrome so Tailwind bg-white utilities can't leave white-on-white */
+  .field {
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    caret-color: var(--color-ink);
+  }
+
+  .field::placeholder {
+    color: var(--color-slate);
+    opacity: 1;
+  }
+
   @media (prefers-color-scheme: dark) {
     .surface {
       background: rgba(28, 28, 30, 0.78);
       border-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .field {
+      background-color: var(--color-mist);
+      color: var(--color-ink);
+      caret-color: var(--color-ink);
     }
   }
 

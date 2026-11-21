@@ -59,9 +59,10 @@ export function LoginPage() {
                 type="email"
                 autoComplete="username"
                 required
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
+                className="field w-full rounded-xl border border-ink/10 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
               />
             </label>
             <label className="block text-sm">
@@ -70,9 +71,10 @@ export function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                placeholder="Пароль"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 bg-white/90 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
+                className="field w-full rounded-xl border border-ink/10 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
               />
             </label>
 
@@ -93,7 +95,7 @@ export function LoginPage() {
 
           {isDemo && (
             <div className="mt-5 rounded-2xl border border-ink/15 bg-amber-soft/50 p-3 text-xs leading-relaxed text-ink-soft">
-              <p className="font-semibold text-ink">Демо-аккаунты (allowlist):</p>
+              <p className="font-semibold text-ink">Демо-аккаунты из списка допуска:</p>
               <ul className="mt-2 space-y-1">
                 {DEMO_USERS.map((u) => (
                   <li key={u.email}>
@@ -103,7 +105,8 @@ export function LoginPage() {
                 ))}
               </ul>
               <p className="mt-2 text-slate">
-                Третий email не войдёт. Для Supabase Auth см. docs/deploy-stage2.md и bootstrap.
+                Любой другой email не войдёт — публичной регистрации нет. Для боевого Supabase Auth см.
+                docs/deploy-stage2.md и bootstrap.
               </p>
             </div>
           )}
