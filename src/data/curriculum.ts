@@ -1,6 +1,14 @@
 import { moduleForWeek, MODULES, type ModuleDef } from './modules'
 import { getSource, LIBRARY_SOURCES } from './sources'
 import { SKILLS } from './skills'
+import {
+  researchForWeek,
+  type CampaignAnalysisPrompt,
+  type CompanyResearchPrompt,
+  type ResearchSkillId,
+  type WeekResearchOverlay,
+} from './research-pedagogy'
+import { assertInterviewInvariants, getInterview, INTERVIEWS } from './interviews'
 
 export interface WeekSourceLink {
   source_id: string
@@ -31,6 +39,25 @@ export interface WeekDef {
   title_ru: string
   summary_ru: string
   problem_ru: string
+  /** Research question / practical problem — week starts here, not with a lecture dump */
+  research_question_ru: string
+  context_why_ru: string
+  theory_short_ru: string
+  topic_tags_ru: string[]
+  starter_examples_ru: string[]
+  open_questions_ru: string[]
+  capture_prompt_ru: string
+  compare_prompt_ru: string
+  /** One main research/practical outcome for the week */
+  practical_task_ru: string
+  research_skill: ResearchSkillId
+  research_skill_label_ru: string
+  find_own_sources: boolean
+  interview_ids: string[]
+  company_research?: CompanyResearchPrompt
+  campaign_analysis?: CampaignAnalysisPrompt
+  feedback_guide_ru: string
+  no_retell_ru: string
   outcomes: string[]
   concepts: string[]
   sources: WeekSourceLink[]
@@ -67,31 +94,55 @@ function src(
   return { source_id, is_mandatory: mandatory, study_minutes_planned: minutes, order_index: order }
 }
 
-function defaultRubric(focus: string): RubricCriterion[] {
+function researchRubric(focus: string): RubricCriterion[] {
   return [
     {
-      id: 'clarity',
-      label: 'Ясность',
-      max_score: 25,
-      description: `Аргументы по теме «${focus}» понятны без догадок`,
+      id: 'answer_quality',
+      label: 'Ответ на вопрос',
+      max_score: 14,
+      description: `Прямой ответ на исследовательский вопрос («${focus}»), а не пересказ статьи/биографии`,
     },
     {
-      id: 'evidence',
-      label: 'Доказательства',
-      max_score: 25,
-      description: 'Есть факты, цитаты из источников или результаты разговоров',
+      id: 'source_independence',
+      label: 'Независимость источников',
+      max_score: 12,
+      description: 'Есть независимые/первичные источники; интерес автора учтён; не один PR-нарратив',
     },
     {
-      id: 'action',
-      label: 'Действие',
-      max_score: 25,
-      description: 'Есть конкретный следующий шаг, который можно выполнить',
+      id: 'interpretation',
+      label: 'Точность интерпретации',
+      max_score: 12,
+      description: 'Цитаты и цифры не искажены; выводы не шире данных',
     },
     {
-      id: 'sales',
-      label: 'Продажи на практике',
-      max_score: 25,
-      description: 'Видна практика продаж/влияния, а не только теория',
+      id: 'facts_vs_opinions',
+      label: 'Факты vs мнения',
+      max_score: 12,
+      description: 'Явно разделены факт, мнение, гипотеза и «недостаточно доказательств»',
+    },
+    {
+      id: 'comparison',
+      label: 'Сравнение',
+      max_score: 12,
+      description: 'Сравнение компаний, стратегий, каналов или кампаний — не одна «история бренда»',
+    },
+    {
+      id: 'justification',
+      label: 'Обоснованность',
+      max_score: 12,
+      description: 'Тезис → основание → следствие; причинность отделена от корреляции',
+    },
+    {
+      id: 'application',
+      label: 'Коммерческое применение',
+      max_score: 14,
+      description: 'Вывод применён к офферу, цене, каналу, скрипту, CX или сделке',
+    },
+    {
+      id: 'search_quality',
+      label: 'Качество поиска',
+      max_score: 12,
+      description: 'Релевантный поиск; где требуется — источник вне готового списка',
     },
   ]
 }
@@ -1269,6 +1320,19 @@ const WEEK_SEEDS: WeekSeed[] = [
   },
 ]
 
+function withResearchBrief(brief: string, research: WeekResearchOverlay): string {
+  const own = research.find_own_sources
+    ? '\n\nОбязательно: найдите ≥1 источник вне обязательного списка недели; URL + почему можно доверять (интерес автора, первичность).'
+    : ''
+  const company = research.company_research
+    ? `\n\nСравнение компаний (в основном итоге): ${research.company_research.prompt_ru} Фокус сравнения: ${research.company_research.compare_focus_ru}`
+    : ''
+  const campaign = research.campaign_analysis
+    ? `\n\nРазбор кампании (в основном итоге): ${research.campaign_analysis.campaign_hint_ru} Поля: ${research.campaign_analysis.fields_ru.join(', ')}. Затем: ${research.campaign_analysis.alternative_task_ru}`
+    : ''
+  return `${brief}\n\nИсследовательский вопрос: ${research.research_question_ru}\nЗачем: ${research.context_why_ru}\nФормат сдачи: ответ на вопрос → факты/цифры/цитаты/ссылки → сравнение → вывод → коммерческое применение.\nФиксация: ${research.capture_prompt_ru}\nСравнение: ${research.compare_prompt_ru}\nПрактический итог: ${research.practical_task_ru}\nНавык исследования: ${research.research_skill_label_ru}.${own}${company}${campaign}\n\n${research.no_retell_ru}\n${research.feedback_guide_ru}`
+}
+
 function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
   const sources: WeekSourceLink[] = []
   let order = 1
@@ -1279,12 +1343,34 @@ function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
     sources.push(src(id, minutes, false, order++))
   }
 
+  const research = researchForWeek(weekNumber)
+  for (const id of research.interview_ids) {
+    if (!getInterview(id)) throw new Error(`Unknown interview ${id} on week ${weekNumber}`)
+  }
+
   const code = `W${String(weekNumber).padStart(2, '0')}`
   return {
     week_number: weekNumber,
     title_ru: seed.title,
     summary_ru: seed.problem,
     problem_ru: seed.problem,
+    research_question_ru: research.research_question_ru,
+    context_why_ru: research.context_why_ru,
+    theory_short_ru: research.theory_short_ru,
+    topic_tags_ru: research.topic_tags_ru,
+    starter_examples_ru: research.starter_examples_ru,
+    open_questions_ru: research.open_questions_ru,
+    capture_prompt_ru: research.capture_prompt_ru,
+    compare_prompt_ru: research.compare_prompt_ru,
+    practical_task_ru: research.practical_task_ru,
+    research_skill: research.research_skill,
+    research_skill_label_ru: research.research_skill_label_ru,
+    find_own_sources: research.find_own_sources,
+    interview_ids: research.interview_ids,
+    company_research: research.company_research,
+    campaign_analysis: research.campaign_analysis,
+    feedback_guide_ru: research.feedback_guide_ru,
+    no_retell_ru: research.no_retell_ru,
     outcomes: seed.outcomes,
     concepts: seed.concepts,
     sources,
@@ -1292,7 +1378,7 @@ function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
       code: `${code}-A`,
       participant_slot: 'A',
       title_ru: seed.a.title,
-      brief_md: seed.a.brief,
+      brief_md: withResearchBrief(seed.a.brief, research),
       deliverable_type: seed.a.type ?? 'text',
       max_minutes: seed.a.minutes,
       skill_slugs: seed.a.skills,
@@ -1301,7 +1387,7 @@ function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
       code: `${code}-B`,
       participant_slot: 'B',
       title_ru: seed.b.title,
-      brief_md: seed.b.brief,
+      brief_md: withResearchBrief(seed.b.brief, research),
       deliverable_type: seed.b.type ?? 'text',
       max_minutes: seed.b.minutes,
       skill_slugs: seed.b.skills,
@@ -1310,7 +1396,7 @@ function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
       code: `${code}-JOINT`,
       participant_slot: 'both',
       title_ru: seed.joint.title,
-      brief_md: seed.joint.brief,
+      brief_md: `${seed.joint.brief}\n\nВ совместном разборе отметьте: где у A/B доказательство, гипотеза или недостаточно данных.`,
       deliverable_type: 'text',
       max_minutes: seed.joint.minutes,
       skill_slugs: ['entrepreneurial'],
@@ -1318,9 +1404,15 @@ function buildWeek(weekNumber: number, seed: WeekSeed): WeekDef {
     debate_ru: seed.debate,
     case_ru: seed.case,
     simulation_ru: seed.simulation,
-    rubric: defaultRubric(seed.focus),
+    rubric: researchRubric(seed.focus),
     reflection: seed.reflection,
-    error_watchlist: seed.errors,
+    error_watchlist: [
+      ...seed.errors,
+      'Пересказ статьи, биографии или истории бренда вместо ответа на вопрос',
+      'Готовый ответ без собственного поиска и фиксации фактов/ссылок',
+      'Гипотеза выдана за доказанный факт',
+      'Нет сравнения и нет коммерческого применения',
+    ],
     sales_drill_ru: seed.sales,
     learning_goals: seed.outcomes,
   }
@@ -1415,6 +1507,9 @@ export function assertCurriculumInvariants(): string[] {
       if (m > 240) errors.push(`week ${w.week_number} slot ${slot}: ${m} min > 240`)
     }
     if (!w.assignment_a || !w.assignment_b) errors.push(`week ${w.week_number} missing A/B`)
+    if (!w.research_question_ru?.trim()) errors.push(`week ${w.week_number} missing research question`)
+    if (!w.practical_task_ru?.trim()) errors.push(`week ${w.week_number} missing practical task`)
+    if (w.rubric.length < 8) errors.push(`week ${w.week_number} research rubric incomplete`)
     for (const link of w.sources.filter((s) => s.is_mandatory)) {
       const s = getSource(link.source_id)
       if (!s?.is_free || s.is_optional_paid) {
@@ -1423,6 +1518,7 @@ export function assertCurriculumInvariants(): string[] {
       if (!s?.url.startsWith('https://')) errors.push(`bad url ${link.source_id}`)
     }
   }
+  errors.push(...assertInterviewInvariants())
   return errors
 }
 
@@ -1434,4 +1530,4 @@ export function getModule(weekNumber: number): ModuleDef {
   return moduleForWeek(weekNumber)
 }
 
-export { MODULES, LIBRARY_SOURCES, SKILLS }
+export { MODULES, LIBRARY_SOURCES, SKILLS, INTERVIEWS }
