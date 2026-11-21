@@ -261,9 +261,12 @@ export function DashboardPage() {
 
       <section className="surface rounded-3xl p-5">
         <h3 className="font-display text-xl text-ink">
-          Календарь недели
+          Сдачи на этой неделе
           <DemoLabel show={isDemoData} />
         </h3>
+        <p className="mt-1 text-xs text-slate">
+          По дням текущей календарной недели · считаются только сданные и оценённые работы
+        </p>
         <div className="mt-4 grid grid-cols-7 gap-2">
           {data.calendarDays.map((d) => {
             const pct = d.total ? Math.round((d.completed / d.total) * 100) : 0
@@ -278,6 +281,51 @@ export function DashboardPage() {
             )
           })}
         </div>
+      </section>
+
+      <section className="surface rounded-3xl p-5">
+        <h3 className="font-display text-xl text-ink">
+          История недель
+          <DemoLabel show={isDemoData} />
+        </h3>
+        <p className="mt-1 text-xs text-slate">
+          Открытые недели программы · прогресс по вашим заданиям варианта и совместным
+        </p>
+        {data.weekHistory.length === 0 ? (
+          <p className="mt-3 text-sm text-slate">Пока нет открытых недель.</p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {data.weekHistory.map((w) => {
+              const pct = w.total ? Math.round((w.completed / w.total) * 100) : 0
+              return (
+                <li
+                  key={w.week_number}
+                  className="flex flex-wrap items-center gap-3 rounded-2xl bg-paper/90 px-3 py-2.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-ink">
+                      Неделя {w.week_number}
+                      <span className="ml-2 text-xs font-normal text-slate">{w.status_ru}</span>
+                    </p>
+                    <p className="truncate text-xs text-slate">{w.title_ru}</p>
+                  </div>
+                  <p className="shrink-0 font-display text-sm text-ink">
+                    {w.completed}/{w.total}
+                  </p>
+                  <div className="w-24 shrink-0">
+                    <ProgressBar value={pct} />
+                  </div>
+                  <Link
+                    to={`/program/weeks/${w.week_number}`}
+                    className="shrink-0 text-xs font-semibold text-teal hover:underline"
+                  >
+                    Открыть →
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </section>
     </div>
   )

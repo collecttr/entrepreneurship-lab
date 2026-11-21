@@ -1,4 +1,4 @@
-import { getModule, getWeek } from '@/data/curriculum'
+import { getModule, getWeek, WEEKS } from '@/data/curriculum'
 import { SKILLS } from '@/data/skills'
 import { authorName, listDiscussions, listMessages } from '@/lib/collab-store'
 import {
@@ -10,6 +10,39 @@ import {
 } from '@/lib/progress-store'
 import { isDemoAuth, supabase } from './supabase'
 import type { DashboardData, Profile, ProgramSettings } from './types'
+
+const DAY_LABELS_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const
+
+function startOfWeekMonday(d: Date): Date {
+  const copy = new Date(d)
+  copy.setHours(0, 0, 0, 0)
+  const day = copy.getDay() // 0 Sun … 6 Sat
+  const offset = day === 0 ? -6 : 1 - day
+  copy.setDate(copy.getDate() + offset)
+  return copy
+}
+
+function isoDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function submissionStatusRu(status: string | undefined): string {
+  switch (status) {
+    case 'draft':
+      return 'черновик'
+    case 'submitted':
+      return 'сдано'
+    case 'returned':
+      return 'возвращено'
+    case 'graded':
+      return 'оценено'
+    default:
+      return 'не начато'
+  }
+}
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
   if (!supabase) return null
@@ -114,7 +147,7 @@ function buildFromCurriculum(profile: Profile): DashboardData {
       .map((s) => ({
         id: s.id,
         title: `Сдано: ${s.assignment_code}`,
-        meta: s.status,
+        meta: submissionStatusRu(s.status),
         at: s.submitted_at?.slice(0, 10) ?? '—',
       })),
     weakSkills,
@@ -144,13 +177,55 @@ function buildFromCurriculum(profile: Profile): DashboardData {
         href: '/library',
       },
     ],
-    calendarDays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((label, i) => ({
-      date: `2026-11-${17 + i}`,
-      label,
-      completed: i < 2 ? 1 : 0,
-      total: 2,
-    })),
-    // Curriculum-backed; chat/calendar still partial
+    calendarDays: (() => {
+      const monday = startOfWeekMonday(new Date())
+      const mine = listSubmissions(profile.id).filter(
+        (s) => s.status === 'submitted' || s.status === 'graded',
+      )
+      const byDay = new Map<string, number>()
+      for (const s of mine) {
+        const day = (s.submitted_at ?? '').slice(0, 10)
+        if (!day) continue
+        byDay.set(day, (byDay.get(day) ?? 0) + 1)
+      }
+      const weekItems = assignmentsForProfile(profile).filter((i) => i.week === unlocked)
+      const plannedPerDay = Math.max(1, Math.ceil(weekItems.length / 5))
+      return DAY_LABELS_RU.map((label, i) => {
+        const d = new Date(monday)
+        d.setDate(monday.getDate() + i)
+        const date = isoDate(d)
+        const completed = byDay.get(date) ?? 0
+        return {
+          date,
+          label,
+          completed,
+          total: Math.max(plannedPerDay, completed),
+        }
+      })
+    })(),
+    weekHistory: (() => {
+      const items = assignmentsForProfile(profile)
+      return WEEKS.filter((w) => w.week_number <= unlocked).map((w) => {
+        const weekItems = items.filter((i) => i.week === w.week_number)
+        const total = weekItems.length
+        const completed = weekItems.filter(
+          (i) => i.submission && ['submitted', 'graded'].includes(i.submission.status),
+        ).length
+        let status_ru = 'не начато'
+        if (total === 0) status_ru = 'нет заданий'
+        else if (completed === total) status_ru = 'закрыта'
+        else if (completed > 0) status_ru = 'в работе'
+        else if (w.week_number === unlocked) status_ru = 'текущая'
+        else status_ru = 'ожидает сдачи'
+        return {
+          week_number: w.week_number,
+          title_ru: w.title_ru,
+          completed,
+          total,
+          status_ru,
+        }
+      })
+    })(),
     isDemoData: false,
   }
 }

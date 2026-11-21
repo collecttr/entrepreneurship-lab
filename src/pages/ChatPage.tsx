@@ -114,8 +114,7 @@ function ChatPageInner() {
         <p className="mt-2 text-xs text-slate">{demoTransportLabel()}</p>
         {isDemoAuth && (
           <p className="mt-1 text-xs rounded-xl bg-mist px-2 py-1 text-ink border border-ink/10">
-            Демо: откройте второй аккаунт во второй вкладке (sessionStorage). Сообщения общие в
-            localStorage.
+            Демо: откройте второй аккаунт во второй вкладке браузера. Сообщения общие в этом браузере.
             {unread > 0 ? ` Непрочитанных до открытия: ${unread}.` : ''}
           </p>
         )}
@@ -143,7 +142,7 @@ function ChatPageInner() {
                   <p className="whitespace-pre-wrap">{m.body_md || '—'}</p>
                   {m.attachment_stub && m.attachment_name && (
                     <p className={`mt-1 text-xs ${mine ? 'text-on-accent/80' : 'text-slate'}`}>
-                      📎 {m.attachment_name} (имя файла; сам файл — через Документы / signed URL)
+                      📎 {m.attachment_name} (имя файла; сам файл — через раздел «Документы»)
                     </p>
                   )}
                   <p className={`mt-1 text-[10px] ${mine ? 'text-on-accent/70' : 'text-slate'}`}>

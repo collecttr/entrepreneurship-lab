@@ -77,5 +77,13 @@ export interface DashboardData {
   weakSkills: SkillProgressStub[]
   recommendationsTomorrow: RecommendationItem[]
   calendarDays: { date: string; label: string; completed: number; total: number }[]
+  /** Week-by-week progress for unlocked weeks (assignments submitted/graded). */
+  weekHistory: {
+    week_number: number
+    title_ru: string
+    completed: number
+    total: number
+    status_ru: string
+  }[]
   isDemoData: boolean
 }

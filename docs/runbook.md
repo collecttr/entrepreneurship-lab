@@ -55,7 +55,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 4. **Authentication** → **Settings** (или **Sign In / Providers**): отключите **Allow new users to sign up** / Sign ups = **OFF**.
 5. OAuth / Magic link — не включать на MVP.
 
-### 2.3. Применить миграции 001–007
+### 2.3. Применить миграции 001–008
 
 1. **SQL Editor** → **New query**.
 2. По порядку вставьте и **Run** содержимое файлов из репо:
@@ -67,9 +67,10 @@ npm run dev -- --host 127.0.0.1 --port 5173
    - `supabase/migrations/005_documents.sql`
    - `supabase/migrations/006_ai_usage.sql`
    - `supabase/migrations/007_auth_allowlist_fix.sql` (JWT allowlist + own-profile SELECT; fixes login bounce)
+   - `supabase/migrations/008_exam_attempts_body.sql` (body_md + updated_at для live slug↔UUID sync аттестаций)
 3. Затем seed (если нужно контент в БД):
    - `supabase/seed.sql`
-   - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте)
+   - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте; таблица `exams` обязательна для UUID map)
 4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts` в publication (миграция 004 добавляет).
 
 ### 2.3b. Профиль отсутствует (bounce / soft profile)

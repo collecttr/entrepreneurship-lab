@@ -88,7 +88,11 @@ export function LibraryPage() {
                   <p className="text-xs text-slate">{s.title_original}</p>
                 </div>
                 <div className="text-right text-xs text-slate">
-                  <p>{s.is_optional_paid ? 'optional paid' : `${s.estimated_study_minutes} мин`}</p>
+                  <p>
+                    {s.is_optional_paid
+                      ? 'платный (необязательный)'
+                      : `${s.estimated_study_minutes} мин`}
+                  </p>
                   <p>{s.language}</p>
                 </div>
               </div>
