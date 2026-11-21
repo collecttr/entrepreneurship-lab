@@ -3,6 +3,10 @@
  * not a biography / brand-story reading list.
  */
 
+/** Always-visible chain; full hints behind «Подробнее». */
+export const RESEARCH_FORMAT_SUMMARY_RU =
+  'Вопрос → зачем → источники → свой поиск → анализ → факты → сравнение → вывод → коммерческое применение.'
+
 /** Nine-step research format shown on every week */
 export const RESEARCH_FORMAT_STEPS_RU: { id: string; title_ru: string; hint_ru: string }[] = [
   {
@@ -69,14 +73,26 @@ export const RESEARCH_TOPICS_RU = [
   'провалы',
 ] as const
 
+/** Short line always visible above interview sections. */
+export const INTERVIEW_EXTRACT_SUMMARY_RU =
+  'Из интервью: утверждения → доказательства → кросс-проверка → ограничения → практический вывод. Не биография.'
+
 export const INTERVIEW_EXTRACT_RULE_RU =
   'Из интервью извлекайте: (1) утверждения спикера, (2) какие доказательства он приводит, (3) что кросс-проверить независимым источником, (4) ограничения рассказа, (5) практический вывод для вашего вопроса. Пересказ биографии / всей истории бренда — не зачёт.'
+
+/** Short line always visible above source sections. */
+export const SOURCE_EXTRACT_SUMMARY_RU =
+  'Материал = доказательства для ответа на вопрос. Смотрите «зачем» и «что извлечь».'
 
 export const SOURCE_EXTRACT_RULE_RU =
   'Каждый материал — доказательная база для ответа на вопрос. Смотрите «зачем читать» и «что извлечь». Пересказ статьи или истории компании без ответа на вопрос — не зачёт.'
 
 export const ASSESSMENT_FAIL_RETELL_RU =
   'Пересказ статьи, биографии или истории компании без ответа на исследовательский вопрос = не зачёт.'
+
+/** Short rubric tip; full guide behind «Подробнее». */
+export const FEEDBACK_EVIDENCE_SUMMARY_RU =
+  'Различайте доказательство, гипотезу и «недостаточно данных». Не подменяйте ответ пересказом.'
 
 export const FEEDBACK_EVIDENCE_RU =
   'В работе и в обратной связи различайте: (1) доказательство — проверяемый факт со ссылкой; (2) гипотеза — ещё нужно проверить; (3) недостаточно доказательств — вывод шире данных. Не выдавайте гипотезу за факт. Не подменяйте ответ на вопрос пересказом источника.'
