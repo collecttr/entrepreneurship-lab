@@ -47,84 +47,149 @@ insert into public.skills (slug, title_ru, category) values ('speaking', 'Пуб
 on conflict (slug) do update set title_ru = excluded.title_ru, category = excluded.category;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('yc-sales-playbook', 'YC: The Sales Playbook For Founders', 'The Sales Playbook For Founders', 'YC Library', 'https://www.ycombinator.com/library/Mo-the-sales-playbook-for-founders', 'Бесплатно на YC Startup Library', true, false, 45, 'en', '2026-11-21', 'Практический каркас продаж для основателя без отдела продаж.', 'Весь материал плейбука; конспект воронки и следующего шага сделки.', 'Как формулировать оффер, кого звать первым и как закрывать следующий шаг.', '["Кто ваш идеальный первый покупатель и почему именно он?","Какой следующий конкретный шаг вы просите после звонка?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('yc-sales-playbook', 'YC: The Sales Playbook For Founders', 'The Sales Playbook For Founders', 'YC Library', 'https://www.ycombinator.com/library/Mo-the-sales-playbook-for-founders', 'Бесплатно на YC Startup Library', true, false, 45, 'en', '2026-11-21', 'Практический каркас продаж для основателя без отдела продаж.', 'Весь материал плейбука; конспект воронки и следующего шага сделки.', 'Как формулировать оффер, кого звать первым и как закрывать следующий шаг.', '["Кто ваш идеальный первый покупатель и почему именно он?", "Какой следующий конкретный шаг вы просите после звонка?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('yc-startup-ideas', 'YC: How to get startup ideas', 'How to get startup ideas', 'YC Library', 'https://www.ycombinator.com/library/8g-how-to-get-startup-ideas', 'Бесплатно на YC Startup Library', true, false, 35, 'en', '2026-11-21', 'Отделяет «идею ради идеи» от реальной боли пользователя.', 'Эссе целиком; выписать 5 критериев сильной идеи.', 'Почему «solution looking for a problem» проваливается.', '["Какую острую проблему вы видите лучше других?","Какие «tar pit» идеи вы сознательно отбрасываете?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('yc-startup-ideas', 'YC: How to get startup ideas', 'How to get startup ideas', 'YC Library', 'https://www.ycombinator.com/library/8g-how-to-get-startup-ideas', 'Бесплатно на YC Startup Library', true, false, 35, 'en', '2026-11-21', 'Отделяет «идею ради идеи» от реальной боли пользователя.', 'Эссе целиком; выписать 5 критериев сильной идеи.', 'Почему «solution looking for a problem» проваливается.', '["Какую острую проблему вы видите лучше других?", "Какие «tar pit» идеи вы сознательно отбрасываете?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('yc-sales-marketing-talk', 'YC: Sales and Marketing (How to Start a Startup)', 'How to Start a Startup: Sales and Marketing; How to Talk to Investors', 'YC Library', 'https://www.ycombinator.com/library/dc-how-to-start-a-startup-sales-and-marketing-how-to-talk-to-investors', 'Бесплатно на YC Startup Library', true, false, 50, 'en', '2026-11-21', 'Связка продаж и маркетинга на ранней стадии.', 'Секция про sales/marketing; конспект каналов и метрик.', 'Чем ранние продажи отличаются от «масштабируемого маркетинга».', '["Какой канал даст 10 разговоров на этой неделе?","Какую метрику вы будете смотреть ежедневно?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('yc-sales-marketing-talk', 'YC: Sales and Marketing (How to Start a Startup)', 'How to Start a Startup: Sales and Marketing; How to Talk to Investors', 'YC Library', 'https://www.ycombinator.com/library/dc-how-to-start-a-startup-sales-and-marketing-how-to-talk-to-investors', 'Бесплатно на YC Startup Library', true, false, 50, 'en', '2026-11-21', 'Связка продаж и маркетинга на ранней стадии.', 'Секция про sales/marketing; конспект каналов и метрик.', 'Чем ранние продажи отличаются от «масштабируемого маркетинга».', '["Какой канал даст 10 разговоров на этой неделе?", "Какую метрику вы будете смотреть ежедневно?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('hubspot-inbound-sales', 'HubSpot Academy: Inbound Sales', 'Inbound Sales Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/inbound-sales', 'Бесплатный курс HubSpot Academy (требуется бесплатный аккаунт)', true, false, 90, 'en', '2026-11-21', 'Структурированный процесс квалификации и ведения сделки.', 'Модули Identify → Connect → Explore → Advise; практические шаблоны.', 'Как вести разговор вокруг проблем покупателя, а не вокруг фич.', '["Какие сигналы показывают, что лид готов к Explore?","Как вы сформулируете рекомендацию (Advise) без давления?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('hubspot-inbound-sales', 'HubSpot Academy: Inbound Sales', 'Inbound Sales Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/inbound-sales', 'Бесплатный курс HubSpot Academy (требуется бесплатный аккаунт)', true, false, 90, 'en', '2026-11-21', 'Структурированный процесс квалификации и ведения сделки.', 'Модули Identify → Connect → Explore → Advise; практические шаблоны.', 'Как вести разговор вокруг проблем покупателя, а не вокруг фич.', '["Какие сигналы показывают, что лид готов к Explore?", "Как вы сформулируете рекомендацию (Advise) без давления?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('hubspot-inbound-marketing', 'HubSpot Academy: Inbound Marketing', 'Inbound Marketing Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/inbound-marketing', 'Бесплатный курс HubSpot Academy', true, false, 90, 'en', '2026-11-21', 'База привлечения через полезный контент и воронку.', 'Attract / Engage / Delight; выбрать один канал для эксперимента.', 'Как связать контент с этапом покупательского пути.', '["Какой один контент-актив вы сделаете за 2 часа?","Как измерите, что он привёл к разговору, а не только к просмотрам?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('hubspot-inbound-marketing', 'HubSpot Academy: Inbound Marketing', 'Inbound Marketing Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/inbound-marketing', 'Бесплатный курс HubSpot Academy', true, false, 90, 'en', '2026-11-21', 'База привлечения через полезный контент и воронку.', 'Attract / Engage / Delight; выбрать один канал для эксперимента.', 'Как связать контент с этапом покупательского пути.', '["Какой один контент-актив вы сделаете за 2 часа?", "Как измерите, что он привёл к разговору, а не только к просмотрам?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('mit-entrepreneurial-marketing', 'MIT OCW: Entrepreneurial Marketing (15.835)', 'Entrepreneurial Marketing', 'MIT OCW', 'https://ocw.mit.edu/courses/15-835-entrepreneurial-marketing-spring-2002/', 'MIT OpenCourseWare — свободный доступ к материалам курса', true, false, 60, 'en', '2026-11-21', 'Маркетинг при ограниченных ресурсах стартапа.', 'Lecture notes: Market Research, Segmentation and Targeting, Positioning Tools.', 'Как выбрать сегмент и позиционирование без большого бюджета.', '["Какой сегмент вы выберете первым и почему?","Какое позиционирование отличимо от 2 конкурентов?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('mit-entrepreneurial-marketing', 'MIT OCW: Entrepreneurial Marketing (15.835)', 'Entrepreneurial Marketing', 'MIT OCW', 'https://ocw.mit.edu/courses/15-835-entrepreneurial-marketing-spring-2002/', 'MIT OpenCourseWare — свободный доступ к материалам курса', true, false, 60, 'en', '2026-11-21', 'Маркетинг при ограниченных ресурсах стартапа.', 'Lecture notes: Market Research, Segmentation and Targeting, Positioning Tools.', 'Как выбрать сегмент и позиционирование без большого бюджета.', '["Какой сегмент вы выберете первым и почему?", "Какое позиционирование отличимо от 2 конкурентов?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('mit-new-enterprises', 'MIT OCW: New Enterprises (15.390)', 'New Enterprises', 'MIT OCW', 'https://ocw.mit.edu/courses/15-390-new-enterprises-spring-2013/', 'MIT OpenCourseWare — свободный доступ', true, false, 70, 'en', '2026-11-21', 'От идеи до go-to-market и unit-экономики.', 'Notes: Target customer, Competition, Sales and distribution, COCA.', 'Связка customer research → CAC → модель захвата ценности.', '["Как клиент узнаёт о продукте и покупает его?","Какой грубый CAC вы оцениваете для первого канала?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('mit-new-enterprises', 'MIT OCW: New Enterprises (15.390)', 'New Enterprises', 'MIT OCW', 'https://ocw.mit.edu/courses/15-390-new-enterprises-spring-2013/', 'MIT OpenCourseWare — свободный доступ', true, false, 70, 'en', '2026-11-21', 'От идеи до go-to-market и unit-экономики.', 'Notes: Target customer, Competition, Sales and distribution, COCA.', 'Связка customer research → CAC → модель захвата ценности.', '["Как клиент узнаёт о продукте и покупает его?", "Какой грубый CAC вы оцениваете для первого канала?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('mit-marketing-management', 'MIT OCW: Marketing Management (15.810)', 'Marketing Management: Analytics, Frameworks, and Applications', 'MIT OCW', 'https://ocw.mit.edu/courses/15-810-marketing-management-analytics-frameworks-and-applications-fall-2015/', 'MIT OpenCourseWare — свободный доступ', true, false, 55, 'en', '2026-11-21', 'Аналитические рамки маркетинговых решений.', 'Обзор курса + выбранные assignments/frameworks из syllabus.', 'Как принимать маркетинговые решения на данных, а не на ощущениях.', '["Какое решение вы сейчас принимаете «на глаз»?","Какой минимальный набор данных его улучшит?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('mit-marketing-management', 'MIT OCW: Marketing Management (15.810)', 'Marketing Management: Analytics, Frameworks, and Applications', 'MIT OCW', 'https://ocw.mit.edu/courses/15-810-marketing-management-analytics-frameworks-and-applications-fall-2015/', 'MIT OpenCourseWare — свободный доступ', true, false, 55, 'en', '2026-11-21', 'Аналитические рамки маркетинговых решений.', 'Обзор курса + выбранные assignments/frameworks из syllabus.', 'Как принимать маркетинговые решения на данных, а не на ощущениях.', '["Какое решение вы сейчас принимаете «на глаз»?", "Какой минимальный набор данных его улучшит?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('openstax-entrepreneurship', 'OpenStax: Entrepreneurship', 'Entrepreneurship', 'OpenStax', 'https://openstax.org/details/books/entrepreneurship', 'OpenStax CC BY — бесплатный учебник', true, false, 50, 'en', '2026-11-21', 'Системное введение в предпринимательство без платного учебника.', 'Главы про opportunity recognition и business models (см. ToC на сайте).', 'Базовый словарь: возможность, модель, ценность, риски.', '["Какую возможность вы формулируете в одном предложении?","Какие 3 риска самые критичные на старте?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('openstax-entrepreneurship', 'OpenStax: Entrepreneurship', 'Entrepreneurship', 'OpenStax', 'https://openstax.org/details/books/entrepreneurship', 'OpenStax CC BY — бесплатный учебник', true, false, 50, 'en', '2026-11-21', 'Системное введение в предпринимательство без платного учебника.', 'Главы про opportunity recognition и business models (см. ToC на сайте).', 'Базовый словарь: возможность, модель, ценность, риски.', '["Какую возможность вы формулируете в одном предложении?", "Какие 3 риска самые критичные на старте?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('openstax-principles-marketing', 'OpenStax: Principles of Marketing', 'Principles of Marketing', 'OpenStax', 'https://openstax.org/details/books/principles-marketing', 'OpenStax CC BY — бесплатный учебник', true, false, 50, 'en', '2026-11-21', 'Классика маркетинга: сегментация, 4P, покупательское поведение.', 'Главы про consumer behavior и segmentation (по ToC).', 'Как описать путь решения покупателя до покупки.', '["Какие этапы проходит ваш покупатель до решения?","Где в пути возникает наибольшее трение?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('openstax-principles-marketing', 'OpenStax: Principles of Marketing', 'Principles of Marketing', 'OpenStax', 'https://openstax.org/details/books/principles-marketing', 'OpenStax CC BY — бесплатный учебник', true, false, 50, 'en', '2026-11-21', 'Классика маркетинга: сегментация, 4P, покупательское поведение.', 'Главы про consumer behavior и segmentation (по ToC).', 'Как описать путь решения покупателя до покупки.', '["Какие этапы проходит ваш покупатель до решения?", "Где в пути возникает наибольшее трение?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('openstax-intro-business', 'OpenStax: Introduction to Business', 'Introduction to Business', 'OpenStax', 'https://openstax.org/details/books/introduction-business', 'OpenStax CC BY — бесплатный учебник', true, false, 45, 'en', '2026-11-21', 'Операции, финансы и структура бизнеса на простом языке.', 'Главы про management/operations и financial basics.', 'Как связаны продажи, операционка и денежный поток.', '["Какой операционный bottleneck мешает продажам?","Где в процессе теряется время после «да» клиента?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('openstax-intro-business', 'OpenStax: Introduction to Business', 'Introduction to Business', 'OpenStax', 'https://openstax.org/details/books/introduction-business', 'OpenStax CC BY — бесплатный учебник', true, false, 45, 'en', '2026-11-21', 'Операции, финансы и структура бизнеса на простом языке.', 'Главы про management/operations и financial basics.', 'Как связаны продажи, операционка и денежный поток.', '["Какой операционный bottleneck мешает продажам?", "Где в процессе теряется время после «да» клиента?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('openstax-organizational-behavior', 'OpenStax: Organizational Behavior', 'Organizational Behavior', 'OpenStax', 'https://openstax.org/details/books/organizational-behavior', 'OpenStax CC BY — бесплатный учебник', true, false, 45, 'en', '2026-11-21', 'Психология влияния, мотивации и переговоров в организациях.', 'Главы про communication, power/influence, conflict.', 'Как интересы и статусы влияют на решение «купить / согласиться».', '["Кто неформально влияет на решение у вашего клиента?","Какой конфликт интересов вы должны назвать вслух?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('openstax-organizational-behavior', 'OpenStax: Organizational Behavior', 'Organizational Behavior', 'OpenStax', 'https://openstax.org/details/books/organizational-behavior', 'OpenStax CC BY — бесплатный учебник', true, false, 45, 'en', '2026-11-21', 'Психология влияния, мотивации и переговоров в организациях.', 'Главы про communication, power/influence, conflict.', 'Как интересы и статусы влияют на решение «купить / согласиться».', '["Кто неформально влияет на решение у вашего клиента?", "Какой конфликт интересов вы должны назвать вслух?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('pon-harvard-home', 'Harvard PON: Program on Negotiation', 'Program on Negotiation at Harvard Law School', 'Harvard PON', 'https://www.pon.harvard.edu/', 'Бесплатные статьи и ресурсы PON (часть материалов платная — берём только free daily/blog)', true, false, 40, 'en', '2026-11-21', 'Авторитетная школа переговоров: интересы vs позиции.', 'Бесплатные Daily Blog материалы про interests, BATNA, preparation.', 'BATNA, резервная цена, подготовка к переговорам.', '["Какая у вас BATNA до разговора?","Какие интересы скрываются за заявленной позицией контрагента?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('pon-harvard-home', 'Harvard PON: Program on Negotiation', 'Program on Negotiation at Harvard Law School', 'Harvard PON', 'https://www.pon.harvard.edu/', 'Бесплатные статьи и ресурсы PON (часть материалов платная — берём только free daily/blog)', true, false, 40, 'en', '2026-11-21', 'Авторитетная школа переговоров: интересы vs позиции.', 'Бесплатные Daily Blog материалы про interests, BATNA, preparation.', 'BATNA, резервная цена, подготовка к переговорам.', '["Какая у вас BATNA до разговора?", "Какие интересы скрываются за заявленной позицией контрагента?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('pon-negotiation-skills', 'Harvard PON: Negotiation skills (Daily)', 'Top Negotiation Skills — PON Daily', 'Harvard PON', 'https://www.pon.harvard.edu/daily/negotiation-skills-daily/top-10-negotiation-skills/', 'Бесплатная статья PON Daily', true, false, 25, 'en', '2026-11-21', 'Короткий чеклист навыков подготовки и ведения переговоров.', 'Статья целиком; выбрать 3 навыка для тренировки на неделе.', 'Какие навыки тренируются действием, а не чтением.', '["Какие 3 навыка вы отработаете на симуляции?","Как измерите улучшение после тренировки?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('pon-negotiation-skills', 'Harvard PON: Negotiation skills (Daily)', 'Top Negotiation Skills — PON Daily', 'Harvard PON', 'https://www.pon.harvard.edu/daily/negotiation-skills-daily/top-10-negotiation-skills/', 'Бесплатная статья PON Daily', true, false, 25, 'en', '2026-11-21', 'Короткий чеклист навыков подготовки и ведения переговоров.', 'Статья целиком; выбрать 3 навыка для тренировки на неделе.', 'Какие навыки тренируются действием, а не чтением.', '["Какие 3 навыка вы отработаете на симуляции?", "Как измерите улучшение после тренировки?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('strategyzer-library', 'Strategyzer Library', 'Strategyzer Business Strategy Library', 'Strategyzer', 'https://www.strategyzer.com/library', 'Бесплатные обзоры инструментов (Business Model / Value Proposition Canvas). Книги — optional paid.', true, false, 40, 'en', '2026-11-21', 'Визуальные инструменты модели и ценностного предложения.', 'Страницы Business Model Canvas и Value Proposition Canvas + 1 статья из library.', 'Как связать jobs/pains/gains с блоками модели.', '["Какой Job-to-be-done у вашего сегмента?","Какой блок модели самый слабый прямо сейчас?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('strategyzer-library', 'Strategyzer Library', 'Strategyzer Business Strategy Library', 'Strategyzer', 'https://www.strategyzer.com/library', 'Бесплатные обзоры инструментов (Business Model / Value Proposition Canvas). Книги — optional paid.', true, false, 40, 'en', '2026-11-21', 'Визуальные инструменты модели и ценностного предложения.', 'Страницы Business Model Canvas и Value Proposition Canvas + 1 статья из library.', 'Как связать jobs/pains/gains с блоками модели.', '["Какой Job-to-be-done у вашего сегмента?", "Какой блок модели самый слабый прямо сейчас?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('strategyzer-bmc', 'Strategyzer: Business Model Canvas', 'The Business Model Canvas', 'Strategyzer', 'https://www.strategyzer.com/canvas/business-model-canvas', 'Официальная страница инструмента Strategyzer; шаблон доступен бесплатно для личного использования', true, false, 30, 'en', '2026-11-21', 'Стандарт описания бизнес-модели на одном листе.', 'Описание 9 блоков; заполнить canvas для своего кейса.', 'Как гипотезы о клиентах стыкуются с каналами и доходами.', '["Какие 2 гипотезы в canvas самые рискованные?","Что вы проверите разговорами на этой неделе?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('strategyzer-bmc', 'Strategyzer: Business Model Canvas', 'The Business Model Canvas', 'Strategyzer', 'https://www.strategyzer.com/canvas/business-model-canvas', 'Официальная страница инструмента Strategyzer; шаблон доступен бесплатно для личного использования', true, false, 30, 'en', '2026-11-21', 'Стандарт описания бизнес-модели на одном листе.', 'Описание 9 блоков; заполнить canvas для своего кейса.', 'Как гипотезы о клиентах стыкуются с каналами и доходами.', '["Какие 2 гипотезы в canvas самые рискованные?", "Что вы проверите разговорами на этой неделе?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('sba-business-guide', 'SBA: Business Guide', 'SBA Business Guide', 'SBA', 'https://www.sba.gov/business-guide', 'Официальные бесплатные материалы U.S. Small Business Administration', true, false, 40, 'en', '2026-11-21', 'Практический чеклист запуска и управления малым бизнесом.', 'Разделы Plan / Launch / Manage — выбрать релевантные подкейсу.', 'Какие операционные шаги обязательны после первых продаж.', '["Какой шаг из Manage вы пропустите ценой риска?","Что нужно formalize после 5-й продажи?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('sba-business-guide', 'SBA: Business Guide', 'SBA Business Guide', 'SBA', 'https://www.sba.gov/business-guide', 'Официальные бесплатные материалы U.S. Small Business Administration', true, false, 40, 'en', '2026-11-21', 'Практический чеклист запуска и управления малым бизнесом.', 'Разделы Plan / Launch / Manage — выбрать релевантные подкейсу.', 'Какие операционные шаги обязательны после первых продаж.', '["Какой шаг из Manage вы пропустите ценой риска?", "Что нужно formalize после 5-й продажи?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('sba-write-business-plan', 'SBA: Write your business plan', 'Write your business plan', 'SBA', 'https://www.sba.gov/business-guide/plan-your-business/write-your-business-plan', 'Официальный бесплатный гайд SBA', true, false, 35, 'en', '2026-11-21', 'Структура плана без «воды» и шаблонных абзацев.', 'Секции market analysis, organization, financial projections overview.', 'Какие разделы плана нужны инвестору/партнёру vs себе.', '["Какой раздел у вас пустой из-за отсутствия данных?","Какой эксперимент закроет этот пробел за неделю?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('sba-write-business-plan', 'SBA: Write your business plan', 'Write your business plan', 'SBA', 'https://www.sba.gov/business-guide/plan-your-business/write-your-business-plan', 'Официальный бесплатный гайд SBA', true, false, 35, 'en', '2026-11-21', 'Структура плана без «воды» и шаблонных абзацев.', 'Секции market analysis, organization, financial projections overview.', 'Какие разделы плана нужны инвестору/партнёру vs себе.', '["Какой раздел у вас пустой из-за отсутствия данных?", "Какой эксперимент закроет этот пробел за неделю?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
-values ('sba-market-research', 'SBA: Market research and competitive analysis', 'Market research and competitive analysis', 'SBA', 'https://www.sba.gov/business-guide/plan-your-business/market-research-competitive-analysis', 'Официальный бесплатный гайд SBA', true, false, 35, 'en', '2026-11-21', 'Как делать market research без покупки дорогих отчётов.', 'Методы primary/secondary research из гайда.', 'Чем отличается мнение знакомых от проверяемой гипотезы рынка.', '["Какой primary research вы сделаете на этой неделе?","Каких 3 конкурентов сравните по 5 критериям?"]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+values ('sba-market-research', 'SBA: Market research and competitive analysis', 'Market research and competitive analysis', 'SBA', 'https://www.sba.gov/business-guide/plan-your-business/market-research-competitive-analysis', 'Официальный бесплатный гайд SBA', true, false, 35, 'en', '2026-11-21', 'Как делать market research без покупки дорогих отчётов.', 'Методы primary/secondary research из гайда.', 'Чем отличается мнение знакомых от проверяемой гипотезы рынка.', '["Какой primary research вы сделаете на этой неделе?", "Каких 3 конкурентов сравните по 5 критериям?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('yc-dont-scale', 'YC: Do things that don''t scale', 'Do things that don''t scale', 'YC Library', 'https://www.ycombinator.com/library/96-do-things-that-dont-scale', 'Бесплатно на YC Startup Library', true, false, 30, 'en', '2026-11-21', 'Ранний рост через ручные, «немасштабируемые» действия основателя.', 'Эссе целиком; выписать 5 ручных тактик под свой кейс.', 'Почему ручные продажи и онбординг важнее «автоматизации» на старте.', '["Какое ручное действие даст вам 5 реальных разговоров на этой неделе?", "Что вы сознательно не автоматизируете до product-market fit?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('yc-pricing-101', 'YC: Startup pricing 101', 'Startup pricing 101', 'YC Library', 'https://www.ycombinator.com/library/6h-startup-pricing-101', 'Бесплатно на YC Startup Library', true, false, 35, 'en', '2026-11-21', 'Практика назначения цены без копирования конкурентов «на глаз».', 'Материал целиком; конспект правил теста цены и пакетов.', 'Как связать цену с ценностью и готовностью платить.', '["Какую цену вы поставите в следующем разговоре и почему?", "Какой эксперимент проверит, что цена не занижена из страха?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('yc-pmf', 'YC: The real product-market fit', 'The real product-market fit', 'YC Library', 'https://www.ycombinator.com/library/5z-growth', 'Бесплатно на YC Startup Library', true, false, 30, 'en', '2026-11-21', 'Отделяет настоящий PMF от «всем нравится идея».', 'Материал целиком; список сигналов PMF vs vanity.', 'Какие доказательства показывают, что сегмент и оффер совпали.', '["Какой сигнал PMF у вас уже есть, а какой отсутствует?", "Что вы перестанете делать, пока нет pull от клиентов?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('yc-product-dev', 'YC: Guide to product development', 'Guide to product development', 'YC Library', 'https://www.ycombinator.com/library/4e-product-development-cycle-fundamentals', 'Бесплатно на YC Startup Library', true, false, 35, 'en', '2026-11-21', 'Цикл разработки продукта без лишних фич «на всякий случай».', 'Основы цикла; связать с гипотезами discovery и продажами.', 'Как приоритезировать фичи под реальные разговоры с клиентами.', '["Какую фичу вы отложите, чтобы успеть сделать 5 продаж?", "Какой feedback-цикл связывает delivery и roadmap?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('mit-entrepreneurial-sales', 'MIT OCW: Entrepreneurial Sales (15.387)', 'Entrepreneurial Sales', 'MIT OCW', 'https://ocw.mit.edu/courses/15-387-entrepreneurial-sales-spring-2015/', 'MIT OpenCourseWare — свободный доступ', true, false, 55, 'en', '2026-11-21', 'Академический каркас продаж на ранней стадии компании.', 'Syllabus + выбранные readings/notes про sales process и pipeline.', 'Как строить повторяемый sales motion, а не разовые «подвиги».', '["Какой этап вашего sales process сейчас самый дырявый?", "Какую метрику pipeline вы введёте на этой неделе?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('mit-power-negotiation', 'MIT OCW: Power and Negotiation (15.665)', 'Power and Negotiation', 'MIT OCW', 'https://ocw.mit.edu/courses/15-665-power-and-negotiation-spring-2014/', 'MIT OpenCourseWare — свободный доступ', true, false, 50, 'en', '2026-11-21', 'Власть, влияние и подготовка к переговорам в организациях.', 'Обзор курса + материалы про preparation, power, multiparty.', 'Как сила сторон и структура сделки меняют тактику.', '["Где у вас реальная сила в сделке, а где только иллюзия?", "Какой multiparty-риск вы не заложили в prep?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('openstax-principles-management', 'OpenStax: Principles of Management', 'Principles of Management', 'OpenStax', 'https://openstax.org/details/books/principles-management', 'OpenStax CC BY — бесплатный учебник', true, false, 45, 'en', '2026-11-21', 'Управление процессами, людьми и решениями без платного MBA-учебника.', 'Главы про decision-making, organizing, leadership (по ToC).', 'Как управленческие решения стыкуются с продажами и исполнением.', '["Какое решение вы делегируете, а какое оставляете за собой?", "Какой управленческий bottleneck тормозит сделки?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('pon-batna-examples', 'Harvard PON: BATNA examples', 'BATNA Examples and What You Can Learn From Them', 'Harvard PON', 'https://www.pon.harvard.edu/daily/batna/batna-examples-and-what-you-can-learn-from-them/', 'Бесплатная статья PON Daily', true, false, 25, 'en', '2026-11-21', 'BATNA на примерах — не абстрактный термин, а запасной план.', 'Статья целиком; выписать свою BATNA и BATNA контрагента.', 'Как слабая/сильная BATNA меняет готовность уступать.', '["Какая у вас BATNA до завтрашнего разговора?", "Что улучшит вашу BATNA без эскалации конфликта?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('pon-batna-power', 'Harvard PON: BATNA as a source of power', 'BATNA in Negotiation: A Key Source of Power', 'Harvard PON', 'https://www.pon.harvard.edu/daily/batna/batna-in-negotiation-a-key-source-of-power/', 'Бесплатная статья PON Daily', true, false, 20, 'en', '2026-11-21', 'Связь BATNA и переговорной силы без агрессии.', 'Статья целиком; 3 действия, усиливающие вашу альтернативу.', 'Почему сила растёт от альтернатив, а не от давления.', '["Какое одно действие усилит вашу BATNA за 48 часов?", "Где вы давите, вместо того чтобы усиливать альтернативу?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('pon-hardball-tactics', 'Harvard PON: Hardball tactics in negotiation', '10 Hardball Tactics in Negotiation', 'Harvard PON', 'https://www.pon.harvard.edu/daily/batna/10-hardball-tactics-in-negotiation/', 'Бесплатная статья PON Daily', true, false, 25, 'en', '2026-11-21', 'Распознать жёсткие приёмы и ответить интересами, а не зеркальной агрессией.', 'Статья целиком; выбрать 3 тактики, которые встречали в продажах.', 'Как отвечать на hardball без скидки «в пустоту».', '["Какой hardball вы встречали чаще всего?", "Какой вопрос возвращает разговор к интересам?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('strategyzer-vpc', 'Strategyzer: Value Proposition Canvas', 'The Value Proposition Canvas', 'Strategyzer', 'https://www.strategyzer.com/canvas/value-proposition-canvas', 'Официальная страница инструмента Strategyzer; шаблон доступен бесплатно для личного использования', true, false, 30, 'en', '2026-11-21', 'Связка jobs/pains/gains с тем, что вы реально предлагаете.', 'Описание VPC; заполнить customer profile + value map для beachhead.', 'Где оффер не попадает в боль сегмента.', '["Какой pain вы закрываете доказанно, а какой только обещаете?", "Какой блок VPC проверите интервью на этой неделе?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('sba-marketing-sales', 'SBA: Marketing and sales', 'Marketing and sales', 'SBA', 'https://www.sba.gov/business-guide/manage-your-business/marketing-sales', 'Официальный бесплатный гайд SBA', true, false, 30, 'en', '2026-11-21', 'Практический чеклист маркетинга и продаж малого бизнеса.', 'Раздел Marketing and sales; выбрать 3 действия на неделю.', 'Как связать привлечение с закрытием сделки, а не с «активностью».', '["Какое одно маркетинговое действие ведёт к разговору?", "Что в вашем sales-процессе всё ещё не записано?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('sba-manage-finances', 'SBA: Manage your finances', 'Manage your finances', 'SBA', 'https://www.sba.gov/business-guide/manage-your-business/manage-your-finances', 'Официальный бесплатный гайд SBA', true, false, 30, 'en', '2026-11-21', 'Денежный контур бизнеса: учёт, поток, базовые финансовые решения.', 'Раздел Manage your finances; связать с ценой и CAC.', 'Почему скидка и отсрочка бьют по cash flow.', '["Какой финансовый показатель вы смотрите еженедельно?", "Где продажа «в кредит доверия» рискует кассой?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('sba-startup-costs', 'SBA: Calculate your startup costs', 'Calculate your startup costs', 'SBA', 'https://www.sba.gov/business-guide/plan-your-business/calculate-your-startup-costs', 'Официальный бесплатный гайд SBA', true, false, 25, 'en', '2026-11-21', 'Честная оценка затрат до и после первых продаж.', 'Гайд по расчёту startup costs; таблица one-time vs recurring.', 'Какие затраты обязательны до первой выручки.', '["Какую статью затрат вы занижали?", "Что можно отложить до первой оплаты клиента?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('hubspot-inbound', 'HubSpot Academy: Inbound', 'Inbound Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/inbound', 'Бесплатный курс HubSpot Academy (требуется бесплатный аккаунт)', true, false, 70, 'en', '2026-11-21', 'Базовый inbound-метод: привлекать полезностью, а не спамом.', 'Ключевые модули про flywheel / buyer journey; один вывод в практику.', 'Как контент и сервис кормят продажи без холодного давления.', '["Какой этап buyer journey у вас пустой?", "Какой полезный актив вы сделаете вместо ещё одного поста «о компании»?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
+insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
+values ('hubspot-sales-enablement', 'HubSpot Academy: Sales Enablement', 'Sales Enablement Course', 'HubSpot Academy', 'https://academy.hubspot.com/courses/sales-enablement', 'Бесплатный курс HubSpot Academy (требуется бесплатный аккаунт)', true, false, 60, 'en', '2026-11-21', 'Как давать продавцу (себе) материалы, скрипты и proof для сделок.', 'Модули про enablement-процесс; собрать мини-набор для своей недели.', 'Какие артефакты ускоряют сделку, а какие только засоряют диск.', '["Какой один enablement-артефакт нужен вам до следующего звонка?", "Что из «библиотеки» вы ни разу не использовали в разговоре?"]'::jsonb)
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
 
 insert into public.sources (slug, title_ru, title_original, provider, url, license_note, is_free, is_optional_paid, estimated_study_minutes, language, verified_at, why_ru, parts_ru, understand_ru, questions_ru)
 values ('optional-getting-to-yes', 'Optional: Getting to Yes (книга)', 'Getting to Yes — Fisher, Ury, Patton', 'Harvard PON', 'https://www.pon.harvard.edu/', 'Платная книга — только optional recommendation; покупать легально. В программу не входит файл.', false, true, 0, 'en', '2026-11-21', 'Классика principled negotiation — углубление после free PON.', 'Необязательно; при наличии легальной копии — главы про interests/options.', 'Углублённая практика интересов вместо позиций.', '[]'::jsonb)
-on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru;
+on conflict (slug) do update set title_ru = excluded.title_ru, url = excluded.url, estimated_study_minutes = excluded.estimated_study_minutes, why_ru = excluded.why_ru, parts_ru = excluded.parts_ru, understand_ru = excluded.understand_ru, questions_ru = excluded.questions_ru, is_free = excluded.is_free, is_optional_paid = excluded.is_optional_paid, license_note = excluded.license_note;
+
 
 insert into public.weeks (module_id, week_number, title_ru, is_unlocked, summary_ru, learning_goals, problem_ru, outcomes, concepts, debate_ru, case_ru, simulation_ru, reflection, error_watchlist, sales_drill_ru)
 select m.id, 1, 'Старт: мышление продавца', true, 'Основатели избегают продаж и путают «рассказать о продукте» с закрытием следующего шага.', '["Собрать карту идеального первого покупателя","Провести 3 разговора по скрипту диагностики","Зафиксировать один измеримый следующий шаг сделки"]'::jsonb, 'Основатели избегают продаж и путают «рассказать о продукте» с закрытием следующего шага.', '["Собрать карту идеального первого покупателя","Провести 3 разговора по скрипту диагностики","Зафиксировать один измеримый следующий шаг сделки"]'::jsonb, '["ICP","следующий шаг","диагностика vs питч","founder-led sales"]'::jsonb, 'Можно ли масштабировать маркетинг до того, как основатель лично закрыл 10 сделок?', 'B2B-сервис: 0 продаж, много «интересно» в чатах. Что меняете в первую неделю?', 'Звонок скептичному ЛПР: у вас 8 минут, цель — календарная встреча, не «рассказ о компании».', '["Где вы избегали прямого запроса следующего шага?","Какой вопрос из discovery оказался самым сильным?"]'::jsonb, '["Питч фич вместо диагностики","Список контактов из «воображаемых компаний»","Нет конкретного CTA в сообщении"]'::jsonb, 'Сделайте 5 исходящих касаний по списку ICP и запишите ответы.'
@@ -261,91 +326,87 @@ select w.id, s.id, true, 45, 1
 from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 60, 2
+select w.id, s.id, true, 50, 2
 from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'hubspot-inbound-sales'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, false, 0, 3
+select w.id, s.id, true, 20, 3
+from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'sba-marketing-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 4
+from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 40, 5
+from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'mit-entrepreneurial-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 0, 6
 from public.weeks w, public.sources s where w.week_number = 1 and s.slug = 'optional-getting-to-yes'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W01-A', 'A', 'Карта ICP и 10 контактов', 'Опишите идеального покупателя (роль, боль, триггер). Составьте список из 10 реальных контактов и черновик первого сообщения. Сдайте текст 400–700 слов + список.', 'text', 70
-from public.weeks w where w.week_number = 1
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W01-B', 'B', 'Скрипт диагностики на 5 вопросов', 'Напишите скрипт discovery-звонка: открытие, 5 вопросов, резюме боли, запрос следующего шага. Прогоните вслух 2 раза и приложите самозаметки.', 'text', 70
-from public.weeks w where w.week_number = 1
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W01-JOINT', 'both', 'Разбор двух скриптов', 'Обсудите скрипты A и B: где давление, где ясность, какой следующий шаг сильнее. Зафиксируйте общую версию v1.', 'text', 40
-from public.weeks w where w.week_number = 1
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 1
+select w.id, s.id, true, 45, 1
 from public.weeks w, public.sources s where w.week_number = 2 and s.slug = 'openstax-principles-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 2
+select w.id, s.id, true, 40, 2
 from public.weeks w, public.sources s where w.week_number = 2 and s.slug = 'openstax-organizational-behavior'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W02-A', 'A', 'Карта стейкхолдеров по кейсу', 'Выберите реальный или учебный B2B-кейс. Нарисуйте карту: роли, интересы, риски, влияние. 1 страница + легензии.', 'text', 75
-from public.weeks w where w.week_number = 2
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W02-B', 'B', 'Разбор 5 возражений', 'Соберите 5 типичных возражений. Для каждого: скрытый интерес, уточняющий вопрос, ответ без скидки «в пустоту».', 'text', 75
-from public.weeks w where w.week_number = 2
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W02-JOINT', 'both', 'Совместная карта сделки', 'Сведите карты A/B в одну: кто блокирует, кто ускоряет, какой следующий разговор нужен.', 'text', 35
-from public.weeks w where w.week_number = 2
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 1
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 2 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 40, 4
+from public.weeks w, public.sources s where w.week_number = 2 and s.slug = 'hubspot-inbound'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 2 and s.slug = 'openstax-principles-management'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 45, 1
 from public.weeks w, public.sources s where w.week_number = 3 and s.slug = 'hubspot-inbound-sales'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 2
+select w.id, s.id, true, 40, 2
 from public.weeks w, public.sources s where w.week_number = 3 and s.slug = 'yc-sales-marketing-talk'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W03-A', 'A', 'Критерии квалификации v1', 'Опишите 6 критериев квалификации под ваш кейс и таблицу: лид → статус → причина → следующий шаг.', 'text', 70
-from public.weeks w where w.week_number = 3
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W03-B', 'B', '2 разговора + заметки', 'Проведите 2 discovery (реальные или ролевые с таймером). Сдайте заметки: боль, критерии, статус, CTA.', 'text', 80
-from public.weeks w where w.week_number = 3
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W03-JOINT', 'both', 'Чистка pipeline', 'Совместно пройдитесь по 8 вымышленным/учебным лидам и решите: active / nurture / drop.', 'text', 35
-from public.weeks w where w.week_number = 3
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 1
+select w.id, s.id, true, 30, 3
+from public.weeks w, public.sources s where w.week_number = 3 and s.slug = 'mit-entrepreneurial-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 35, 4
+from public.weeks w, public.sources s where w.week_number = 3 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 3 and s.slug = 'sba-marketing-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 4 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 4 and s.slug = 'openstax-principles-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W04-A', 'A', 'Midterm A: портфолио продавца', 'Соберите пакет: ICP, сообщения, скрипт, карта стейкхолдеров, лог касаний. Самооценка по рубрике.', 'doc', 90
-from public.weeks w where w.week_number = 4
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W04-B', 'B', 'Midterm B: oral defense 8 мин', 'Подготовьте защиту: гипотеза покупателя, доказательства из разговоров, следующий эксперимент. Сдайте структуру + запись/заметки прогона.', 'defense', 90
-from public.weeks w where w.week_number = 4
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W04-JOINT', 'both', 'Взаимное ревью midterm', 'Обменяйтесь пакетами, дайте фидбек по 4 критериям рубрики, без переписывания чужой работы.', 'text', 40
-from public.weeks w where w.week_number = 4
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 1
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 4 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 4
+from public.weeks w, public.sources s where w.week_number = 4 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 4 and s.slug = 'mit-entrepreneurial-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'pon-harvard-home'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
@@ -353,141 +414,127 @@ select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'pon-negotiation-skills'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 3
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'pon-batna-examples'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
 from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'openstax-organizational-behavior'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W05-A', 'A', 'Подготовка: интересы и BATNA', 'Для учебного кейса: ваша позиция, 3 интереса, BATNA, резерв, 2 опции win-win. Таблица на 1 стр.', 'text', 70
-from public.weeks w where w.week_number = 5
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W05-B', 'B', 'Карта интересов контрагента', 'Смоделируйте интересы другой стороны и вопросы для проверки гипотез. Не придумывайте «магические» уступки.', 'text', 70
-from public.weeks w where w.week_number = 5
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W05-JOINT', 'both', 'Симуляция 12 минут', 'Сыграйте кейс по ролям A/B, затем разберите: где ушли в позиции, где нашли опцию.', 'text', 45
-from public.weeks w where w.week_number = 5
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 5
+from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'pon-batna-power'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 35, 6
+from public.weeks w, public.sources s where w.week_number = 5 and s.slug = 'mit-power-negotiation'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 6 and s.slug = 'pon-negotiation-skills'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 2
+select w.id, s.id, true, 35, 2
 from public.weeks w, public.sources s where w.week_number = 6 and s.slug = 'sba-business-guide'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 3
+select w.id, s.id, true, 35, 3
 from public.weeks w, public.sources s where w.week_number = 6 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W06-A', 'A', 'Prep-пакет переговоров', 'Шаблон: цели, красные линии, вопросы, пакет обмена (если/то), критерии успеха встречи.', 'text', 75
-from public.weeks w where w.week_number = 6
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W06-B', 'B', 'Протокол договорённостей', 'После симуляции оформите протокол: что согласовано, что открыто, владельцы, даты.', 'text', 65
-from public.weeks w where w.week_number = 6
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W06-JOINT', 'both', 'Переговоры с обменом', 'Симуляция: каждая уступка только в паре с встречным условием. Разбор записи/заметок.', 'text', 45
-from public.weeks w where w.week_number = 6
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 1
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 6 and s.slug = 'pon-hardball-tactics'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 6 and s.slug = 'mit-power-negotiation'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'pon-harvard-home'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 2
-from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'mit-new-enterprises'
+select w.id, s.id, true, 35, 2
+from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'mit-power-negotiation'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 25, 3
 from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'openstax-organizational-behavior'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W07-A', 'A', 'Модель трёхсторонней сделки', 'Опишите стороны, интересы, BATNA, возможные коалиции. Предложите пакет условий.', 'text', 75
-from public.weeks w where w.week_number = 7
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W07-B', 'B', 'План эскалации', 'Когда эскалировать, к кому, с каким пакетом фактов. Скрипт эскалационного письма.', 'text', 70
-from public.weeks w where w.week_number = 7
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W07-JOINT', 'both', 'Симуляция трёх ролей', 'Один ведёт, второй — вторая сторона, третий — наблюдатель с чеклистом ошибок. Ротация.', 'text', 45
-from public.weeks w where w.week_number = 7
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 25, 1
+select w.id, s.id, false, 20, 4
+from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'pon-hardball-tactics'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 7 and s.slug = 'mit-new-enterprises'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 1
 from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'pon-negotiation-skills'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'pon-harvard-home'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W08-A', 'A', 'Midterm A: negotiation dossier', 'Пакет: prep, карта интересов, BATNA, опции, протокол симуляции, самооценка.', 'doc', 95
-from public.weeks w where w.week_number = 8
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W08-B', 'B', 'Midterm B: live negotiation defense', '10-минутная симуляция + 5 минут разбора своих ошибок. Сдайте план и заметки наблюдателя.', 'defense', 95
-from public.weeks w where w.week_number = 8
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W08-JOINT', 'both', 'Кросс-ревью midterm', 'Оцените пакет партнёра по рубрике; один must-fix на следующую фазу.', 'text', 35
-from public.weeks w where w.week_number = 8
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 1
+select w.id, s.id, true, 20, 3
+from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'pon-batna-power'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'pon-batna-examples'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'mit-power-negotiation'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 6
+from public.weeks w, public.sources s where w.week_number = 8 and s.slug = 'pon-hardball-tactics'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 40, 1
 from public.weeks w, public.sources s where w.week_number = 9 and s.slug = 'mit-entrepreneurial-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 2
+select w.id, s.id, true, 30, 2
 from public.weeks w, public.sources s where w.week_number = 9 and s.slug = 'yc-startup-ideas'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 3
+select w.id, s.id, true, 25, 3
 from public.weeks w, public.sources s where w.week_number = 9 and s.slug = 'strategyzer-library'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W09-A', 'A', 'Скрипт 5-минутного питча', 'Текст питча с таймингами по блокам. Ask должен быть конкретным (встреча/пилот/интро).', 'text', 75
-from public.weeks w where w.week_number = 9
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W09-B', 'B', 'Карта аудитории', 'Для 2 аудиторий (клиент / партнёр) опишите заботы, возражения, какой proof нужен.', 'text', 70
-from public.weeks w where w.week_number = 9
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W09-JOINT', 'both', 'Прогон питчей', 'Каждый выступает 5 минут, партнер даёт фидбек только по структуре и ask.', 'text', 45
-from public.weeks w where w.week_number = 9
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 1
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 9 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 9 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 40, 1
 from public.weeks w, public.sources s where w.week_number = 10 and s.slug = 'mit-marketing-management'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 55, 2
+select w.id, s.id, true, 45, 2
 from public.weeks w, public.sources s where w.week_number = 10 and s.slug = 'hubspot-inbound-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W10-A', 'A', 'Колода питча v1', '8 слайдов max. На каждом: заголовок-тезис. Сдайте outline + заметки спикера.', 'slides', 85
-from public.weeks w where w.week_number = 10
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W10-B', 'B', 'Матрица доказательств', 'Таблица: утверждение → тип proof → источник/факт → риск недоверия.', 'text', 70
-from public.weeks w where w.week_number = 10
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W10-JOINT', 'both', 'Редактура колоды', 'Вычеркните вместе 30% текста. Проверьте, что ask на последнем слайде ясен.', 'text', 40
-from public.weeks w where w.week_number = 10
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 1
+select w.id, s.id, true, 20, 3
+from public.weeks w, public.sources s where w.week_number = 10 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 40, 4
+from public.weeks w, public.sources s where w.week_number = 10 and s.slug = 'hubspot-inbound'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 10 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 11 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
@@ -495,337 +542,319 @@ select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 11 and s.slug = 'pon-negotiation-skills'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 3
+select w.id, s.id, true, 35, 3
 from public.weeks w, public.sources s where w.week_number = 11 and s.slug = 'openstax-entrepreneurship'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W11-A', 'A', 'Запись прогона 5 мин', 'Запишите питч (аудио/видео). Саморазбор: темп, паразиты, ясность ask. Список 3 правок.', 'audio_note', 80
-from public.weeks w where w.week_number = 11
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W11-B', 'B', 'Банк ответов на 8 вопросов', 'Подготовьте короткие ответы на типовые жёсткие вопросы (цена, конкуренты, риски, сроки).', 'text', 75
-from public.weeks w where w.week_number = 11
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W11-JOINT', 'both', 'Q&A-спарринг', 'По очереди задавайте неудобные вопросы 7 минут. Запрещены оправдания длиннее 40 секунд.', 'text', 45
-from public.weeks w where w.week_number = 11
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 1
+select w.id, s.id, true, 15, 4
+from public.weeks w, public.sources s where w.week_number = 11 and s.slug = 'pon-hardball-tactics'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 11 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 12 and s.slug = 'mit-entrepreneurial-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 12 and s.slug = 'strategyzer-bmc'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W12-A', 'A', 'Midterm A: pitch package', 'Колода ≤8, скрипт, матрица proof, самооценка.', 'slides', 95
-from public.weeks w where w.week_number = 12
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W12-B', 'B', 'Midterm B: live pitch + Q&A', '5+5 минут. Сдайте план и лист фидбека партнёра.', 'defense', 95
-from public.weeks w where w.week_number = 12
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W12-JOINT', 'both', 'Жюри друг для друга', 'Оцените по рубрике; один комплимент и один must-fix.', 'text', 40
-from public.weeks w where w.week_number = 12
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 55, 1
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 12 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 4
+from public.weeks w, public.sources s where w.week_number = 12 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 12 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 45, 1
 from public.weeks w, public.sources s where w.week_number = 13 and s.slug = 'mit-entrepreneurial-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 2
+select w.id, s.id, true, 30, 2
 from public.weeks w, public.sources s where w.week_number = 13 and s.slug = 'sba-market-research'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 3
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 13 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 13 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
 from public.weeks w, public.sources s where w.week_number = 13 and s.slug = 'strategyzer-library'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W13-A', 'A', 'Выбор beachhead', 'Сравните 3 сегмента по боли, доступности, платежеспособности. Выберите один и обоснуйте.', 'text', 75
-from public.weeks w where w.week_number = 13
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W13-B', 'B', 'Позиционирование и тест сообщения', '1 фраза позиционирования + 3 варианта сообщения. Протестируйте на 3 людях, сдайте заметки.', 'text', 80
-from public.weeks w where w.week_number = 13
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W13-JOINT', 'both', 'Согласование сегмента', 'Выберите общий beachhead на 4 недели и список 15 контактов в нём.', 'text', 35
-from public.weeks w where w.week_number = 13
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 1
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'yc-startup-ideas'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 2
+select w.id, s.id, true, 40, 2
 from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'mit-new-enterprises'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 3
+select w.id, s.id, true, 25, 3
 from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'sba-market-research'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W14-A', 'A', 'Гид интервью', '10 вопросов, которые нельзя заменить питчем. Цель каждого вопроса. Запрещённые формулировки.', 'text', 65
-from public.weeks w where w.week_number = 14
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W14-B', 'B', '4 интервью + синтез', 'Проведите 4 разговора (реальные/ролевые). Таблица: цитата → факт → гипотеза → решение.', 'text', 80
-from public.weeks w where w.week_number = 14
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W14-JOINT', 'both', 'Обновление гипотез', 'Какие гипотезы умерли? Какие усилили? Что меняете в оффере на следующей неделе?', 'text', 35
-from public.weeks w where w.week_number = 14
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 70, 1
+select w.id, s.id, true, 25, 4
+from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 6
+from public.weeks w, public.sources s where w.week_number = 14 and s.slug = 'yc-product-dev'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 45, 1
 from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'hubspot-inbound-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 2
+select w.id, s.id, true, 30, 2
 from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'yc-sales-marketing-talk'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W15-A', 'A', 'Дизайн эксперимента', 'Гипотеза, канал, актив, метрика (разговоры), критерий успеха/провала, бюджет времени.', 'text', 70
-from public.weeks w where w.week_number = 15
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W15-B', 'B', 'Запуск и лог', 'Запустите актив, ведите лог касаний/ответов 5 дней. Итог: что сработало.', 'text', 90
-from public.weeks w where w.week_number = 15
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W15-JOINT', 'both', 'Разбор эксперимента', 'Решите: scale / iterate / kill. Один следующий тест.', 'text', 35
-from public.weeks w where w.week_number = 15
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 1
+select w.id, s.id, true, 20, 3
+from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'sba-marketing-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'hubspot-inbound'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 15 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'strategyzer-bmc'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'sba-market-research'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 3
+select w.id, s.id, true, 30, 3
 from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'mit-entrepreneurial-marketing'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W16-A', 'A', 'Midterm A: discovery & segment dossier', 'Сегмент, позиционирование, 4 интервью, обновлённые гипотезы.', 'doc', 95
-from public.weeks w where w.week_number = 16
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W16-B', 'B', 'Midterm B: channel experiment defense', 'Защита эксперимента: метрики, выводы, следующий тест, влияние на продажи.', 'defense', 90
-from public.weeks w where w.week_number = 16
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W16-JOINT', 'both', 'Согласование go-to-market на модуль 5', 'Общий beachhead + канал + sales motion на следующие 4 недели.', 'text', 40
-from public.weeks w where w.week_number = 16
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 1
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 35, 6
+from public.weeks w, public.sources s where w.week_number = 16 and s.slug = 'hubspot-inbound'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'sba-business-guide'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 2
+select w.id, s.id, true, 35, 2
 from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'openstax-intro-business'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 3
+select w.id, s.id, true, 30, 3
 from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'mit-new-enterprises'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W17-A', 'A', 'Карта процесса delivery', 'Шаги от yes до first value, владельцы, SLA, точки фейла. 1 схема + комментарии.', 'text', 75
-from public.weeks w where w.week_number = 17
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W17-B', 'B', 'Скрипт handoff', 'Что продавец передаёт в delivery: данные, ожидания, риски. Чеклист kickoff-звонка.', 'text', 70
-from public.weeks w where w.week_number = 17
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W17-JOINT', 'both', 'Разбор срыва onboarding', 'Кейс: клиент не активировался 14 дней. Найдите 3 причины и 3 фикса.', 'text', 35
-from public.weeks w where w.week_number = 17
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 1
+select w.id, s.id, true, 25, 4
+from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'yc-product-dev'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'openstax-principles-management'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 6
+from public.weeks w, public.sources s where w.week_number = 17 and s.slug = 'sba-startup-costs'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 35, 1
 from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'mit-new-enterprises'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 30, 2
-from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'sba-write-business-plan'
+from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'yc-pricing-101'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'sba-manage-finances'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
 from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'openstax-intro-business'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W18-A', 'A', 'Грубая модель экономики', 'Оцените CAC канала, средний чек, вклад, payback. Покажите допущения явно.', 'text', 80
-from public.weeks w where w.week_number = 18
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W18-B', 'B', 'Прайс и политика скидок', 'Прайс-лист v1 + правила скидок (когда можно/нельзя) + скрипт ценового разговора.', 'text', 75
-from public.weeks w where w.week_number = 18
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W18-JOINT', 'both', 'Ценовая симуляция', 'Клиент давит на скидку. Используйте пакет (срок/объём/условия), не «−20% сразу».', 'text', 40
-from public.weeks w where w.week_number = 18
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 1
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'sba-write-business-plan'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 6
+from public.weeks w, public.sources s where w.week_number = 18 and s.slug = 'sba-startup-costs'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 35, 1
 from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'hubspot-inbound-sales'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 2
+select w.id, s.id, true, 30, 2
 from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'sba-business-guide'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 3
+select w.id, s.id, true, 30, 3
+from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'yc-product-dev'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 4
 from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'strategyzer-library'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W19-A', 'A', 'Дизайн feedback-цикла', 'Когда спрашиваем, какие 3 вопроса, кто отвечает, куда пишем, SLA реакции.', 'text', 70
-from public.weeks w where w.week_number = 19
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W19-B', 'B', 'Фикс одного дефекта', 'Выберите дефект delivery/sales handoff. До/после, метрика, проверка с клиентом/ролью.', 'text', 85
-from public.weeks w where w.week_number = 19
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W19-JOINT', 'both', 'Ревью дефектов', 'Приоритизируйте backlog дефектов по влиянию на деньги и доверие.', 'text', 35
-from public.weeks w where w.week_number = 19
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 1
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'openstax-principles-management'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 19 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'mit-new-enterprises'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'openstax-intro-business'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W20-A', 'A', 'Midterm A: ops & economics dossier', 'Процесс, экономика, скидки, feedback-цикл, один закрытый дефект.', 'doc', 100
-from public.weeks w where w.week_number = 20
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W20-B', 'B', 'Midterm B: pricing defense', 'Защита цены и пакета на симуляции с давлением скидки.', 'defense', 90
-from public.weeks w where w.week_number = 20
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W20-JOINT', 'both', 'Согласование коммерческой политики', 'Общие правила: floor цены, скидки, обещания SLA в продажах.', 'text', 40
-from public.weeks w where w.week_number = 20
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 1
+select w.id, s.id, true, 25, 3
+from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'yc-pricing-101'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'sba-manage-finances'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 5
+from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'sba-startup-costs'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 20 and s.slug = 'yc-product-dev'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 21 and s.slug = 'strategyzer-bmc'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 2
+select w.id, s.id, true, 25, 2
+from public.weeks w, public.sources s where w.week_number = 21 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 3
 from public.weeks w, public.sources s where w.week_number = 21 and s.slug = 'strategyzer-library'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 3
+select w.id, s.id, true, 35, 4
 from public.weeks w, public.sources s where w.week_number = 21 and s.slug = 'openstax-entrepreneurship'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W21-A', 'A', 'BMC v1 с рисками', 'Заполните 9 блоков. Красным — гипотезы без доказательств. План проверки на 14 дней.', 'text', 80
-from public.weeks w where w.week_number = 21
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W21-B', 'B', 'Value Proposition Canvas', 'Jobs/pains/gains ↔ продукты/pain relievers/gain creators. Разрывы и фиксы.', 'text', 80
-from public.weeks w where w.week_number = 21
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W21-JOINT', 'both', 'Выбор 3 тестов', 'Выберите 3 теста гипотез на 2 недели: метод, метрика, kill-критерий.', 'text', 40
-from public.weeks w where w.week_number = 21
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 40, 1
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 21 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 35, 1
 from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 50, 2
+select w.id, s.id, true, 40, 2
 from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'hubspot-inbound-sales'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 30, 3
+from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'mit-entrepreneurial-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
 from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'sba-write-business-plan'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W22-A', 'A', 'Sales rhythm design', 'Календарь недели: prospecting, разговоры, follow-up, review. Нормы активности.', 'text', 70
-from public.weeks w where w.week_number = 22
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W22-B', 'B', 'Dashboard ведущих метрик', '5 leading metrics + определение каждой + пороги «красная зона».', 'text', 70
-from public.weeks w where w.week_number = 22
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W22-JOINT', 'both', 'Pipeline review 20 мин', 'Проведите review по правилам: статус, риск, следующий шаг, просьба помощи.', 'text', 40
-from public.weeks w where w.week_number = 22
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 45, 1
+select w.id, s.id, false, 30, 5
+from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'hubspot-sales-enablement'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 22 and s.slug = 'yc-dont-scale'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 35, 1
 from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'openstax-organizational-behavior'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 2
+select w.id, s.id, true, 30, 2
 from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'pon-harvard-home'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
 select w.id, s.id, true, 30, 3
+from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'openstax-principles-management'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 15, 4
+from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'pon-batna-power'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
 from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'yc-startup-ideas'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W23-A', 'A', 'Карта влияния', 'Для ключевой сделки/инициативы: кто влияет, чем мотивирован, как вы строите кредит доверия.', 'text', 75
-from public.weeks w where w.week_number = 23
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W23-B', 'B', 'Скрипт трудного разговора', 'Разговор о сорванном сроке/риске: факты, влияние, просьба, следующий шаг. Прогон вслух.', 'text', 75
-from public.weeks w where w.week_number = 23
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W23-JOINT', 'both', 'Симуляция трудного разговора', 'Роли: вы и контрагент. Наблюдатель отмечает давление vs ясность.', 'text', 45
-from public.weeks w where w.week_number = 23
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 25, 1
+select w.id, s.id, false, 30, 6
+from public.weeks w, public.sources s where w.week_number = 23 and s.slug = 'mit-power-negotiation'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 1
 from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'strategyzer-bmc'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 2
+select w.id, s.id, true, 25, 2
 from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 3
+select w.id, s.id, true, 25, 3
 from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'openstax-entrepreneurship'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W24-A', 'A', 'Midterm A: system dossier', 'BMC, VPC, ритм, метрики, карта влияния, лог недели.', 'doc', 100
-from public.weeks w where w.week_number = 24
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W24-B', 'B', 'Midterm B: system defense', '12 минут: как система приводит к сделкам; ответы на атаки по слабым блокам.', 'defense', 95
-from public.weeks w where w.week_number = 24
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W24-JOINT', 'both', 'Стресс-тест системы', 'Партнёр атакует 3 слабых гипотезы. Зафиксируйте патчи.', 'text', 40
-from public.weeks w where w.week_number = 24
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 35, 1
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'mit-entrepreneurial-sales'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 30, 6
+from public.weeks w, public.sources s where w.week_number = 24 and s.slug = 'openstax-principles-management'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 30, 1
 from public.weeks w, public.sources s where w.week_number = 25 and s.slug = 'sba-write-business-plan'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
@@ -836,21 +865,20 @@ insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes
 select w.id, s.id, true, 30, 3
 from public.weeks w, public.sources s where w.week_number = 25 and s.slug = 'yc-sales-playbook'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W25-A', 'A', 'Портфолио A: артефакты и кейс', 'Индекс артефактов + выбранный кейс + пробелы. План закрытия пробелов за неделю 26.', 'doc', 100
-from public.weeks w where w.week_number = 25
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W25-B', 'B', 'Портфолио B: narrative защиты', 'Скрипт итоговой защиты 12 минут: проблема, практика, результаты, чему научились, ask.', 'defense', 95
-from public.weeks w where w.week_number = 25
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W25-JOINT', 'both', 'Репетиция финала', 'Полный прогон защиты + список дыр в доказательствах.', 'text', 50
-from public.weeks w where w.week_number = 25
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 30, 1
+select w.id, s.id, false, 25, 4
+from public.weeks w, public.sources s where w.week_number = 25 and s.slug = 'strategyzer-vpc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 25 and s.slug = 'yc-pmf'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 25 and s.slug = 'sba-manage-finances'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 25, 1
 from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'mit-new-enterprises'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
@@ -858,45 +886,22 @@ select w.id, s.id, true, 20, 2
 from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'pon-negotiation-skills'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
 insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
-select w.id, s.id, true, 25, 3
+select w.id, s.id, true, 20, 3
 from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'hubspot-inbound-sales'
 on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W26-A', 'A', 'Final A: полный пакет', 'Кейс, экономика, pipeline, BMC, 3 сильных артефакта, план на 30 дней.', 'doc', 100
-from public.weeks w where w.week_number = 26
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W26-B', 'B', 'Final B: defense 15+10', 'Защита и Q&A. Сдайте запись/протокол и ответы на 5 заранее неизвестных типов вопросов.', 'defense', 100
-from public.weeks w where w.week_number = 26
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-insert into public.assignments (week_id, code, participant_slot, title_ru, brief_md, deliverable_type, max_minutes)
-select w.id, 'W26-JOINT', 'both', 'Взаимная аттестация', 'Оценка по финальной рубрике + одно обязательство практики на месяц.', 'text', 40
-from public.weeks w where w.week_number = 26
-on conflict (code) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md, max_minutes = excluded.max_minutes, participant_slot = excluded.participant_slot;
-
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (4, 'midterm', 'Промежуточная аттестация 1 — продажи и психология', 'Портфолио ICP/скрипт/стейкхолдеры + oral defense.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (8, 'midterm', 'Промежуточная аттестация 2 — переговоры', 'Negotiation dossier + live negotiation defense.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (12, 'midterm', 'Промежуточная аттестация 3 — презентации', 'Pitch package + live pitch/Q&A.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (16, 'midterm', 'Промежуточная аттестация 4 — маркетинг и discovery', 'Discovery dossier + channel experiment defense.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (20, 'midterm', 'Промежуточная аттестация 5 — операции и экономика', 'Ops/economics dossier + pricing defense.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (24, 'midterm', 'Промежуточная аттестация 6 — системы и лидерство', 'System dossier + system defense.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (25, 'final', 'Финальная аттестация — сборка портфолио', 'Индекс артефактов курса и narrative защиты.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-insert into public.exams (week_number, kind, title_ru, brief_md)
-values (26, 'final', 'Финальная аттестация — защита', 'Полный пакет + defense 15+10.')
-on conflict (week_number, kind) do update set title_ru = excluded.title_ru, brief_md = excluded.brief_md;
-
-update public.program_settings set current_unlocked_week = 1, hours_per_week_target = 240, ai_spend_lock = true where id = 1;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, true, 20, 4
+from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'yc-sales-playbook'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 5
+from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'strategyzer-bmc'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 25, 6
+from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'yc-pricing-101'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;
+insert into public.week_sources (week_id, source_id, is_mandatory, study_minutes_planned, order_index)
+select w.id, s.id, false, 20, 7
+from public.weeks w, public.sources s where w.week_number = 26 and s.slug = 'pon-batna-examples'
+on conflict (week_id, source_id) do update set is_mandatory = excluded.is_mandatory, study_minutes_planned = excluded.study_minutes_planned, order_index = excluded.order_index;

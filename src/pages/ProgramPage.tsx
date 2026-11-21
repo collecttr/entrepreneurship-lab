@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { EXAMS, MODULES, WEEKS, mandatoryMinutesForSlot } from '@/data/curriculum'
+import { PROGRAM_STUDY_INTRO_RU, STUDY_GUIDE_STEPS_RU, STUDY_GUIDE_TITLE_RU } from '@/data/study-guide'
 import { useAuth } from '@/context/AuthContext'
 import { examKindLabel } from '@/lib/exam-store'
 import { getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
@@ -15,10 +16,23 @@ export function ProgramPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Программа</p>
         <h1 className="mt-2 font-display text-3xl text-ink md:text-4xl">7 модулей · 26 недель</h1>
         <p className="mt-3 max-w-2xl text-slate">
-          Постепенное открытие до недели {unlocked}. Обязательная нагрузка ≤ 240 мин/нед на участника.
-          Прогресс считается по сданным заданиям, не по просмотрам.
+          Постепенное открытие до недели {unlocked}. Обязательная нагрузка ≤ 240 мин/нед (~4 ч) на
+          участника. Прогресс считается по сданным заданиям, не по просмотрам.
         </p>
+        <p className="mt-2 max-w-2xl text-sm text-ink">{PROGRAM_STUDY_INTRO_RU}</p>
       </header>
+
+      <section className="surface rounded-3xl p-5">
+        <h2 className="font-display text-xl text-ink">{STUDY_GUIDE_TITLE_RU}</h2>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-ink">
+          {STUDY_GUIDE_STEPS_RU.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <Link to="/library" className="mt-3 inline-block text-sm font-semibold text-teal hover:underline">
+          Открыть библиотеку источников →
+        </Link>
+      </section>
 
       <section className="surface rounded-3xl p-5">
         <h2 className="font-display text-xl text-ink">Аттестации</h2>

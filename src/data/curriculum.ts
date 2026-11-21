@@ -127,9 +127,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     concepts: ['ICP', 'следующий шаг', 'диагностика vs питч', 'founder-led sales'],
     mandatory: [
       ['yc-sales-playbook', 45],
-      ['hubspot-inbound-sales', 60],
+      ['hubspot-inbound-sales', 50],
+      ['sba-marketing-sales', 20],
     ],
-    optional: [['optional-getting-to-yes', 0]],
+    optional: [
+      ['yc-dont-scale', 30],
+      ['mit-entrepreneurial-sales', 40],
+      ['optional-getting-to-yes', 0],
+    ],
     a: {
       title: 'Карта ICP и 10 контактов',
       brief:
@@ -174,8 +179,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['карта ЛПР', 'интересы', 'возражения', 'покупательский путь'],
     mandatory: [
-      ['openstax-principles-marketing', 50],
-      ['openstax-organizational-behavior', 45],
+      ['openstax-principles-marketing', 45],
+      ['openstax-organizational-behavior', 40],
+      ['yc-dont-scale', 25],
+    ],
+    optional: [
+      ['hubspot-inbound', 40],
+      ['openstax-principles-management', 30],
     ],
     a: {
       title: 'Карта стейкхолдеров по кейсу',
@@ -212,8 +222,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['квалификация', 'pipeline hygiene', 'BANT/аналоги', 'следующий шаг'],
     mandatory: [
-      ['hubspot-inbound-sales', 50],
-      ['yc-sales-marketing-talk', 50],
+      ['hubspot-inbound-sales', 45],
+      ['yc-sales-marketing-talk', 40],
+      ['mit-entrepreneurial-sales', 30],
+    ],
+    optional: [
+      ['hubspot-sales-enablement', 35],
+      ['sba-marketing-sales', 25],
     ],
     a: {
       title: 'Критерии квалификации v1',
@@ -250,8 +265,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['аттестация', 'портфолио продаж', 'защита'],
     mandatory: [
-      ['yc-sales-playbook', 30],
-      ['openstax-principles-marketing', 30],
+      ['yc-sales-playbook', 25],
+      ['openstax-principles-marketing', 25],
+      ['hubspot-sales-enablement', 25],
+    ],
+    optional: [
+      ['yc-dont-scale', 25],
+      ['mit-entrepreneurial-sales', 30],
     ],
     a: {
       title: 'Midterm A: портфолио продавца',
@@ -290,9 +310,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['интересы', 'позиции', 'BATNA', 'опции'],
     mandatory: [
-      ['pon-harvard-home', 40],
+      ['pon-harvard-home', 30],
       ['pon-negotiation-skills', 25],
-      ['openstax-organizational-behavior', 35],
+      ['pon-batna-examples', 25],
+      ['openstax-organizational-behavior', 20],
+    ],
+    optional: [
+      ['pon-batna-power', 20],
+      ['mit-power-negotiation', 35],
     ],
     a: {
       title: 'Подготовка: интересы и BATNA',
@@ -330,9 +355,11 @@ const WEEK_SEEDS: WeekSeed[] = [
     concepts: ['повестка', 'критерии', 'обмен', 'протокол'],
     mandatory: [
       ['pon-negotiation-skills', 25],
-      ['sba-business-guide', 40],
-      ['yc-sales-playbook', 40],
+      ['sba-business-guide', 35],
+      ['yc-sales-playbook', 35],
+      ['pon-hardball-tactics', 20],
     ],
+    optional: [['mit-power-negotiation', 30]],
     a: {
       title: 'Prep-пакет переговоров',
       brief: 'Шаблон: цели, красные линии, вопросы, пакет обмена (если/то), критерии успеха встречи.',
@@ -368,9 +395,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['многосторонность', 'коалиции', 'пакеты', 'эскалация'],
     mandatory: [
-      ['pon-harvard-home', 30],
-      ['mit-new-enterprises', 45],
+      ['pon-harvard-home', 25],
+      ['mit-power-negotiation', 35],
       ['openstax-organizational-behavior', 25],
+    ],
+    optional: [
+      ['pon-hardball-tactics', 20],
+      ['mit-new-enterprises', 30],
     ],
     a: {
       title: 'Модель трёхсторонней сделки',
@@ -407,8 +438,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['midterm', 'BATNA', 'пакеты'],
     mandatory: [
-      ['pon-negotiation-skills', 25],
-      ['pon-harvard-home', 30],
+      ['pon-negotiation-skills', 20],
+      ['pon-harvard-home', 25],
+      ['pon-batna-power', 20],
+      ['pon-batna-examples', 20],
+    ],
+    optional: [
+      ['mit-power-negotiation', 30],
+      ['pon-hardball-tactics', 20],
     ],
     a: {
       title: 'Midterm A: negotiation dossier',
@@ -447,10 +484,12 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['нарратив', 'ask', 'доказательства', 'аудитория'],
     mandatory: [
-      ['mit-entrepreneurial-marketing', 50],
-      ['yc-startup-ideas', 35],
-      ['strategyzer-library', 30],
+      ['mit-entrepreneurial-marketing', 40],
+      ['yc-startup-ideas', 30],
+      ['strategyzer-library', 25],
+      ['hubspot-sales-enablement', 20],
     ],
+    optional: [['strategyzer-vpc', 25]],
     a: {
       title: 'Скрипт 5-минутного питча',
       brief: 'Текст питча с таймингами по блокам. Ask должен быть конкретным (встреча/пилот/интро).',
@@ -486,8 +525,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['визуальная иерархия', 'доказательства', 'один тезис'],
     mandatory: [
-      ['mit-marketing-management', 45],
-      ['hubspot-inbound-marketing', 55],
+      ['mit-marketing-management', 40],
+      ['hubspot-inbound-marketing', 45],
+      ['strategyzer-vpc', 20],
+    ],
+    optional: [
+      ['hubspot-inbound', 40],
+      ['hubspot-sales-enablement', 30],
     ],
     a: {
       title: 'Колода питча v1',
@@ -525,10 +569,12 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['присутствие', 'пауза', 'Q&A', 'голос'],
     mandatory: [
-      ['yc-sales-playbook', 35],
+      ['yc-sales-playbook', 30],
       ['pon-negotiation-skills', 25],
-      ['openstax-entrepreneurship', 40],
+      ['openstax-entrepreneurship', 35],
+      ['pon-hardball-tactics', 15],
     ],
+    optional: [['hubspot-sales-enablement', 30]],
     a: {
       title: 'Запись прогона 5 мин',
       brief: 'Запишите питч (аудио/видео). Саморазбор: темп, паразиты, ясность ask. Список 3 правок.',
@@ -565,8 +611,13 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['midterm', 'питч', 'защита'],
     mandatory: [
-      ['mit-entrepreneurial-marketing', 40],
-      ['strategyzer-bmc', 30],
+      ['mit-entrepreneurial-marketing', 30],
+      ['strategyzer-bmc', 25],
+      ['strategyzer-vpc', 25],
+    ],
+    optional: [
+      ['hubspot-sales-enablement', 30],
+      ['yc-pmf', 25],
     ],
     a: {
       title: 'Midterm A: pitch package',
@@ -605,10 +656,12 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['сегмент', 'позиционирование', 'beachhead', 'сообщение'],
     mandatory: [
-      ['mit-entrepreneurial-marketing', 55],
-      ['sba-market-research', 35],
-      ['strategyzer-library', 30],
+      ['mit-entrepreneurial-marketing', 45],
+      ['sba-market-research', 30],
+      ['strategyzer-vpc', 25],
+      ['yc-pmf', 20],
     ],
+    optional: [['strategyzer-library', 25]],
     a: {
       title: 'Выбор beachhead',
       brief: 'Сравните 3 сегмента по боли, доступности, платежеспособности. Выберите один и обоснуйте.',
@@ -644,9 +697,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['гипотеза', 'интервью', 'факт vs мнение', 'Mom Test-принципы (без пиратства книги)'],
     mandatory: [
-      ['yc-startup-ideas', 35],
-      ['mit-new-enterprises', 50],
-      ['sba-market-research', 30],
+      ['yc-startup-ideas', 30],
+      ['mit-new-enterprises', 40],
+      ['sba-market-research', 25],
+      ['yc-dont-scale', 25],
+    ],
+    optional: [
+      ['yc-pmf', 25],
+      ['yc-product-dev', 30],
     ],
     a: {
       title: 'Гид интервью',
@@ -683,8 +741,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['канал', 'эксперимент', 'конверсия в разговор', 'inbound'],
     mandatory: [
-      ['hubspot-inbound-marketing', 70],
-      ['yc-sales-marketing-talk', 40],
+      ['hubspot-inbound-marketing', 45],
+      ['yc-sales-marketing-talk', 30],
+      ['sba-marketing-sales', 20],
+      ['hubspot-inbound', 20],
+    ],
+    optional: [
+      ['yc-pmf', 25],
+      ['yc-dont-scale', 25],
     ],
     a: {
       title: 'Дизайн эксперимента',
@@ -721,9 +785,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['midterm', 'beachhead', 'эксперимент'],
     mandatory: [
-      ['strategyzer-bmc', 30],
-      ['sba-market-research', 30],
-      ['mit-entrepreneurial-marketing', 35],
+      ['strategyzer-bmc', 25],
+      ['sba-market-research', 25],
+      ['mit-entrepreneurial-marketing', 30],
+      ['yc-pmf', 20],
+    ],
+    optional: [
+      ['strategyzer-vpc', 25],
+      ['hubspot-inbound', 35],
     ],
     a: {
       title: 'Midterm A: discovery & segment dossier',
@@ -762,9 +831,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['onboarding', 'время до ценности', 'handoff sales→ops'],
     mandatory: [
-      ['sba-business-guide', 35],
-      ['openstax-intro-business', 40],
-      ['mit-new-enterprises', 35],
+      ['sba-business-guide', 30],
+      ['openstax-intro-business', 35],
+      ['mit-new-enterprises', 30],
+      ['yc-product-dev', 25],
+    ],
+    optional: [
+      ['openstax-principles-management', 30],
+      ['sba-startup-costs', 20],
     ],
     a: {
       title: 'Карта процесса delivery',
@@ -801,9 +875,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['CAC', 'вклад', 'скидка как инвестиция', 'payback'],
     mandatory: [
-      ['mit-new-enterprises', 45],
-      ['sba-write-business-plan', 30],
-      ['openstax-intro-business', 25],
+      ['mit-new-enterprises', 35],
+      ['yc-pricing-101', 30],
+      ['sba-manage-finances', 25],
+      ['openstax-intro-business', 20],
+    ],
+    optional: [
+      ['sba-write-business-plan', 25],
+      ['sba-startup-costs', 20],
     ],
     a: {
       title: 'Грубая модель экономики',
@@ -840,9 +919,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['feedback loop', 'качество', 'закрытие дефекта'],
     mandatory: [
-      ['hubspot-inbound-sales', 40],
-      ['sba-business-guide', 35],
-      ['strategyzer-library', 35],
+      ['hubspot-inbound-sales', 35],
+      ['sba-business-guide', 30],
+      ['yc-product-dev', 30],
+      ['strategyzer-library', 25],
+    ],
+    optional: [
+      ['openstax-principles-management', 30],
+      ['strategyzer-vpc', 25],
     ],
     a: {
       title: 'Дизайн feedback-цикла',
@@ -879,8 +963,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['midterm', 'CAC', 'delivery'],
     mandatory: [
-      ['mit-new-enterprises', 40],
-      ['openstax-intro-business', 30],
+      ['mit-new-enterprises', 30],
+      ['openstax-intro-business', 25],
+      ['yc-pricing-101', 25],
+      ['sba-manage-finances', 20],
+    ],
+    optional: [
+      ['sba-startup-costs', 20],
+      ['yc-product-dev', 25],
     ],
     a: {
       title: 'Midterm A: ops & economics dossier',
@@ -919,10 +1009,12 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['BMC', 'гипотезы', 'риск', 'система'],
     mandatory: [
-      ['strategyzer-bmc', 30],
-      ['strategyzer-library', 35],
-      ['openstax-entrepreneurship', 45],
+      ['strategyzer-bmc', 25],
+      ['strategyzer-vpc', 25],
+      ['strategyzer-library', 25],
+      ['openstax-entrepreneurship', 35],
     ],
+    optional: [['yc-pmf', 25]],
     a: {
       title: 'BMC v1 с рисками',
       brief: 'Заполните 9 блоков. Красным — гипотезы без доказательств. План проверки на 14 дней.',
@@ -958,9 +1050,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['ритм', 'leading indicators', 'pipeline review'],
     mandatory: [
-      ['yc-sales-playbook', 40],
-      ['hubspot-inbound-sales', 50],
-      ['sba-write-business-plan', 30],
+      ['yc-sales-playbook', 35],
+      ['hubspot-inbound-sales', 40],
+      ['mit-entrepreneurial-sales', 30],
+      ['sba-write-business-plan', 20],
+    ],
+    optional: [
+      ['hubspot-sales-enablement', 30],
+      ['yc-dont-scale', 25],
     ],
     a: {
       title: 'Sales rhythm design',
@@ -997,9 +1094,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['влияние', 'социальный капитал', 'трудный разговор'],
     mandatory: [
-      ['openstax-organizational-behavior', 45],
-      ['pon-harvard-home', 35],
-      ['yc-startup-ideas', 30],
+      ['openstax-organizational-behavior', 35],
+      ['pon-harvard-home', 30],
+      ['openstax-principles-management', 30],
+      ['pon-batna-power', 15],
+    ],
+    optional: [
+      ['yc-startup-ideas', 25],
+      ['mit-power-negotiation', 30],
     ],
     a: {
       title: 'Карта влияния',
@@ -1036,9 +1138,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['midterm', 'система', 'ритм'],
     mandatory: [
-      ['strategyzer-bmc', 25],
-      ['yc-sales-playbook', 30],
-      ['openstax-entrepreneurship', 30],
+      ['strategyzer-bmc', 20],
+      ['yc-sales-playbook', 25],
+      ['openstax-entrepreneurship', 25],
+      ['mit-entrepreneurial-sales', 20],
+    ],
+    optional: [
+      ['strategyzer-vpc', 25],
+      ['openstax-principles-management', 30],
     ],
     a: {
       title: 'Midterm A: system dossier',
@@ -1077,9 +1184,14 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['портфолио', 'доказательства', 'финальный кейс'],
     mandatory: [
-      ['sba-write-business-plan', 35],
+      ['sba-write-business-plan', 30],
       ['strategyzer-bmc', 25],
       ['yc-sales-playbook', 30],
+    ],
+    optional: [
+      ['strategyzer-vpc', 25],
+      ['yc-pmf', 25],
+      ['sba-manage-finances', 25],
     ],
     a: {
       title: 'Портфолио A: артефакты и кейс',
@@ -1118,9 +1230,15 @@ const WEEK_SEEDS: WeekSeed[] = [
     ],
     concepts: ['final', 'защита', 'план после курса'],
     mandatory: [
-      ['mit-new-enterprises', 30],
+      ['mit-new-enterprises', 25],
       ['pon-negotiation-skills', 20],
-      ['hubspot-inbound-sales', 25],
+      ['hubspot-inbound-sales', 20],
+      ['yc-sales-playbook', 20],
+    ],
+    optional: [
+      ['strategyzer-bmc', 25],
+      ['yc-pricing-101', 25],
+      ['pon-batna-examples', 20],
     ],
     a: {
       title: 'Final A: полный пакет',

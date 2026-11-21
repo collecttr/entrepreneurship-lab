@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LIBRARY_SOURCES, type SourceProvider } from '@/data/sources'
 import { WEEKS } from '@/data/curriculum'
+import { LIBRARY_STUDY_INTRO_RU, STUDY_GUIDE_STEPS_RU, STUDY_GUIDE_TITLE_RU } from '@/data/study-guide'
 
 const PROVIDERS: Array<SourceProvider | 'Все'> = [
   'Все',
@@ -50,7 +51,17 @@ export function LibraryPage() {
           Только официальные бесплатные материалы (MIT OCW, Y Combinator, HubSpot Academy, OpenStax,
           Harvard PON, Strategyzer, SBA). Платные книги — по желанию, без файлов и пиратских ссылок.
         </p>
+        <p className="mt-2 max-w-2xl text-sm text-ink">{LIBRARY_STUDY_INTRO_RU}</p>
       </header>
+
+      <section className="surface rounded-3xl p-5 md:p-6">
+        <h2 className="font-display text-xl text-ink">{STUDY_GUIDE_TITLE_RU}</h2>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-ink">
+          {STUDY_GUIDE_STEPS_RU.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      </section>
 
       <div className="surface flex flex-col gap-3 rounded-3xl p-4 md:flex-row md:items-center">
         <input
