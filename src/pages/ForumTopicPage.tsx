@@ -6,12 +6,16 @@ import {
   addPost,
   authorName,
   getDiscussion,
+  hydrateAllowlistedProfiles,
+  isDemoForumSeedId,
   listPosts,
+  rememberProfile,
   setDiscussionResolved,
   subscribeCollab,
   type Discussion,
   type DiscussionPost,
 } from '@/lib/collab-store'
+import { isDemoAuth } from '@/lib/supabase'
 
 function ForumTopicPageInner() {
   const { discussionId } = useParams()
@@ -24,6 +28,17 @@ function ForumTopicPageInner() {
   const [attach, setAttach] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [missing, setMissing] = useState(false)
+
+  useEffect(() => {
+    if (profile) {
+      rememberProfile({
+        id: profile.id,
+        email: profile.email,
+        display_name: profile.display_name,
+      })
+      void hydrateAllowlistedProfiles(profile.id)
+    }
+  }, [profile])
 
   useEffect(() => {
     if (!discussionId) return
@@ -104,6 +119,7 @@ function ForumTopicPageInner() {
         )}
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate">
           <span>{authorName(topic.author_id)}</span>
+          {isDemoAuth && isDemoForumSeedId(topic.id) && <span className="font-semibold">демо</span>}
           {topic.week_number && (
             <Link to={`/program/weeks/${topic.week_number}`} className="font-semibold text-teal">
               Неделя {topic.week_number}

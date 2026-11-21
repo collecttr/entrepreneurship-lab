@@ -6,12 +6,16 @@ import {
   authorName,
   createDiscussion,
   demoTransportLabel,
+  hydrateAllowlistedProfiles,
+  isDemoForumSeedId,
   listDiscussions,
   listPosts,
+  rememberProfile,
   subscribeCollab,
   type Discussion,
   type ForumKind,
 } from '@/lib/collab-store'
+import { isDemoAuth } from '@/lib/supabase'
 
 const KINDS: Array<ForumKind | 'all'> = ['all', 'debate', 'question', 'case', 'source', 'general']
 
@@ -37,6 +41,14 @@ function ForumPageInner() {
   const [week, setWeek] = useState('')
 
   useEffect(() => {
+    if (profile) {
+      rememberProfile({
+        id: profile.id,
+        email: profile.email,
+        display_name: profile.display_name,
+      })
+      void hydrateAllowlistedProfiles(profile.id)
+    }
     const refresh = () => {
       try {
         setItems(listDiscussions())
@@ -49,7 +61,7 @@ function ForumPageInner() {
     }
     refresh()
     return subscribeCollab(refresh)
-  }, [])
+  }, [profile])
 
   const filtered = useMemo(() => {
     return items.filter((d) => {
@@ -93,7 +105,8 @@ function ForumPageInner() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Форум</p>
         <h1 className="mt-2 font-display text-3xl text-ink">Обсуждения по неделям</h1>
         <p className="mt-2 text-sm text-slate">
-          Темы, ответы, цитаты, привязка к неделе, поиск и «решено». {demoTransportLabel()}.
+          Темы и авторы — только реальные участники из списка допуска.
+          {isDemoAuth ? ' В демо показаны учебные темы с пометкой «демо».' : ''} {demoTransportLabel()}.
         </p>
         {loadError && (
           <p className="mt-2 text-xs text-slate" role="status">
@@ -189,6 +202,7 @@ function ForumPageInner() {
                     {KIND_RU[d.kind] ?? 'общее'}
                     {d.week_number ? ` · неделя ${d.week_number}` : ''}
                     {d.is_resolved ? ' · решено' : ''}
+                    {isDemoAuth && isDemoForumSeedId(d.id) ? ' · демо' : ''}
                   </p>
                   <h2 className="mt-1 font-display text-xl text-ink">
                     <Link to={`/forum/${d.id}`} className="hover:text-teal">
@@ -217,7 +231,9 @@ function ForumPageInner() {
           <li className="surface rounded-3xl p-5 text-sm text-slate">
             {q.trim() || kind !== 'all'
               ? 'Ничего не найдено по текущему фильтру.'
-              : 'Пока нет тем. Создайте первую — или дождитесь синхронизации с сервером.'}
+              : isDemoAuth
+                ? 'Пока нет тем. Создайте первую.'
+                : 'Пока нет тем от реальных участников. Создайте первую — без демо-персонажей.'}
           </li>
         )}
       </ul>

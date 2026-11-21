@@ -1,5 +1,6 @@
 import { DEMO_USERS } from '@/lib/demo-data'
 import { isDemoAuth, supabase, supabaseConfigured } from '@/lib/supabase'
+import type { Profile } from '@/lib/types'
 
 const CHANNEL = 'elab-collab-v1'
 const useLiveCollab = () => Boolean(supabaseConfigured && !isDemoAuth && supabase)
@@ -9,6 +10,24 @@ const POST_KEY = 'elab_discussion_posts'
 const ACOMM_KEY = 'elab_assignment_comments'
 const READ_KEY = 'elab_chat_last_read'
 const SEEDED_KEY = 'elab_forum_seeded_v1'
+const PEER_KEY = 'elab_chat_peer_v1'
+const PROFILE_CACHE_KEY = 'elab_profile_cache_v1'
+
+/** Lightweight contact used for 1:1 chat peer + author labels. */
+export type PeerContact = Pick<Profile, 'id' | 'email' | 'display_name'>
+
+const DEMO_SEED_DISCUSSION_IDS = new Set([
+  'seed-debate-w1',
+  'seed-q-qualification',
+  'seed-case-stakeholder',
+  'seed-source-yc-sales',
+])
+
+const DEMO_SEED_POST_IDS = new Set(['seed-post-1', 'seed-post-2', 'seed-post-3'])
+
+export function isDemoForumSeedId(id: string): boolean {
+  return DEMO_SEED_DISCUSSION_IDS.has(id) || id.startsWith('seed-')
+}
 
 export type ForumKind = 'debate' | 'question' | 'case' | 'source' | 'general'
 
@@ -327,13 +346,262 @@ export function demoTransportLabel(): string {
   return 'Демо: сообщения хранятся в браузере и синхронизируются между вкладками'
 }
 
-function peerId(myId: string): string {
-  const other = DEMO_USERS.find((u) => u.profile.id !== myId)
-  return other?.profile.id ?? myId
+function readProfileCache(): Record<string, PeerContact> {
+  const raw = readJson<unknown>(PROFILE_CACHE_KEY, {})
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const out: Record<string, PeerContact> = {}
+  for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== 'object') continue
+    const row = value as Partial<PeerContact>
+    if (typeof row.id !== 'string' || typeof row.email !== 'string') continue
+    out[id] = {
+      id: row.id,
+      email: row.email,
+      display_name:
+        typeof row.display_name === 'string' && row.display_name
+          ? row.display_name
+          : row.email.split('@')[0] ?? row.email,
+    }
+  }
+  return out
 }
 
-export function getPeerProfile(myId: string) {
-  return DEMO_USERS.find((u) => u.profile.id !== myId)?.profile ?? null
+export function rememberProfile(contact: PeerContact) {
+  try {
+    const cache = readProfileCache()
+    cache[contact.id] = {
+      id: contact.id,
+      email: contact.email.trim().toLowerCase(),
+      display_name: contact.display_name.trim() || contact.email.split('@')[0] || 'Участник',
+    }
+    writeJson(PROFILE_CACHE_KEY, cache)
+  } catch (err) {
+    console.warn('rememberProfile failed:', err)
+  }
+}
+
+function readStoredPeer(): PeerContact | null {
+  try {
+    const raw = readJson<unknown>(PEER_KEY, null)
+    if (!raw || typeof raw !== 'object') return null
+    const row = raw as Partial<PeerContact>
+    if (typeof row.id !== 'string' || !row.id) return null
+    if (typeof row.email !== 'string' || !row.email) return null
+    return {
+      id: row.id,
+      email: row.email,
+      display_name:
+        typeof row.display_name === 'string' && row.display_name
+          ? row.display_name
+          : row.email.split('@')[0] ?? 'Участник',
+    }
+  } catch {
+    return null
+  }
+}
+
+/** Persist the single 1:1 chat contact (closed course = one peer). */
+export function setChatPeer(contact: PeerContact | null) {
+  try {
+    if (!contact) {
+      localStorage.removeItem(PEER_KEY)
+      broadcast({ type: 'read' })
+      return
+    }
+    const normalized: PeerContact = {
+      id: contact.id,
+      email: contact.email.trim().toLowerCase(),
+      display_name: contact.display_name.trim() || contact.email.split('@')[0] || 'Участник',
+    }
+    writeJson(PEER_KEY, normalized)
+    rememberProfile(normalized)
+    broadcast({ type: 'read' })
+  } catch (err) {
+    console.warn('setChatPeer failed:', err)
+  }
+}
+
+function demoPeerFor(myId: string): PeerContact | null {
+  const other = DEMO_USERS.find((u) => u.profile.id !== myId)
+  if (!other) return null
+  return {
+    id: other.profile.id,
+    email: other.profile.email,
+    display_name: other.profile.display_name,
+  }
+}
+
+export function getPeerProfile(myId: string): PeerContact | null {
+  const stored = readStoredPeer()
+  if (stored && stored.id !== myId) return stored
+
+  if (isDemoAuth) {
+    const demo = demoPeerFor(myId)
+    if (demo) {
+      // Auto-wire demo peer so two-tab demos keep working without search.
+      if (!stored) setChatPeer(demo)
+      return demo
+    }
+  }
+
+  return null
+}
+
+function peerId(myId: string): string | null {
+  return getPeerProfile(myId)?.id ?? null
+}
+
+export type AllowlistedSearchHit = PeerContact & { registered: boolean }
+
+/**
+ * Search allowlisted users by email/name.
+ * Live: RPC `search_allowlisted_users` (profiles ∩ allowed_emails), fallback to profiles select.
+ * Demo: filter DEMO_USERS only (no bots beyond the two fixtures).
+ */
+export async function searchAllowlistedUsers(
+  query: string,
+  myId: string,
+): Promise<{ hits: AllowlistedSearchHit[]; error?: string }> {
+  const q = query.trim().toLowerCase()
+
+  if (isDemoAuth) {
+    const hits = DEMO_USERS.filter((u) => u.profile.id !== myId)
+      .map((u) => u.profile)
+      .filter((p) => {
+        if (!q) return true
+        return p.email.toLowerCase().includes(q) || p.display_name.toLowerCase().includes(q)
+      })
+      .map((p) => ({
+        id: p.id,
+        email: p.email,
+        display_name: p.display_name,
+        registered: true,
+      }))
+    return { hits }
+  }
+
+  if (!useLiveCollab() || !supabase) {
+    return {
+      hits: [],
+      error: 'Сервер недоступен для поиска участников. Проверьте настройки входа.',
+    }
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('search_allowlisted_users', {
+      search_query: q,
+    })
+    if (!error && Array.isArray(data)) {
+      const hits: AllowlistedSearchHit[] = data
+        .map((row: { id?: string; email?: string; display_name?: string }) => {
+          if (typeof row?.id !== 'string' || typeof row?.email !== 'string') return null
+          const hit: AllowlistedSearchHit = {
+            id: row.id,
+            email: row.email,
+            display_name:
+              typeof row.display_name === 'string' && row.display_name
+                ? row.display_name
+                : row.email.split('@')[0] ?? row.email,
+            registered: true,
+          }
+          rememberProfile(hit)
+          return hit
+        })
+        .filter((h): h is AllowlistedSearchHit => h != null && h.id !== myId)
+      return { hits }
+    }
+    if (error) {
+      console.warn('search_allowlisted_users RPC:', error.message)
+    }
+  } catch (err) {
+    console.warn('search_allowlisted_users failed:', err)
+  }
+
+  // Fallback if migration 009 not applied yet — RLS profiles_select still requires allowlist
+  try {
+    let req = supabase
+      .from('profiles')
+      .select('id,email,display_name')
+      .neq('id', myId)
+      .limit(20)
+    if (q) {
+      req = req.or(`email.ilike.%${q}%,display_name.ilike.%${q}%`)
+    }
+    const { data, error } = await req
+    if (error) {
+      return {
+        hits: [],
+        error:
+          'Не удалось найти участников. Проверьте доступ и миграцию search_allowlisted_users (009).',
+      }
+    }
+    const hits: AllowlistedSearchHit[] = asArray<unknown>(data)
+      .map((row) => {
+        if (!row || typeof row !== 'object') return null
+        const r = row as Partial<PeerContact>
+        if (typeof r.id !== 'string' || typeof r.email !== 'string') return null
+        const hit: AllowlistedSearchHit = {
+          id: r.id,
+          email: r.email,
+          display_name:
+            typeof r.display_name === 'string' && r.display_name
+              ? r.display_name
+              : r.email.split('@')[0] ?? r.email,
+          registered: true,
+        }
+        rememberProfile(hit)
+        return hit
+      })
+      .filter((h): h is AllowlistedSearchHit => h != null)
+    return { hits }
+  } catch (err) {
+    console.warn('profiles search fallback failed:', err)
+    return { hits: [], error: 'Не удалось найти участников. Попробуйте ещё раз.' }
+  }
+}
+
+/** Prefetch other allowlisted profiles into the name cache (live only). */
+export async function hydrateAllowlistedProfiles(myId?: string): Promise<void> {
+  if (!useLiveCollab() || !supabase) {
+    for (const u of DEMO_USERS) {
+      rememberProfile({
+        id: u.profile.id,
+        email: u.profile.email,
+        display_name: u.profile.display_name,
+      })
+    }
+    return
+  }
+  try {
+    const { data, error } = await supabase.rpc('search_allowlisted_users', { search_query: '' })
+    if (!error && Array.isArray(data)) {
+      for (const row of data as Array<{ id?: string; email?: string; display_name?: string }>) {
+        if (typeof row?.id !== 'string' || typeof row?.email !== 'string') continue
+        if (myId && row.id === myId) continue
+        rememberProfile({
+          id: row.id,
+          email: row.email,
+          display_name:
+            typeof row.display_name === 'string' && row.display_name
+              ? row.display_name
+              : row.email.split('@')[0] ?? row.email,
+        })
+      }
+      return
+    }
+  } catch {
+    // fall through
+  }
+  try {
+    let req = supabase.from('profiles').select('id,email,display_name').limit(20)
+    if (myId) req = req.neq('id', myId)
+    const { data } = await req
+    for (const row of asArray<{ id: string; email: string; display_name: string }>(data ?? [])) {
+      rememberProfile(row)
+    }
+  } catch (err) {
+    console.warn('hydrateAllowlistedProfiles failed:', err)
+  }
 }
 
 export function listMessages(): ChatMessage[] {
@@ -402,7 +670,7 @@ export function markChatRead(readerId: string) {
     const now = new Date().toISOString()
     let messagesChanged = false
     const all = listMessages().map((m) => {
-      if (m.sender_id === peer && !m.read_at) {
+      if (peer && m.sender_id === peer && !m.read_at) {
         messagesChanged = true
         return { ...m, read_at: now }
       }
@@ -428,9 +696,10 @@ export function markChatRead(readerId: string) {
 
 export function unreadCount(readerId: string): number {
   try {
+    const peer = peerId(readerId)
+    if (!peer) return 0
     const map = readCursorMap()
     const last = map[readerId] ?? '1970-01-01T00:00:00.000Z'
-    const peer = peerId(readerId)
     return listMessages().filter((m) => m.sender_id === peer && m.created_at > last).length
   } catch (err) {
     console.warn('unreadCount failed:', err)
@@ -634,10 +903,44 @@ export function addAssignmentComment(input: {
 }
 
 export function authorName(userId: string): string {
-  return DEMO_USERS.find((u) => u.profile.id === userId)?.profile.display_name ?? 'Участник'
+  const cached = readProfileCache()[userId]
+  if (cached?.display_name) return cached.display_name
+  const demo = DEMO_USERS.find((u) => u.profile.id === userId)?.profile.display_name
+  if (demo) return isDemoAuth ? `${demo} (демо)` : demo
+  return 'Участник'
+}
+
+/** Live mode: drop fake demo forum personas from local cache. */
+function purgeDemoForumSeedsIfLive() {
+  if (isDemoAuth) return
+  try {
+    const discs = asArray<unknown>(readJson<unknown>(DISC_KEY, []))
+      .map((row, i) => normalizeDiscussion(row, i))
+      .filter((d): d is Discussion => d != null && !DEMO_SEED_DISCUSSION_IDS.has(d.id) && !d.id.startsWith('seed-'))
+    const posts = asArray<unknown>(readJson<unknown>(POST_KEY, []))
+      .map((row, i) => normalizePost(row, i))
+      .filter(
+        (p): p is DiscussionPost =>
+          p != null &&
+          !DEMO_SEED_POST_IDS.has(p.id) &&
+          !p.id.startsWith('seed-') &&
+          !DEMO_SEED_DISCUSSION_IDS.has(p.discussion_id),
+      )
+    writeJson(DISC_KEY, discs)
+    writeJson(POST_KEY, posts)
+    localStorage.removeItem(SEEDED_KEY)
+  } catch (err) {
+    console.warn('purgeDemoForumSeedsIfLive failed:', err)
+  }
 }
 
 function ensureForumSeed() {
+  // Live / Supabase: only real allowlisted authors — never invent demo personas.
+  if (!isDemoAuth) {
+    purgeDemoForumSeedsIfLive()
+    return
+  }
+
   try {
     if (localStorage.getItem(SEEDED_KEY) === '1') {
       const existing = asArray<unknown>(readJson<unknown>(DISC_KEY, []))
@@ -650,14 +953,16 @@ function ensureForumSeed() {
   }
   const a = DEMO_USERS[0].profile.id
   const b = DEMO_USERS[1].profile.id
+  rememberProfile({ id: a, email: DEMO_USERS[0].profile.email, display_name: DEMO_USERS[0].profile.display_name })
+  rememberProfile({ id: b, email: DEMO_USERS[1].profile.email, display_name: DEMO_USERS[1].profile.display_name })
   const now = Date.now()
   const seeds: Discussion[] = [
     {
       id: 'seed-debate-w1',
       week_number: 1,
-      title: 'Дебаты недели 1: маркетинг до 10 личных сделок?',
+      title: '[демо] Дебаты недели 1: маркетинг до 10 личных сделок?',
       description_md:
-        'Можно ли масштабировать маркетинг до того, как основатель лично закрыл 10 сделок? Аргументы с доказательствами.',
+        'Демо-тема. Можно ли масштабировать маркетинг до того, как основатель лично закрыл 10 сделок? Аргументы с доказательствами.',
       kind: 'debate',
       author_id: a,
       is_resolved: false,
@@ -667,9 +972,9 @@ function ensureForumSeed() {
     {
       id: 'seed-q-qualification',
       week_number: 3,
-      title: 'Вопрос: какие критерии квалификации у вас сработали?',
+      title: '[демо] Вопрос: какие критерии квалификации у вас сработали?',
       description_md:
-        'Поделитесь 2–3 критериями «идём / не идём» из практики недели 3.',
+        'Демо-тема. Поделитесь 2–3 критериями «идём / не идём» из практики недели 3.',
       kind: 'question',
       author_id: b,
       is_resolved: false,
@@ -679,9 +984,9 @@ function ensureForumSeed() {
     {
       id: 'seed-case-stakeholder',
       week_number: 2,
-      title: 'Кейс: чемпион говорит «да», финдиректор молчит',
+      title: '[демо] Кейс: чемпион говорит «да», финдиректор молчит',
       description_md:
-        'Разберите план на 10 дней. Кто следующий разговор и с какой конкретной просьбой?',
+        'Демо-тема. Разберите план на 10 дней. Кто следующий разговор и с какой конкретной просьбой?',
       kind: 'case',
       author_id: a,
       is_resolved: false,
@@ -691,9 +996,9 @@ function ensureForumSeed() {
     {
       id: 'seed-source-yc-sales',
       week_number: 1,
-      title: 'Источник: руководство YC по продажам — что вынесли?',
+      title: '[демо] Источник: руководство YC по продажам — что вынесли?',
       description_md:
-        'После чтения https://www.ycombinator.com/library/Mo-the-sales-playbook-for-founders — один инсайт и один следующий шаг.',
+        'Демо-тема. После чтения https://www.ycombinator.com/library/Mo-the-sales-playbook-for-founders — один инсайт и один следующий шаг.',
       kind: 'source',
       author_id: b,
       is_resolved: true,
