@@ -213,6 +213,17 @@ export function examinePresentation(
   })
 }
 
+function evidenceLabels(text: string): { evidence: number; hypothesis: number; insufficient: number } {
+  const evidence = scoreText(text, ['факт', 'источник', 'данные', 'например', 'разговор', 'url', 'https', 'отчёт'], 40)
+  const hypothesis = scoreText(text, ['гипотеза', 'возможно', 'кажется', 'предполож', 'если'], 30)
+  const insufficient = scoreText(
+    text,
+    ['недостаточно', 'не хватает', 'неизвестно', 'мало данных', 'не доказа'],
+    30,
+  )
+  return { evidence, hypothesis, insufficient }
+}
+
 export function examineSocratic(
   userId: string,
   input: { answer: string; weekNumber?: number },
@@ -225,7 +236,10 @@ export function examineSocratic(
     /^(да|нет|ок|хорошо|согласен|верно)[.!]?$/i.test(t) ||
     t.split(/\s+/).length < 8
   const usesConcept = week.concepts.some((c) => t.toLowerCase().includes(c.toLowerCase().slice(0, 5)))
-  const overall = weak ? 18 : Math.min(100, 40 + (usesConcept ? 25 : 0) + lengthBonus(t))
+  const ev = evidenceLabels(t)
+  const overall = weak
+    ? 18
+    : Math.min(100, 35 + (usesConcept ? 20 : 0) + Math.min(ev.evidence, 25) + lengthBonus(t, 80, 200))
 
   return finish(userId, 'socratic', ['entrepreneurial', ...week.assignment_a.skill_slugs.slice(0, 1)], {
     title: `Сократический диалог · ${concept}`,
@@ -234,27 +248,53 @@ export function examineSocratic(
       {
         id: 'depth',
         label: 'Глубина ответа',
-        score: weak ? 10 : 40,
-        max: 40,
+        score: weak ? 10 : 30,
+        max: 30,
         note: weak ? 'Слишком короткий/соглашательский ответ' : 'Есть развёрнутая мысль',
       },
       {
         id: 'concept',
         label: 'Связь с понятиями недели',
-        score: usesConcept ? 35 : 10,
-        max: 35,
+        score: usesConcept ? 25 : 10,
+        max: 25,
         note: week.concepts.join(', '),
       },
-      { id: 'evidence', label: 'Пример/факт', score: scoreText(t, ['например', 'когда', 'факт', 'разговор'], 25), max: 25, note: '' },
+      {
+        id: 'evidence',
+        label: 'Доказательство',
+        score: Math.min(ev.evidence, 20),
+        max: 20,
+        note: 'Проверяемый факт / ссылка / наблюдение',
+      },
+      {
+        id: 'uncertainty',
+        label: 'Гипотеза и пределы',
+        score: Math.min(25, Math.round((ev.hypothesis + ev.insufficient) / 2) + (ev.evidence > 10 ? 5 : 0)),
+        max: 25,
+        note: 'Отделяете гипотезу и признаёте нехватку данных',
+      },
     ],
-    strengths: usesConcept ? ['Опираетесь на понятие недели'] : [],
+    strengths: [
+      ...(usesConcept ? ['Опираетесь на понятие недели'] : []),
+      ...(ev.evidence >= 15 ? ['Есть признаки опоры на факты'] : []),
+      ...(ev.insufficient >= 10 ? ['Признаёте пробелы в доказательствах'] : []),
+    ],
     gaps: weak
       ? ['Локальный экзаменатор не соглашается с пустым ответом — раскройте почему']
-      : week.error_watchlist.slice(0, 1),
-    next_actions: week.reflection.slice(0, 2),
+      : [
+          ...week.error_watchlist.slice(0, 1),
+          ev.evidence < 10 ? 'Мало явных доказательств (факт/источник/наблюдение)' : '',
+          ev.hypothesis < 5 && ev.insufficient < 5
+            ? 'Не видно, где гипотеза, а где «недостаточно доказательств»'
+            : '',
+        ].filter(Boolean),
+    next_actions: [
+      ...week.reflection.slice(0, 1),
+      'Пометьте в ответе: доказательство / гипотеза / недостаточно доказательств',
+    ],
     reply_md: weak
-      ? `Не принимаю ответ как достаточный.\n\nПонятие: **${concept}**.\nВопрос: как это проявляется в вашем кейсе на неделе ${week.week_number}? Приведите один конкретный пример поведения (не лозунг).\n\nПроблема недели: ${week.problem_ru}`
-      : `Ок, есть зацепка. Уточняющий вопрос: какое **ограничение** вашего примера ломает вывод?\n\nДебаты недели: ${week.debate_ru}`,
+      ? `Не принимаю ответ как достаточный.\n\nПонятие: **${concept}**.\nИсследовательский вопрос недели: ${week.research_question_ru}\nПриведите один конкретный пример поведения и скажите, это **доказательство**, **гипотеза** или **недостаточно данных**.\n\nКонтекст: ${week.problem_ru}`
+      : `Ок, есть зацепка. Уточнение: какое утверждение у вас **доказательство**, какое **гипотеза**, и где **недостаточно доказательств**?\n\nВопрос недели: ${week.research_question_ru}\n\n${week.feedback_guide_ru}`,
     refused_weak_agreement: weak,
   })
 }
@@ -290,6 +330,7 @@ export function examineWriting(
   userId: string,
   input: { text: string; documentGroupId?: string },
 ): ExaminerResult {
+  const week = weekContext()
   const t = input.text
   let versionNote = ''
   if (input.documentGroupId) {
@@ -297,27 +338,57 @@ export function examineWriting(
     const latest = g ? latestVersion(g.id) : undefined
     versionNote = latest ? `Документ «${g!.title}» v${latest.version}.` : ''
   }
-  const structure = scoreText(t, ['1)', '2)', 'вывод', 'итог', 'рекоменд', 'тезис'], 30)
-  const argument = scoreText(t, ['потому', 'например', 'данные', 'факт', 'источник'], 30)
-  const clarity = t.includes('  ') || t.split('.').some((s) => s.length > 220) ? 15 : 30
-  const overall = Math.min(100, structure + argument + clarity)
+  const structure = scoreText(t, ['1)', '2)', 'вывод', 'итог', 'рекоменд', 'тезис'], 20)
+  const argument = scoreText(t, ['потому', 'например', 'данные', 'факт', 'источник', 'противореч'], 20)
+  const clarity = t.includes('  ') || t.split('.').some((s) => s.length > 220) ? 10 : 20
+  const ev = evidenceLabels(t)
+  const overall = Math.min(
+    100,
+    structure + argument + clarity + Math.min(ev.evidence, 20) + Math.min(ev.hypothesis + ev.insufficient, 20),
+  )
 
   return finish(userId, 'writing-evaluator', ['presentation', 'entrepreneurial'], {
-    title: 'Оценка текста',
+    title: 'Оценка текста (исследование)',
     overall,
     rubrics: [
-      { id: 'structure', label: 'Структура', score: structure, max: 30, note: 'Заголовки/пункты/вывод' },
-      { id: 'argument', label: 'Аргументация', score: argument, max: 30, note: 'Причины и примеры' },
-      { id: 'clarity', label: 'Ясность', score: clarity, max: 30, note: 'Без «воды» и сверхдлинных предложений' },
-      { id: 'integrity', label: 'Честность источников', score: 10, max: 10, note: 'Не выдумываем DOI; только ваши ссылки' },
+      { id: 'structure', label: 'Структура', score: structure, max: 20, note: 'Заголовки/пункты/вывод' },
+      { id: 'argument', label: 'Аргументация', score: argument, max: 20, note: 'Причины, примеры, противоречия' },
+      { id: 'clarity', label: 'Ясность', score: clarity, max: 20, note: 'Без «воды» и сверхдлинных предложений' },
+      {
+        id: 'evidence',
+        label: 'Доказательства',
+        score: Math.min(ev.evidence, 20),
+        max: 20,
+        note: 'Факты и источники отдельно от мнений',
+      },
+      {
+        id: 'uncertainty',
+        label: 'Гипотеза / недостаточно доказательств',
+        score: Math.min(20, Math.round((ev.hypothesis + ev.insufficient) / 1.5)),
+        max: 20,
+        note: week.feedback_guide_ru.slice(0, 120),
+      },
     ],
-    strengths: structure >= 20 ? ['Видна структура'] : [],
+    strengths: [
+      ...(structure >= 12 ? ['Видна структура'] : []),
+      ...(ev.evidence >= 12 ? ['Есть опора на факты/источники'] : []),
+      ...(ev.insufficient >= 8 ? ['Признаёте нехватку доказательств'] : []),
+    ],
     gaps: [
-      argument < 15 ? 'Мало опоры на факты/примеры' : '',
+      argument < 10 ? 'Мало опоры на факты/примеры' : '',
+      ev.evidence < 8 ? 'Слабо видно блок «доказательство»' : '',
+      ev.hypothesis < 5 && ev.insufficient < 5
+        ? 'Не размечены гипотезы и зоны с недостаточными доказательствами'
+        : '',
       'Полную перепись текста не делаем — правьте сами по замечаниям',
     ].filter(Boolean),
-    next_actions: ['Сократите на 20%', 'Добавьте один проверяемый факт'],
-    reply_md: `${versionNote}\n\nЗамечания по категориям (структура / аргументы / ясность). Источники не выдумываем.`,
+    next_actions: [
+      'Пометьте абзацы: доказательство / гипотеза / недостаточно доказательств',
+      'Добавьте один проверяемый факт со ссылкой',
+      'Проверьте: есть ли прямой ответ на вопрос недели — или только пересказ источника?',
+      week.research_question_ru.slice(0, 120),
+    ],
+    reply_md: `${versionNote}\n\nРазбор: ответ на вопрос / независимость источников / факты vs мнения / применение.\n\n${week.no_retell_ru}\n\n${week.feedback_guide_ru}\n\nИсследовательский вопрос: ${week.research_question_ru}\nЗачем: ${week.context_why_ru}`,
   })
 }
 

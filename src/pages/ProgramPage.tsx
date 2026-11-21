@@ -30,7 +30,7 @@ export function ProgramPage() {
           ))}
         </ol>
         <Link to="/library" className="mt-3 inline-block text-sm font-semibold text-teal hover:underline">
-          Открыть библиотеку источников →
+          Библиотека (источники и интервью как доказательства) →
         </Link>
       </section>
 
