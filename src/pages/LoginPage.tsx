@@ -6,7 +6,7 @@ import { DEMO_USERS } from '@/lib/demo-data'
 import { isDemoAuth } from '@/lib/supabase'
 
 export function LoginPage() {
-  const { profile, loading, signIn, isDemo } = useAuth()
+  const { profile, loading, signIn, isDemo, authError, hasSession, retryProfile } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
@@ -18,6 +18,24 @@ export function LoginPage() {
 
   if (!loading && profile) {
     return <Navigate to={from} replace />
+  }
+
+  // Session restored but profile stuck — stay here with retry, do not look "logged out"
+  if (!loading && hasSession && !profile) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-slate" role="alert">
+          {authError ?? 'Сессия найдена, профиль ещё загружается.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => void retryProfile()}
+          className="rounded-xl bg-teal px-4 py-3 text-[15px] font-semibold text-on-accent hover:bg-teal-deep"
+        >
+          Повторить загрузку профиля
+        </button>
+      </div>
+    )
   }
 
   async function onSubmit(e: FormEvent) {

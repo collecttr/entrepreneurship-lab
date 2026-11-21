@@ -55,7 +55,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 4. **Authentication** → **Settings** (или **Sign In / Providers**): отключите **Allow new users to sign up** / Sign ups = **OFF**.
 5. OAuth / Magic link — не включать на MVP.
 
-### 2.3. Применить миграции 001–006
+### 2.3. Применить миграции 001–007
 
 1. **SQL Editor** → **New query**.
 2. По порядку вставьте и **Run** содержимое файлов из репо:
@@ -66,10 +66,23 @@ npm run dev -- --host 127.0.0.1 --port 5173
    - `supabase/migrations/004_collab.sql`
    - `supabase/migrations/005_documents.sql`
    - `supabase/migrations/006_ai_usage.sql`
+   - `supabase/migrations/007_auth_allowlist_fix.sql` (JWT allowlist + own-profile SELECT; fixes login bounce)
 3. Затем seed (если нужно контент в БД):
    - `supabase/seed.sql`
    - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте)
 4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts` в publication (миграция 004 добавляет).
+
+### 2.3b. Профиль отсутствует (bounce / soft profile)
+
+Если Auth-пользователь есть, а строки в `profiles` нет — клиент больше **не** делает `signOut` после login. Выполните SQL (пример для Петра):
+
+`supabase/snippets/ensure-profile-standkill25.sql`
+
+Или вручную: `allowed_emails` + `profiles` upsert по `auth.users.id` для нужного email.
+
+### 2.3c. Сессия (~24ч)
+
+Клиент: `persistSession` + `autoRefreshToken` + `localStorage` (`elab-auth`). Access JWT ~1ч, обновляется автоматически. Срок refresh-токена — в Supabase Dashboard → Authentication → Settings (по умолчанию обычно **больше** 24ч; cookieOptions на plain JS-клиенте нет).
 
 ### 2.4. Storage (private documents)
 
