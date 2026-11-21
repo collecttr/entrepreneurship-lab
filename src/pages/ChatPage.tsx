@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useAuth } from '@/context/AuthContext'
 import {
   demoTransportLabel,
@@ -21,34 +22,54 @@ function formatTime(iso: string) {
       minute: '2-digit',
     })
   } catch {
-    return iso
+    return iso || '—'
   }
 }
 
-export function ChatPage() {
+function ChatPageInner() {
   const { profile } = useAuth()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [text, setText] = useState('')
   const [attachName, setAttachName] = useState<string | null>(null)
   const [unread, setUnread] = useState(0)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const markingRead = useRef(false)
 
   useEffect(() => {
     if (!profile) return
     const refresh = () => {
-      setMessages(listMessages())
-      setUnread(unreadCount(profile.id))
+      try {
+        setMessages(listMessages())
+        setUnread(unreadCount(profile.id))
+        setLoadError(null)
+      } catch (err) {
+        console.warn('chat refresh failed:', err)
+        setMessages([])
+        setUnread(0)
+        setLoadError('Не удалось загрузить сообщения. Показан пустой чат.')
+      }
     }
     refresh()
-    markChatRead(profile.id)
+    try {
+      markingRead.current = true
+      markChatRead(profile.id)
+    } finally {
+      markingRead.current = false
+    }
     refresh()
     return subscribeCollab((event) => {
       refresh()
       // Mark peer messages read without re-entering on our own write echoes
-      if (event.type === 'messages') {
+      if (event.type === 'messages' && !markingRead.current) {
         const before = unreadCount(profile.id)
         if (before > 0) {
-          markChatRead(profile.id)
+          try {
+            markingRead.current = true
+            markChatRead(profile.id)
+          } finally {
+            markingRead.current = false
+          }
           refresh()
         }
       }
@@ -59,16 +80,28 @@ export function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
 
-  if (!profile) return null
+  if (!profile) {
+    return (
+      <div className="surface rounded-3xl p-5 text-sm text-slate">Загрузка профиля…</div>
+    )
+  }
+
   const peer = getPeerProfile(profile.id)
 
   function onSend(e: FormEvent) {
     e.preventDefault()
+    if (!profile) return
     if (!text.trim() && !attachName) return
-    sendMessage(profile!.id, text || '(вложение)', attachName)
-    setText('')
-    setAttachName(null)
-    setMessages(listMessages())
+    try {
+      sendMessage(profile.id, text || '(вложение)', attachName)
+      setText('')
+      setAttachName(null)
+      setMessages(listMessages())
+      setLoadError(null)
+    } catch (err) {
+      console.warn('sendMessage failed:', err)
+      setLoadError('Не удалось отправить сообщение. Попробуйте ещё раз.')
+    }
   }
 
   return (
@@ -81,8 +114,14 @@ export function ChatPage() {
         <p className="mt-2 text-xs text-slate">{demoTransportLabel()}</p>
         {isDemoAuth && (
           <p className="mt-1 text-xs rounded-xl bg-mist px-2 py-1 text-ink border border-ink/10">
-            Демо: откройте второй аккаунт во второй вкладке (sessionStorage). Сообщения общие в localStorage.
+            Демо: откройте второй аккаунт во второй вкладке (sessionStorage). Сообщения общие в
+            localStorage.
             {unread > 0 ? ` Непрочитанных до открытия: ${unread}.` : ''}
+          </p>
+        )}
+        {loadError && (
+          <p className="mt-2 text-xs text-slate" role="status">
+            {loadError}
           </p>
         )}
       </header>
@@ -101,7 +140,7 @@ export function ChatPage() {
                     mine ? 'bg-teal text-on-accent' : 'bg-mist text-ink'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{m.body_md}</p>
+                  <p className="whitespace-pre-wrap">{m.body_md || '—'}</p>
                   {m.attachment_stub && m.attachment_name && (
                     <p className={`mt-1 text-xs ${mine ? 'text-on-accent/80' : 'text-slate'}`}>
                       📎 {m.attachment_name} (имя файла; сам файл — через Документы / signed URL)
@@ -133,7 +172,7 @@ export function ChatPage() {
               onChange={(e) => setText(e.target.value)}
               rows={2}
               placeholder="Сообщение партнёру…"
-              className="min-h-[2.75rem] flex-1 rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm outline-none ring-ink focus:ring-2"
+              className="field min-h-[2.75rem] flex-1 rounded-xl border border-ink/10 px-3 py-2 text-sm outline-none ring-ink focus:ring-2"
             />
             <div className="flex gap-2">
               <label className="cursor-pointer rounded-xl border border-ink/10 px-3 py-2 text-sm text-slate hover:bg-mist">
@@ -159,5 +198,16 @@ export function ChatPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export function ChatPage() {
+  return (
+    <ErrorBoundary
+      title="Чат временно недоступен"
+      hint="Не удалось показать переписку. Нажмите «Повторить» — оболочка приложения остаётся рабочей. Если ошибка повторяется, откройте другой раздел и вернитесь позже."
+    >
+      <ChatPageInner />
+    </ErrorBoundary>
   )
 }

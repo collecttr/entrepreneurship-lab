@@ -72,7 +72,37 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function writeJson(key: string, value: unknown) {
-  localStorage.setItem(key, JSON.stringify(value))
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (err) {
+    console.warn('localStorage write failed:', key, err)
+  }
+}
+
+function asArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : []
+}
+
+function safeIso(value: unknown, fallback = '1970-01-01T00:00:00.000Z'): string {
+  return typeof value === 'string' && value.length > 0 ? value : fallback
+}
+
+function normalizeMessage(raw: unknown, index: number): ChatMessage | null {
+  if (!raw || typeof raw !== 'object') return null
+  const m = raw as Partial<ChatMessage>
+  const id = typeof m.id === 'string' && m.id ? m.id : `msg-${index}`
+  const sender_id = typeof m.sender_id === 'string' ? m.sender_id : ''
+  if (!sender_id) return null
+  return {
+    id,
+    sender_id,
+    body_md: typeof m.body_md === 'string' ? m.body_md : String(m.body_md ?? ''),
+    created_at: safeIso(m.created_at),
+    read_at: typeof m.read_at === 'string' && m.read_at ? m.read_at : null,
+    attachment_name:
+      typeof m.attachment_name === 'string' && m.attachment_name ? m.attachment_name : null,
+    attachment_stub: Boolean(m.attachment_stub),
+  }
 }
 
 function broadcast(event: CollabEvent) {
@@ -83,80 +113,145 @@ function broadcast(event: CollabEvent) {
   } catch {
     // BroadcastChannel unavailable — polling/subscribers still work via storage events
   }
-  window.dispatchEvent(new CustomEvent('elab-collab', { detail: event }))
+  try {
+    window.dispatchEvent(new CustomEvent('elab-collab', { detail: event }))
+  } catch (err) {
+    console.warn('collab broadcast failed:', err)
+  }
+}
+
+function notifySubscriber(onChange: (event: CollabEvent) => void, event: CollabEvent) {
+  try {
+    onChange(event)
+  } catch (err) {
+    // Subscriber bugs (or transient store errors) must not tear down the app
+    console.warn('collab subscriber error:', err)
+  }
 }
 
 async function hydrateMessagesFromSupabase() {
   if (!useLiveCollab() || !supabase) return
-  const { data, error } = await supabase
-    .from('messages')
-    .select('id,sender_id,body_md,created_at,read_at,attachment_name,attachment_stub')
-    .order('created_at', { ascending: true })
-  if (error) {
-    console.warn('messages hydrate skipped:', error.message)
-    return
-  }
-  if (data) {
-    writeJson(MSG_KEY, data as ChatMessage[])
-    broadcast({ type: 'messages' })
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id,sender_id,body_md,created_at,read_at,attachment_name,attachment_stub')
+      .order('created_at', { ascending: true })
+    if (error) {
+      console.warn('messages hydrate skipped:', error.message)
+      return
+    }
+    if (data) {
+      const normalized = asArray<unknown>(data)
+        .map((row, i) => normalizeMessage(row, i))
+        .filter((m): m is ChatMessage => m != null)
+      writeJson(MSG_KEY, normalized)
+      broadcast({ type: 'messages' })
+    }
+  } catch (err) {
+    console.warn('messages hydrate failed:', err)
   }
 }
 
 async function hydrateForumFromSupabase() {
   if (!useLiveCollab() || !supabase) return
-  const [disc, posts] = await Promise.all([
-    supabase.from('discussions').select('*').order('updated_at', { ascending: false }),
-    supabase.from('discussion_posts').select('*').order('created_at', { ascending: true }),
-  ])
-  if (disc.error) console.warn('discussions hydrate:', disc.error.message)
-  else if (disc.data) writeJson(DISC_KEY, disc.data as Discussion[])
-  if (posts.error) console.warn('posts hydrate:', posts.error.message)
-  else if (posts.data) writeJson(POST_KEY, posts.data as DiscussionPost[])
-  broadcast({ type: 'discussions' })
-  broadcast({ type: 'posts' })
+  try {
+    const [disc, posts] = await Promise.all([
+      supabase.from('discussions').select('*').order('updated_at', { ascending: false }),
+      supabase.from('discussion_posts').select('*').order('created_at', { ascending: true }),
+    ])
+    if (disc.error) console.warn('discussions hydrate:', disc.error.message)
+    else if (disc.data) writeJson(DISC_KEY, asArray(disc.data))
+    if (posts.error) console.warn('posts hydrate:', posts.error.message)
+    else if (posts.data) writeJson(POST_KEY, asArray(posts.data))
+    broadcast({ type: 'discussions' })
+    broadcast({ type: 'posts' })
+  } catch (err) {
+    console.warn('forum hydrate failed:', err)
+  }
+}
+
+/** Shared Realtime channel so AppShell + Chat + Forum do not fight over the same topic.
+ * Hydrate helpers already `broadcast()`, so every local subscriber receives updates. */
+let realtimeRefCount = 0
+let sharedRealtimeCleanup: (() => void) | null = null
+
+function acquireRealtime(live: NonNullable<typeof supabase>) {
+  realtimeRefCount += 1
+  if (realtimeRefCount === 1 || !sharedRealtimeCleanup) {
+    try {
+      void hydrateMessagesFromSupabase()
+      void hydrateForumFromSupabase()
+      const channel = live
+        .channel('elab-collab-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+          void hydrateMessagesFromSupabase()
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'discussions' }, () => {
+          void hydrateForumFromSupabase()
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'discussion_posts' }, () => {
+          void hydrateForumFromSupabase()
+        })
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.warn('realtime collab:', err?.message ?? status)
+          }
+        })
+      sharedRealtimeCleanup = () => {
+        try {
+          void live.removeChannel(channel)
+        } catch (removeErr) {
+          console.warn('realtime remove failed:', removeErr)
+        }
+        sharedRealtimeCleanup = null
+      }
+    } catch (err) {
+      console.warn('realtime subscribe failed — using local cache only:', err)
+      sharedRealtimeCleanup = null
+    }
+  }
+  return () => {
+    realtimeRefCount = Math.max(0, realtimeRefCount - 1)
+    if (realtimeRefCount === 0) {
+      sharedRealtimeCleanup?.()
+    }
+  }
 }
 
 export function subscribeCollab(onChange: (event: CollabEvent) => void): () => void {
-  const onCustom = (e: Event) => onChange((e as CustomEvent<CollabEvent>).detail)
+  const onCustom = (e: Event) => {
+    const detail = (e as CustomEvent<CollabEvent>).detail
+    if (!detail || typeof detail !== 'object' || !('type' in detail)) return
+    notifySubscriber(onChange, detail)
+  }
   const onStorage = (e: StorageEvent) => {
     if (!e.key) return
-    if (e.key === MSG_KEY) onChange({ type: 'messages' })
-    if (e.key === DISC_KEY) onChange({ type: 'discussions' })
-    if (e.key === POST_KEY) onChange({ type: 'posts' })
-    if (e.key === ACOMM_KEY) onChange({ type: 'assignment_comments' })
-    if (e.key === READ_KEY) onChange({ type: 'read' })
+    if (e.key === MSG_KEY) notifySubscriber(onChange, { type: 'messages' })
+    if (e.key === DISC_KEY) notifySubscriber(onChange, { type: 'discussions' })
+    if (e.key === POST_KEY) notifySubscriber(onChange, { type: 'posts' })
+    if (e.key === ACOMM_KEY) notifySubscriber(onChange, { type: 'assignment_comments' })
+    if (e.key === READ_KEY) notifySubscriber(onChange, { type: 'read' })
   }
   let bc: BroadcastChannel | null = null
   try {
     bc = new BroadcastChannel(CHANNEL)
-    bc.onmessage = (e) => onChange(e.data as CollabEvent)
+    bc.onmessage = (e) => {
+      const data = e.data as CollabEvent
+      if (!data || typeof data !== 'object' || !('type' in data)) return
+      notifySubscriber(onChange, data)
+    }
   } catch {
     bc = null
   }
   window.addEventListener('elab-collab', onCustom)
   window.addEventListener('storage', onStorage)
-  const poll = window.setInterval(() => onChange({ type: 'messages' }), 4000)
+  const poll = window.setInterval(() => notifySubscriber(onChange, { type: 'messages' }), 4000)
 
-  let removeRealtime: (() => void) | null = null
+  let releaseRealtime: (() => void) | null = null
   const live = supabase
   if (useLiveCollab() && live) {
-    void hydrateMessagesFromSupabase()
-    void hydrateForumFromSupabase()
-    const channel = live
-      .channel('elab-collab-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-        void hydrateMessagesFromSupabase().then(() => onChange({ type: 'messages' }))
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'discussions' }, () => {
-        void hydrateForumFromSupabase().then(() => onChange({ type: 'discussions' }))
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'discussion_posts' }, () => {
-        void hydrateForumFromSupabase().then(() => onChange({ type: 'posts' }))
-      })
-      .subscribe()
-    removeRealtime = () => {
-      void live.removeChannel(channel)
-    }
+    // Fan-in: first subscriber owns the channel; later ones still get CustomEvent/poll.
+    releaseRealtime = acquireRealtime(live)
   }
 
   return () => {
@@ -164,7 +259,7 @@ export function subscribeCollab(onChange: (event: CollabEvent) => void): () => v
     window.removeEventListener('storage', onStorage)
     window.clearInterval(poll)
     bc?.close()
-    removeRealtime?.()
+    releaseRealtime?.()
   }
 }
 
@@ -184,7 +279,16 @@ export function getPeerProfile(myId: string) {
 }
 
 export function listMessages(): ChatMessage[] {
-  return readJson<ChatMessage[]>(MSG_KEY, []).sort((a, b) => a.created_at.localeCompare(b.created_at))
+  try {
+    const raw = readJson<unknown>(MSG_KEY, [])
+    return asArray<unknown>(raw)
+      .map((row, i) => normalizeMessage(row, i))
+      .filter((m): m is ChatMessage => m != null)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  } catch (err) {
+    console.warn('listMessages failed:', err)
+    return []
+  }
 }
 
 export function sendMessage(
@@ -223,36 +327,57 @@ export function sendMessage(
   return msg
 }
 
+function readCursorMap(): Record<string, string> {
+  const raw = readJson<unknown>(READ_KEY, {})
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof v === 'string') out[k] = v
+  }
+  return out
+}
+
 export function markChatRead(readerId: string) {
-  const map = readJson<Record<string, string>>(READ_KEY, {})
-  const peer = peerId(readerId)
-  const now = new Date().toISOString()
-  let messagesChanged = false
-  const all = listMessages().map((m) => {
-    if (m.sender_id === peer && !m.read_at) {
-      messagesChanged = true
-      return { ...m, read_at: now }
+  try {
+    const map = readCursorMap()
+    const peer = peerId(readerId)
+    const now = new Date().toISOString()
+    let messagesChanged = false
+    const all = listMessages().map((m) => {
+      if (m.sender_id === peer && !m.read_at) {
+        messagesChanged = true
+        return { ...m, read_at: now }
+      }
+      return m
+    })
+    const prevRead = map[readerId]
+    map[readerId] = now
+    writeJson(READ_KEY, map)
+    if (messagesChanged) {
+      writeJson(MSG_KEY, all)
+      // Prefer 'read' over echoing 'messages' to ChatPage markChatRead — avoids
+      // synchronous CustomEvent re-entry. Still bump unread listeners via 'read'.
+      broadcast({ type: 'read' })
+      broadcast({ type: 'messages' })
+    } else if (!prevRead) {
+      // first visit: publish read cursor once, without rewriting messages
+      broadcast({ type: 'read' })
     }
-    return m
-  })
-  const prevRead = map[readerId]
-  map[readerId] = now
-  writeJson(READ_KEY, map)
-  if (messagesChanged) {
-    writeJson(MSG_KEY, all)
-    broadcast({ type: 'read' })
-    broadcast({ type: 'messages' })
-  } else if (!prevRead) {
-    // first visit: publish read cursor once, without rewriting messages
-    broadcast({ type: 'read' })
+  } catch (err) {
+    console.warn('markChatRead failed:', err)
   }
 }
 
 export function unreadCount(readerId: string): number {
-  const map = readJson<Record<string, string>>(READ_KEY, {})
-  const last = map[readerId] ?? '1970-01-01T00:00:00.000Z'
-  const peer = peerId(readerId)
-  return listMessages().filter((m) => m.sender_id === peer && m.created_at > last).length
+  try {
+    const map = readCursorMap()
+    const last = map[readerId] ?? '1970-01-01T00:00:00.000Z'
+    const peer = peerId(readerId)
+    return listMessages().filter((m) => m.sender_id === peer && m.created_at > last).length
+  } catch (err) {
+    console.warn('unreadCount failed:', err)
+    return 0
+  }
 }
 
 export function listDiscussions(): Discussion[] {

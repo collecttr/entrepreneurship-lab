@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/context/AuthContext'
 import { AdminRoute } from '@/components/AdminRoute'
 import { AppShell } from '@/components/AppShell'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -29,35 +30,40 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppShell />}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/program" element={<ProgramPage />} />
-                <Route path="/program/weeks/:weekNumber" element={<WeekPage />} />
-                <Route path="/library" element={<LibraryPage />} />
-                <Route path="/assignments" element={<AssignmentsPage />} />
-                <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
-                <Route path="/skills" element={<SkillsPage />} />
-                <Route path="/exams/:id" element={<ExamPage />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/forum" element={<ForumPage />} />
-                <Route path="/forum/:discussionId" element={<ForumTopicPage />} />
-                <Route path="/documents" element={<DocumentsPage />} />
-                <Route path="/documents/:id" element={<DocumentDetailPage />} />
-                <Route path="/ai" element={<AiPage />} />
-                <Route path="/ai/:trainerSlug" element={<AiTrainerPage />} />
-                <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminPage />} />
+        <ErrorBoundary
+          title="Приложение временно недоступно"
+          hint="Произошла ошибка интерфейса. Нажмите «Повторить». Если не поможет — обновите страницу."
+        >
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AppShell />}>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/program" element={<ProgramPage />} />
+                  <Route path="/program/weeks/:weekNumber" element={<WeekPage />} />
+                  <Route path="/library" element={<LibraryPage />} />
+                  <Route path="/assignments" element={<AssignmentsPage />} />
+                  <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
+                  <Route path="/skills" element={<SkillsPage />} />
+                  <Route path="/exams/:id" element={<ExamPage />} />
+                  <Route path="/chat" element={<ChatPage />} />
+                  <Route path="/forum" element={<ForumPage />} />
+                  <Route path="/forum/:discussionId" element={<ForumTopicPage />} />
+                  <Route path="/documents" element={<DocumentsPage />} />
+                  <Route path="/documents/:id" element={<DocumentDetailPage />} />
+                  <Route path="/ai" element={<AiPage />} />
+                  <Route path="/ai/:trainerSlug" element={<AiTrainerPage />} />
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminPage />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>
   )
