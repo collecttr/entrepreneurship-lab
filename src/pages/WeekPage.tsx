@@ -2,6 +2,11 @@ import type { ReactNode } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getModule, getWeek, mandatoryMinutesForSlot } from '@/data/curriculum'
 import { getSource } from '@/data/sources'
+import {
+  STUDY_GUIDE_STEPS_RU,
+  STUDY_GUIDE_TITLE_RU,
+  STUDY_MINUTES_CAP,
+} from '@/data/study-guide'
 import { useAuth } from '@/context/AuthContext'
 import { getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
 
@@ -51,13 +56,25 @@ export function WeekPage() {
         </p>
         <h1 className="mt-2 font-display text-3xl text-ink">{week.title_ru}</h1>
         <p className="mt-2 text-sm text-slate">
-          Обязательная нагрузка (вариант {slot}): <strong className="text-ink">{mins} мин</strong> / 240
-          {mins > 240 && <span className="text-danger"> — превышение!</span>}
+          Обязательная нагрузка (вариант {slot}): <strong className="text-ink">{mins} мин</strong> /{' '}
+          {STUDY_MINUTES_CAP} (~4 ч)
+          {mins > STUDY_MINUTES_CAP && <span className="text-danger"> — превышение!</span>}
         </p>
         <Link to="/program" className="mt-3 inline-block text-sm font-semibold text-teal">
           ← Все недели
         </Link>
       </header>
+
+      <Section title={STUDY_GUIDE_TITLE_RU}>
+        <ol className="list-decimal space-y-2 pl-5 text-ink">
+          {STUDY_GUIDE_STEPS_RU.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <p className="mt-3 text-slate">
+          Источники ниже идут в порядке чтения. Сначала обязательные, затем «по желанию».
+        </p>
+      </Section>
 
       <Section title="Проблема недели">
         <p className="text-ink">{week.problem_ru}</p>

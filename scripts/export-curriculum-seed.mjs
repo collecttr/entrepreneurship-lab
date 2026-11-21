@@ -1,8 +1,9 @@
-#!/usr/bin/env node
 /**
- * Emits SQL seed snippets from the TypeScript curriculum pack.
- * Run: npx tsx scripts/export-curriculum-seed.mjs > supabase/seed_curriculum.sql
- * (This file documents the intended export; seed_curriculum.sql is maintained alongside.)
+ * Curriculum seed is hand-synced / regenerated alongside src/data.
+ * Preferred path: update src/data/sources.ts + curriculum.ts (demo source of truth),
+ * then refresh supabase/seed_curriculum.sql source + week_sources blocks.
+ *
+ * Quick dump helper:
+ *   npx tsx -e "import {LIBRARY_SOURCES} from './src/data/sources.ts'; import {WEEKS} from './src/data/curriculum.ts'; console.log(LIBRARY_SOURCES.length, WEEKS.reduce((n,w)=>n+w.sources.length,0))"
  */
-console.log('-- Use supabase/seed_curriculum.sql (generated/hand-synced from src/data).')
-console.log('-- Demo mode reads src/data/* directly without Postgres.')
+console.log('Use src/data/* as source of truth; supabase/seed_curriculum.sql mirrors sources + week_sources.')
