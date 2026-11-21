@@ -176,4 +176,71 @@
       background: linear-gradient(90deg, #1c1c1e, #000000, #1c1c1e);
     }
   }
+
+  /* Dialogue + result motions (tasteful, 2–3 intentional) */
+  @keyframes el-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes el-bar-grow {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes el-check-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .result-panel {
+    animation: el-fade-up 420ms var(--ease-apple) both;
+  }
+
+  .result-item {
+    animation: el-fade-up 380ms var(--ease-apple) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+
+  .result-bar {
+    transform-origin: left center;
+    animation: el-bar-grow 520ms var(--ease-apple) both;
+    animation-delay: 120ms;
+  }
+
+  .result-check {
+    animation: el-check-in 360ms var(--ease-apple) both;
+    animation-delay: calc(80ms + var(--i, 0) * 45ms);
+  }
+
+  .dialogue-bubble {
+    animation: el-fade-up 280ms var(--ease-apple) both;
+    animation-delay: calc(var(--i, 0) * 20ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result-panel,
+    .result-item,
+    .result-bar,
+    .result-check,
+    .dialogue-bubble {
+      animation: none;
+    }
+  }
 }

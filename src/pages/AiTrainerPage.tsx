@@ -14,34 +14,12 @@ import {
   examineWriting,
   type ExaminerResult,
 } from '@/ai/examiners'
+import { DialogueSimPanel } from '@/components/DialogueSimPanel'
+import { ExaminerResultPanel } from '@/components/ExaminerResultPanel'
 import { useAuth } from '@/context/AuthContext'
 import { TRAINERS, examinerBanner, type TrainerSlug } from '@/lib/ai-config'
 import { listDocumentGroups } from '@/lib/document-store'
 import { getUnlockedWeek } from '@/lib/progress-store'
-
-/** Роли покупателя в учебной симуляции продаж — не технические «типы» из CRM. */
-const CLIENT_TYPES = [
-  {
-    id: 'Скептик-ЛПР',
-    label: 'Скептик — лицо, принимающее решение (ЛПР)',
-    tip: 'Тот, кто реально говорит «да/нет» по деньгам. Сомневается в цифрах и рисках.',
-  },
-  {
-    id: 'Энтузиаст без бюджета',
-    label: 'Энтузиаст без бюджета',
-    tip: 'Горит идеей, но платить не может. Нужен путь к реальному плательщику.',
-  },
-  {
-    id: 'Занятый чемпион',
-    label: 'Занятый чемпион внутри компании',
-    tip: 'Ваш союзник внутри клиента; мало времени, надо помогать ему «продать» вас дальше.',
-  },
-  {
-    id: 'Закупщик по чеклисту',
-    label: 'Закупщик по чеклисту',
-    tip: 'Сравнивает по формальным критериям. Важно закрыть пункты списка, а не «вдохновлять».',
-  },
-] as const
 
 function Tip({ children }: { children: ReactNode }) {
   return <p className="mt-1 text-xs leading-snug text-slate">{children}</p>
@@ -65,10 +43,7 @@ function Field({
   )
 }
 
-function modeLabel(mode: ExaminerResult['mode']): string {
-  if (mode === 'local_examiner') return 'локальная проверка'
-  return mode
-}
+type PracticeMode = 'dialogue' | 'transcript'
 
 export function AiTrainerPage() {
   const { trainerSlug } = useParams()
@@ -79,7 +54,7 @@ export function AiTrainerPage() {
   const [result, setResult] = useState<ExaminerResult | null>(null)
 
   const [text, setText] = useState('')
-  const [clientType, setClientType] = useState<string>(CLIENT_TYPES[0].id)
+  const [clientType, setClientType] = useState('Скептичный руководитель с бюджетом')
   const [goal, setGoal] = useState('')
   const [reservation, setReservation] = useState('')
   const [batna, setBatna] = useState('')
@@ -89,6 +64,7 @@ export function AiTrainerPage() {
   const [options, setOptions] = useState('')
   const [recommendation, setRecommendation] = useState('')
   const [docId, setDocId] = useState('')
+  const [practiceMode, setPracticeMode] = useState<PracticeMode>('dialogue')
 
   const docs = useMemo(
     () => (profile ? listDocumentGroups().filter((g) => g.owner_id === profile.id) : []),
@@ -99,7 +75,7 @@ export function AiTrainerPage() {
   if (!profile) return null
 
   const slug = trainerSlug as TrainerSlug
-  const selectedClient = CLIENT_TYPES.find((c) => c.id === clientType) ?? CLIENT_TYPES[0]
+  const usesDialogue = slug === 'sales' || slug === 'negotiation'
 
   function run(e: FormEvent) {
     e.preventDefault()
@@ -154,6 +130,75 @@ export function AiTrainerPage() {
 
   const adaptivePreview = slug === 'adaptive' ? buildAdaptiveExercises(profile.id) : []
 
+  function negotiationPrepFields(required: boolean) {
+    return (
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="Ваша цель" tip="Чего хотите добиться на этой встрече (одна фраза).">
+          <input
+            className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+            placeholder="Например: согласовать пилот на 2 недели"
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            required={required}
+          />
+        </Field>
+        <Field label="Красная линия" tip="Ниже чего не опускаетесь: цена, срок, условия.">
+          <input
+            className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+            placeholder="Например: не ниже X ₽ / не без предоплаты"
+            value={reservation}
+            onChange={(e) => setReservation(e.target.value)}
+            required={required}
+          />
+        </Field>
+        <div className="md:col-span-2">
+          <Field
+            label="BATNA — запасной план, если сделка сорвётся"
+            tip="Что сделаете без этой сделки. Без BATNA легко сдаться."
+          >
+            <textarea
+              className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              rows={2}
+              placeholder="Если не договоримся — …"
+              value={batna}
+              onChange={(e) => setBatna(e.target.value)}
+              required={required}
+            />
+          </Field>
+        </div>
+        <div className="md:col-span-2">
+          <Field
+            label="Интересы сторон"
+            tip="Не позиции («хочу скидку»), а зачем: скорость, статус, риск, бюджет."
+          >
+            <textarea
+              className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              rows={2}
+              placeholder="Мы: … · Они: …"
+              value={interests}
+              onChange={(e) => setInterests(e.target.value)}
+              required={required}
+            />
+          </Field>
+        </div>
+        <div className="md:col-span-2">
+          <Field
+            label="Возможный обмен (по желанию)"
+            tip="Пакет «если…, то…», а не односторонняя уступка."
+          >
+            <textarea
+              className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              rows={2}
+              placeholder="Если они…, то мы…"
+              value={concessions}
+              onChange={(e) => setConcessions(e.target.value)}
+            />
+          </Field>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <header className="surface rounded-3xl p-6">
@@ -181,365 +226,305 @@ export function AiTrainerPage() {
         )}
       </header>
 
-      <form onSubmit={run} className="surface space-y-4 rounded-3xl p-5">
-        {slug === 'sales' && (
-          <>
-            <p className="text-sm text-slate">
-              Шаг 1 — выберите, с кем говорите. Шаг 2 — вставьте реплики разговора. Шаг 3 — нажмите
-              «Проверить».
-            </p>
-            <Field
-              label="Роль клиента в разговоре"
-              tip="Кого вы «продаёте» в этом раунде — как в живой сделке, не как в CRM."
+      {usesDialogue && (
+        <div className="surface space-y-4 rounded-3xl p-5">
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Режим практики">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={practiceMode === 'dialogue'}
+              onClick={() => {
+                setPracticeMode('dialogue')
+                setResult(null)
+              }}
+              className={`rounded-xl px-3.5 py-2 text-sm font-semibold ${
+                practiceMode === 'dialogue'
+                  ? 'bg-ink text-on-accent'
+                  : 'border border-ink/15 text-ink hover:bg-mist'
+              }`}
             >
-              <select
-                value={clientType}
-                onChange={(e) => setClientType(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2"
-              >
-                {CLIENT_TYPES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-              <Tip>{selectedClient.tip}</Tip>
-            </Field>
-            <Field
-              label="Текст разговора"
-              tip="Диалог своими словами или стенограмма. Чем конкретнее реплики, тем точнее разбор."
+              Диалог по фразам
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={practiceMode === 'transcript'}
+              onClick={() => {
+                setPracticeMode('transcript')
+                setResult(null)
+              }}
+              className={`rounded-xl px-3.5 py-2 text-sm font-semibold ${
+                practiceMode === 'transcript'
+                  ? 'bg-ink text-on-accent'
+                  : 'border border-ink/15 text-ink hover:bg-mist'
+              }`}
             >
-              <textarea
-                required
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={8}
-                placeholder="Например: «Какую задачу сейчас решаете?» — «…» — «Когда удобно созвониться на 20 минут?»"
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-              />
-            </Field>
-          </>
-        )}
+              {slug === 'sales' ? 'Вставить весь текст разговора' : 'Заметки раунда без диалога'}
+            </button>
+          </div>
 
-        {slug === 'negotiation' && (
-          <>
-            <p className="text-sm text-slate">
-              Сначала заполните подготовку к встрече, затем — что произошло в раунде.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              <Field label="Ваша цель" tip="Чего хотите добиться на этой встрече (одна фраза).">
+          {practiceMode === 'dialogue' && (
+            <DialogueSimPanel
+              kind={slug === 'sales' ? 'sales' : 'negotiation'}
+              weekNumber={week?.week_number}
+              prepSlot={slug === 'negotiation' ? negotiationPrepFields(false) : undefined}
+              buildResult={(persona, transcript) => {
+                if (slug === 'sales') {
+                  return examineSales(profile.id, {
+                    clientType: persona.label,
+                    transcript,
+                    weekNumber: week?.week_number,
+                  })
+                }
+                return examineNegotiation(profile.id, {
+                  goal: goal || 'Цель раунда',
+                  reservation: reservation || 'Красная линия не указана',
+                  batna: batna || 'BATNA не указана',
+                  interests: interests || 'Интересы не указаны',
+                  concessions,
+                  roundNotes: transcript,
+                  weekNumber: week?.week_number,
+                })
+              }}
+            />
+          )}
+
+          {practiceMode === 'transcript' && slug === 'sales' && (
+            <form onSubmit={run} className="space-y-4">
+              <p className="text-sm text-slate">
+                Старый путь: вставьте весь разговор целиком и получите разбор. Для тренировки удобнее
+                режим «Диалог по фразам».
+              </p>
+              <Field
+                label="Роль клиента (для подписи в итоге)"
+                tip="Кратко — кого вы имели в виду в этом тексте."
+              >
                 <input
-                  className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                  placeholder="Например: согласовать пилот на 2 недели"
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                  required
+                  value={clientType}
+                  onChange={(e) => setClientType(e.target.value)}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  placeholder="Например: скептичный руководитель с бюджетом"
                 />
               </Field>
               <Field
-                label="Красная линия"
-                tip="Ниже чего не опускаетесь: цена, срок, условия — ваш предел."
+                label="Текст разговора"
+                tip="Диалог своими словами или стенограмма."
               >
-                <input
-                  className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                  placeholder="Например: не ниже X ₽ / не без предоплаты"
-                  value={reservation}
-                  onChange={(e) => setReservation(e.target.value)}
+                <textarea
                   required
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={8}
+                  placeholder="Например: «Какую задачу сейчас решаете?» — «…» — «Когда удобно созвониться?»"
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
                 />
               </Field>
-              <div className="md:col-span-2">
-                <Field
-                  label="BATNA — запасной план, если сделка сорвётся"
-                  tip="Что сделаете без этой сделки (другой клиент, отложить, сделать сами). Без BATNA легко сдаться."
-                >
-                  <textarea
-                    className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                    rows={2}
-                    placeholder="Если не договоримся — …"
-                    value={batna}
-                    onChange={(e) => setBatna(e.target.value)}
-                    required
-                  />
-                </Field>
-              </div>
-              <div className="md:col-span-2">
-                <Field
-                  label="Интересы сторон"
-                  tip="Не позиции («хочу скидку»), а зачем: скорость, статус, риск, бюджет."
-                >
-                  <textarea
-                    className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                    rows={2}
-                    placeholder="Мы: … · Они: …"
-                    value={interests}
-                    onChange={(e) => setInterests(e.target.value)}
-                    required
-                  />
-                </Field>
-              </div>
-              <div className="md:col-span-2">
-                <Field
-                  label="Возможный обмен (необязательно)"
-                  tip="Что можете отдать взамен чего — пакет «если…, то…», а не односторонняя уступка."
-                >
-                  <textarea
-                    className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                    rows={2}
-                    placeholder="Если они…, то мы…"
-                    value={concessions}
-                    onChange={(e) => setConcessions(e.target.value)}
-                  />
-                </Field>
-              </div>
-            </div>
-            <Field label="Заметки по раунду" tip="Что сказали, что предложили, где застряли.">
-              <textarea
-                required
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={6}
-                placeholder="Кратко по ходу переговоров…"
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-              />
-            </Field>
-          </>
-        )}
-
-        {slug === 'presentation' && (
-          <Field
-            label="Скрипт выступления"
-            tip="Структура: проблема слушателя → доказательства → конкретная просьба (что сделать дальше)."
-          >
-            <textarea
-              required
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={7}
-              placeholder="Начните с боли аудитории, не с «мы компания…»"
-              className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-            />
-          </Field>
-        )}
-
-        {slug === 'socratic' && (
-          <Field
-            label="Ваш ответ"
-            tip="Развёрнуто, со своим примером. Короткое «да/согласен» не засчитывается."
-          >
-            <textarea
-              required
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={7}
-              placeholder="Свяжите ответ с понятиями текущей недели…"
-              className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-            />
-          </Field>
-        )}
-
-        {slug === 'voice-practice' && (
-          <>
-            <Field
-              label="Текст выступления (стенограмма)"
-              tip="Распознавание речи в приложении не подключено — вставьте текст вручную. Тон и темп голоса здесь не оцениваются."
-            >
-              <textarea
-                required
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={8}
-                placeholder="Вставьте текст того, что сказали вслух…"
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-              />
-            </Field>
-            <Field
-              label="Аудиофайл (по желанию)"
-              tip="Сохраняется только имя файла; разбор идёт по тексту выше."
-            >
-              <input type="file" accept="audio/*" className="block w-full text-sm" />
-            </Field>
-          </>
-        )}
-
-        {slug === 'adaptive' && (
-          <Field
-            label="Что сделали по упражнению"
-            tip="Короткий отчёт: шаги и результат, не лозунг."
-          >
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={7}
-              placeholder="Опишите выполнение — что сделали и что получилось…"
-              className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-            />
-          </Field>
-        )}
-
-        {slug === 'business-case' && (
-          <>
-            <p className="text-sm text-slate">Три блока: в чём проблема → какие варианты → что выбираете и почему.</p>
-            <Field label="Диагноз" tip="В чём суть проблемы кейса — своими словами.">
-              <textarea
-                required
-                rows={3}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                placeholder="Ситуация и корень проблемы…"
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
-              />
-            </Field>
-            <Field label="Варианты" tip="Не меньше двух осмысленных путей.">
-              <textarea
-                required
-                rows={3}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                placeholder="Вариант 1… Вариант 2…"
-                value={options}
-                onChange={(e) => setOptions(e.target.value)}
-              />
-            </Field>
-            <Field
-              label="Рекомендация"
-              tip="Что выбираете, почему, какой риск и как проверите за неделю."
-            >
-              <textarea
-                required
-                rows={3}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                placeholder="Рекомендую… потому что… риск… проверка…"
-                value={recommendation}
-                onChange={(e) => setRecommendation(e.target.value)}
-              />
-            </Field>
-          </>
-        )}
-
-        {slug === 'writing-evaluator' && (
-          <>
-            <Field
-              label="Документ из библиотеки (по желанию)"
-              tip="Можно привязать к уже загруженному файлу — или проверить любой текст ниже."
-            >
-              <select
-                value={docId}
-                onChange={(e) => setDocId(e.target.value)}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              <button
+                type="submit"
+                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
               >
-                <option value="">Без привязки к документу</option>
-                {docs.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.title}
-                  </option>
-                ))}
-              </select>
-            </Field>
+                Проверить
+              </button>
+            </form>
+          )}
+
+          {practiceMode === 'transcript' && slug === 'negotiation' && (
+            <form onSubmit={run} className="space-y-4">
+              <p className="text-sm text-slate">
+                Заполните подготовку и кратко опишите раунд — без пошагового диалога.
+              </p>
+              {negotiationPrepFields(true)}
+              <Field label="Заметки по раунду" tip="Что сказали, что предложили, где застряли.">
+                <textarea
+                  required
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={6}
+                  placeholder="Кратко по ходу переговоров…"
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                />
+              </Field>
+              <button
+                type="submit"
+                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+              >
+                Проверить
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {!usesDialogue && (
+        <form onSubmit={run} className="surface space-y-4 rounded-3xl p-5">
+          {slug === 'presentation' && (
             <Field
-              label="Текст на проверку"
-              tip="Разбор структуры и ясности; полную перепись текст не получит — правки за вами."
+              label="Скрипт выступления"
+              tip="Структура: проблема слушателя → доказательства → конкретная просьба."
             >
               <textarea
                 required
-                rows={10}
-                className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
-                placeholder="Вставьте текст…"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
+                rows={7}
+                placeholder="Начните с боли аудитории, не с «мы компания…»"
+                className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
               />
             </Field>
-          </>
-        )}
+          )}
 
-        {slug === 'adaptive' && adaptivePreview.length > 0 && (
-          <ul className="space-y-2 rounded-2xl bg-teal-soft/40 p-3 text-sm">
-            {adaptivePreview.map((a) => (
-              <li key={a.skill}>
-                <strong className="text-ink">{a.skill}</strong>
-                {a.replaces_optional_work ? ' · замена необязательной работы' : ' · по желанию'}:{' '}
-                {a.exercise}
-              </li>
-            ))}
-          </ul>
-        )}
+          {slug === 'socratic' && (
+            <Field
+              label="Ваш ответ"
+              tip="Развёрнуто, со своим примером. Короткое «да/согласен» не засчитывается."
+            >
+              <textarea
+                required
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={7}
+                placeholder="Свяжите ответ с понятиями текущей недели…"
+                className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              />
+            </Field>
+          )}
 
-        {slug === 'skill-map' && (
-          <p className="text-sm text-slate">
-            Нажмите «Разобрать карту» — кратко объясним слабые места по вашим баллам и что потренировать
-            дальше. Платный AI не нужен.
-          </p>
-        )}
+          {slug === 'voice-practice' && (
+            <>
+              <Field
+                label="Текст выступления (стенограмма)"
+                tip="Распознавание речи не подключено — вставьте текст вручную."
+              >
+                <textarea
+                  required
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={8}
+                  placeholder="Вставьте текст того, что сказали вслух…"
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                />
+              </Field>
+              <Field label="Аудиофайл (по желанию)" tip="Сохраняется только имя файла.">
+                <input type="file" accept="audio/*" className="block w-full text-sm" />
+              </Field>
+            </>
+          )}
 
-        {slug === 'adaptive' && adaptivePreview.length === 0 && (
-          <p className="text-sm text-slate">Пока нет данных по навыкам — сначала сдайте задание или другой тренажёр.</p>
-        )}
+          {slug === 'adaptive' && (
+            <Field label="Что сделали по упражнению" tip="Короткий отчёт: шаги и результат.">
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={7}
+                placeholder="Опишите результат…"
+                className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+              />
+            </Field>
+          )}
 
-        <button
-          type="submit"
-          className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
-        >
-          {slug === 'skill-map' ? 'Разобрать карту' : 'Проверить'}
-        </button>
-      </form>
+          {slug === 'business-case' && (
+            <>
+              <p className="text-sm text-slate">
+                Три блока: в чём проблема → какие варианты → что выбираете и почему.
+              </p>
+              <Field label="Диагноз" tip="В чём суть проблемы кейса.">
+                <textarea
+                  required
+                  rows={3}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  placeholder="Ситуация и корень проблемы…"
+                  value={diagnosis}
+                  onChange={(e) => setDiagnosis(e.target.value)}
+                />
+              </Field>
+              <Field label="Варианты" tip="Не меньше двух осмысленных путей.">
+                <textarea
+                  required
+                  rows={3}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  placeholder="Вариант 1… Вариант 2…"
+                  value={options}
+                  onChange={(e) => setOptions(e.target.value)}
+                />
+              </Field>
+              <Field label="Рекомендация" tip="Что выбираете, почему, риск и проверка за неделю.">
+                <textarea
+                  required
+                  rows={3}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  placeholder="Рекомендую… потому что… риск… проверка…"
+                  value={recommendation}
+                  onChange={(e) => setRecommendation(e.target.value)}
+                />
+              </Field>
+            </>
+          )}
 
-      {result && (
-        <section className="surface space-y-3 rounded-3xl p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-display text-xl text-ink">{result.title}</h2>
-            <span className="rounded-full bg-teal-soft px-3 py-1 text-sm font-semibold text-teal-deep">
-              {result.overall}/100 · {modeLabel(result.mode)}
-            </span>
-          </div>
-          {result.refused_weak_agreement && (
-            <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">
-              Ответ слишком короткий или пустой — разверните мысль.
+          {slug === 'writing-evaluator' && (
+            <>
+              <Field label="Документ из библиотеки (по желанию)" tip="Можно привязать к файлу.">
+                <select
+                  value={docId}
+                  onChange={(e) => setDocId(e.target.value)}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                >
+                  <option value="">Без привязки к документу</option>
+                  {docs.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.title}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Текст на проверку" tip="Разбор структуры и ясности.">
+                <textarea
+                  required
+                  rows={10}
+                  className="field w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  placeholder="Вставьте текст…"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                />
+              </Field>
+            </>
+          )}
+
+          {slug === 'adaptive' && adaptivePreview.length > 0 && (
+            <ul className="space-y-2 rounded-2xl bg-teal-soft/40 p-3 text-sm">
+              {adaptivePreview.map((a) => (
+                <li key={a.skill}>
+                  <strong className="text-ink">{a.skill}</strong>
+                  {a.replaces_optional_work ? ' · замена необязательной работы' : ' · по желанию'}:{' '}
+                  {a.exercise}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {slug === 'skill-map' && (
+            <p className="text-sm text-slate">
+              Нажмите «Разобрать карту» — слабые места по баллам и что потренировать. Платный AI не
+              нужен.
             </p>
           )}
-          <ul className="space-y-2">
-            {result.rubrics.map((r) => (
-              <li key={r.id}>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span className="font-medium text-ink">{r.label}</span>
-                  <span className="text-slate">
-                    {r.score}/{r.max}
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-mist">
-                  <div
-                    className="h-full rounded-full bg-teal"
-                    style={{ width: `${Math.min(100, (r.score / r.max) * 100)}%` }}
-                  />
-                </div>
-                {r.note && <p className="mt-1 text-xs text-slate">{r.note}</p>}
-              </li>
-            ))}
-          </ul>
-          {result.gaps.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase text-teal">Что улучшить</p>
-              <ul className="mt-1 list-disc pl-5 text-sm text-ink">
-                {result.gaps.map((g) => (
-                  <li key={g}>{g}</li>
-                ))}
-              </ul>
-            </div>
+
+          {slug === 'adaptive' && adaptivePreview.length === 0 && (
+            <p className="text-sm text-slate">
+              Пока нет данных по навыкам — сначала сдайте задание или другой тренажёр.
+            </p>
           )}
-          {result.next_actions.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase text-teal">Дальше</p>
-              <ul className="mt-1 list-disc pl-5 text-sm text-ink">
-                {result.next_actions.map((g) => (
-                  <li key={g}>{g}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <div className="rounded-2xl bg-paper/80 p-3 text-sm whitespace-pre-wrap text-slate">{result.reply_md}</div>
-          <p className="text-xs text-slate">
-            Балл обновляет карту навыков (скользящая оценка). Платный AI не вызывался.
-          </p>
-        </section>
+
+          <button
+            type="submit"
+            className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+          >
+            {slug === 'skill-map' ? 'Разобрать карту' : 'Проверить'}
+          </button>
+        </form>
       )}
+
+      {result && practiceMode === 'transcript' && <ExaminerResultPanel result={result} />}
+      {result && !usesDialogue && <ExaminerResultPanel result={result} />}
     </div>
   )
 }

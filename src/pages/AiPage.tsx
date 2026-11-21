@@ -49,7 +49,11 @@ export function AiPage() {
             to={`/ai/${t.slug}`}
             className="surface block rounded-3xl p-5 transition hover:border-ink/20"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-teal">локальная проверка</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-teal">
+              {t.slug === 'sales' || t.slug === 'negotiation'
+                ? 'диалог · локальная проверка'
+                : 'локальная проверка'}
+            </p>
             <h2 className="mt-1 font-display text-xl text-ink">{t.title_ru}</h2>
             <p className="mt-2 text-sm text-slate">{t.blurb_ru}</p>
             <p className="mt-3 text-xs text-slate">
