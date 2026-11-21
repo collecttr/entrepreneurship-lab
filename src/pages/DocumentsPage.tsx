@@ -166,7 +166,7 @@ export function DocumentsPage() {
           <textarea
             value={sources}
             onChange={(e) => setSources(e.target.value)}
-            placeholder="Список источников (verified free / optional paid notes)"
+            placeholder="Список источников (бесплатные проверенные / заметки по платным)"
             rows={2}
             className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
           />

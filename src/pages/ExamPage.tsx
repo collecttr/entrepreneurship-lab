@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getWeek } from '@/data/curriculum'
@@ -7,6 +7,7 @@ import {
   examLinkedAssignments,
   getExam,
   getExamAttempt,
+  hydrateExamAttemptsFromSupabase,
   saveExamDraft,
   submitExamAttempt,
 } from '@/lib/exam-store'
@@ -18,13 +19,31 @@ export function ExamPage() {
   const exam = id ? getExam(id) : undefined
   const unlocked = getUnlockedWeek()
 
-  const attempt = profile && exam ? getExamAttempt(profile.id, exam.id) : undefined
+  const [attempt, setAttempt] = useState(() =>
+    profile && exam ? getExamAttempt(profile.id, exam.id) : undefined,
+  )
   const [body, setBody] = useState(attempt?.body_md ?? '')
   const [saved, setSaved] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const linked = useMemo(() => (exam ? examLinkedAssignments(exam) : []), [exam])
   const week = exam ? getWeek(exam.week_number) : undefined
+
+  useEffect(() => {
+    if (!profile || !exam) return
+    let cancelled = false
+    void hydrateExamAttemptsFromSupabase(profile.id).then(() => {
+      if (cancelled) return
+      const next = getExamAttempt(profile.id, exam.id)
+      setAttempt(next)
+      if (next?.body_md && !body.trim()) setBody(next.body_md)
+    })
+    return () => {
+      cancelled = true
+    }
+    // body intentionally omitted — hydrate only fills empty editor
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, exam])
 
   if (!profile) return null
   if (!exam) return <Navigate to="/program" replace />
@@ -35,7 +54,8 @@ export function ExamPage() {
   function onSaveDraft(e: FormEvent) {
     e.preventDefault()
     if (!profile || !exam) return
-    saveExamDraft(profile.id, exam.id, body)
+    const row = saveExamDraft(profile.id, exam.id, body)
+    setAttempt(row)
     setSaved('Черновик сохранён')
     setError(null)
   }
@@ -49,7 +69,8 @@ export function ExamPage() {
       )
       return
     }
-    submitExamAttempt(profile.id, exam.id, body)
+    const row = submitExamAttempt(profile.id, exam.id, body)
+    setAttempt(row)
     setSaved('Аттестация сдана')
     setError(null)
   }

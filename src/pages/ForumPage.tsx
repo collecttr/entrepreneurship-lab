@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useAuth } from '@/context/AuthContext'
 import {
   authorName,
@@ -22,10 +23,11 @@ const KIND_RU: Record<ForumKind, string> = {
   general: 'общее',
 }
 
-export function ForumPage() {
+function ForumPageInner() {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const [items, setItems] = useState<Discussion[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [kind, setKind] = useState<(typeof KINDS)[number]>('all')
   const [showNew, setShowNew] = useState(false)
@@ -35,7 +37,16 @@ export function ForumPage() {
   const [week, setWeek] = useState('')
 
   useEffect(() => {
-    const refresh = () => setItems(listDiscussions())
+    const refresh = () => {
+      try {
+        setItems(listDiscussions())
+        setLoadError(null)
+      } catch (err) {
+        console.warn('forum refresh failed:', err)
+        setItems([])
+        setLoadError('Не удалось загрузить темы. Показан пустой список.')
+      }
+    }
     refresh()
     return subscribeCollab(refresh)
   }, [])
@@ -52,19 +63,28 @@ export function ForumPage() {
   function onCreate(e: FormEvent) {
     e.preventDefault()
     if (!profile || !title.trim()) return
-    const d = createDiscussion({
-      author_id: profile.id,
-      title,
-      description_md: desc,
-      kind: newKind,
-      week_number: week ? Number(week) : null,
-    })
-    setTitle('')
-    setDesc('')
-    setWeek('')
-    setShowNew(false)
-    setItems(listDiscussions())
-    void navigate(`/forum/${d.id}`)
+    try {
+      const d = createDiscussion({
+        author_id: profile.id,
+        title,
+        description_md: desc,
+        kind: newKind,
+        week_number: week ? Number(week) : null,
+      })
+      setTitle('')
+      setDesc('')
+      setWeek('')
+      setShowNew(false)
+      setItems(listDiscussions())
+      void navigate(`/forum/${d.id}`)
+    } catch (err) {
+      console.warn('createDiscussion failed:', err)
+      setLoadError('Не удалось создать тему. Попробуйте ещё раз.')
+    }
+  }
+
+  if (!profile) {
+    return <div className="surface rounded-3xl p-5 text-sm text-slate">Загрузка профиля…</div>
   }
 
   return (
@@ -75,6 +95,11 @@ export function ForumPage() {
         <p className="mt-2 text-sm text-slate">
           Темы, ответы, цитаты, привязка к неделе, поиск и «решено». {demoTransportLabel()}.
         </p>
+        {loadError && (
+          <p className="mt-2 text-xs text-slate" role="status">
+            {loadError}
+          </p>
+        )}
         <button
           type="button"
           onClick={() => setShowNew((v) => !v)}
@@ -118,7 +143,7 @@ export function ForumPage() {
               max={26}
               value={week}
               onChange={(e) => setWeek(e.target.value)}
-              placeholder="Неделя (опц.)"
+              placeholder="Неделя (необяз.)"
               className="w-36 rounded-xl border border-ink/10 px-3 py-2 text-sm"
             />
             <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
@@ -150,26 +175,31 @@ export function ForumPage() {
 
       <ul className="space-y-3">
         {filtered.map((d) => {
-          const posts = listPosts(d.id)
+          let postCount = 0
+          try {
+            postCount = listPosts(d.id).length
+          } catch {
+            postCount = 0
+          }
           return (
             <li key={d.id} className="surface rounded-3xl p-5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-teal">
-                    {KIND_RU[d.kind]}
+                    {KIND_RU[d.kind] ?? 'общее'}
                     {d.week_number ? ` · неделя ${d.week_number}` : ''}
                     {d.is_resolved ? ' · решено' : ''}
                   </p>
                   <h2 className="mt-1 font-display text-xl text-ink">
                     <Link to={`/forum/${d.id}`} className="hover:text-teal">
-                      {d.title}
+                      {d.title || 'Без названия'}
                     </Link>
                   </h2>
                   <p className="mt-1 line-clamp-2 text-sm text-slate">{d.description_md}</p>
                 </div>
                 <div className="text-right text-xs text-slate">
                   <p>{authorName(d.author_id)}</p>
-                  <p>{posts.length} сообщ.</p>
+                  <p>{postCount} сообщ.</p>
                 </div>
               </div>
               {d.week_number && (
@@ -183,8 +213,25 @@ export function ForumPage() {
             </li>
           )
         })}
-        {filtered.length === 0 && <li className="text-sm text-slate">Ничего не найдено.</li>}
+        {filtered.length === 0 && (
+          <li className="surface rounded-3xl p-5 text-sm text-slate">
+            {q.trim() || kind !== 'all'
+              ? 'Ничего не найдено по текущему фильтру.'
+              : 'Пока нет тем. Создайте первую — или дождитесь синхронизации с сервером.'}
+          </li>
+        )}
       </ul>
     </div>
+  )
+}
+
+export function ForumPage() {
+  return (
+    <ErrorBoundary
+      title="Форум временно недоступен"
+      hint="Не удалось показать темы. Нажмите «Повторить». Чат и другие разделы остаются рабочими."
+    >
+      <ForumPageInner />
+    </ErrorBoundary>
   )
 }

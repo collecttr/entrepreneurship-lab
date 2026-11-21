@@ -183,6 +183,22 @@ export function buildDemoDashboard(profile: Profile): DashboardData {
       { date: '2026-11-22', label: 'Сб', completed: 0, total: 1 },
       { date: '2026-11-23', label: 'Вс', completed: 0, total: 1 },
     ],
+    weekHistory: [
+      {
+        week_number: 1,
+        title_ru: 'Неделя 1',
+        completed: 2,
+        total: 2,
+        status_ru: 'закрыта',
+      },
+      {
+        week_number: 2,
+        title_ru: 'Неделя 2',
+        completed: 1,
+        total: 2,
+        status_ru: 'в работе',
+      },
+    ],
     isDemoData: true,
   }
 }

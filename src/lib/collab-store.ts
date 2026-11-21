@@ -105,6 +105,54 @@ function normalizeMessage(raw: unknown, index: number): ChatMessage | null {
   }
 }
 
+const FORUM_KINDS: ForumKind[] = ['debate', 'question', 'case', 'source', 'general']
+
+function normalizeDiscussion(raw: unknown, index: number): Discussion | null {
+  if (!raw || typeof raw !== 'object') return null
+  const d = raw as Partial<Discussion>
+  const id = typeof d.id === 'string' && d.id ? d.id : `disc-${index}`
+  const author_id = typeof d.author_id === 'string' ? d.author_id : ''
+  if (!author_id) return null
+  const kind = FORUM_KINDS.includes(d.kind as ForumKind) ? (d.kind as ForumKind) : 'general'
+  const weekRaw = d.week_number
+  const week_number =
+    typeof weekRaw === 'number' && Number.isFinite(weekRaw)
+      ? Math.max(1, Math.min(26, Math.floor(weekRaw)))
+      : null
+  return {
+    id,
+    week_number,
+    title: typeof d.title === 'string' ? d.title : String(d.title ?? 'Без названия'),
+    description_md:
+      typeof d.description_md === 'string' ? d.description_md : String(d.description_md ?? ''),
+    kind,
+    author_id,
+    is_resolved: Boolean(d.is_resolved),
+    created_at: safeIso(d.created_at),
+    updated_at: safeIso(d.updated_at, safeIso(d.created_at)),
+  }
+}
+
+function normalizePost(raw: unknown, index: number): DiscussionPost | null {
+  if (!raw || typeof raw !== 'object') return null
+  const p = raw as Partial<DiscussionPost>
+  const id = typeof p.id === 'string' && p.id ? p.id : `post-${index}`
+  const discussion_id = typeof p.discussion_id === 'string' ? p.discussion_id : ''
+  const author_id = typeof p.author_id === 'string' ? p.author_id : ''
+  if (!discussion_id || !author_id) return null
+  return {
+    id,
+    discussion_id,
+    author_id,
+    body_md: typeof p.body_md === 'string' ? p.body_md : String(p.body_md ?? ''),
+    parent_id: typeof p.parent_id === 'string' && p.parent_id ? p.parent_id : null,
+    quote_md: typeof p.quote_md === 'string' && p.quote_md ? p.quote_md : null,
+    attachment_name:
+      typeof p.attachment_name === 'string' && p.attachment_name ? p.attachment_name : null,
+    created_at: safeIso(p.created_at),
+  }
+}
+
 function broadcast(event: CollabEvent) {
   try {
     const bc = new BroadcastChannel(CHANNEL)
@@ -160,9 +208,19 @@ async function hydrateForumFromSupabase() {
       supabase.from('discussion_posts').select('*').order('created_at', { ascending: true }),
     ])
     if (disc.error) console.warn('discussions hydrate:', disc.error.message)
-    else if (disc.data) writeJson(DISC_KEY, asArray(disc.data))
+    else if (disc.data) {
+      const normalized = asArray<unknown>(disc.data)
+        .map((row, i) => normalizeDiscussion(row, i))
+        .filter((d): d is Discussion => d != null)
+      writeJson(DISC_KEY, normalized)
+    }
     if (posts.error) console.warn('posts hydrate:', posts.error.message)
-    else if (posts.data) writeJson(POST_KEY, asArray(posts.data))
+    else if (posts.data) {
+      const normalized = asArray<unknown>(posts.data)
+        .map((row, i) => normalizePost(row, i))
+        .filter((p): p is DiscussionPost => p != null)
+      writeJson(POST_KEY, normalized)
+    }
     broadcast({ type: 'discussions' })
     broadcast({ type: 'posts' })
   } catch (err) {
@@ -381,12 +439,26 @@ export function unreadCount(readerId: string): number {
 }
 
 export function listDiscussions(): Discussion[] {
-  ensureForumSeed()
-  return readJson<Discussion[]>(DISC_KEY, []).sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+  try {
+    ensureForumSeed()
+    const raw = readJson<unknown>(DISC_KEY, [])
+    return asArray<unknown>(raw)
+      .map((row, i) => normalizeDiscussion(row, i))
+      .filter((d): d is Discussion => d != null)
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+  } catch (err) {
+    console.warn('listDiscussions failed:', err)
+    return []
+  }
 }
 
 export function getDiscussion(id: string): Discussion | undefined {
-  return listDiscussions().find((d) => d.id === id)
+  try {
+    return listDiscussions().find((d) => d.id === id)
+  } catch (err) {
+    console.warn('getDiscussion failed:', err)
+    return undefined
+  }
 }
 
 export function createDiscussion(input: {
@@ -451,9 +523,16 @@ export function setDiscussionResolved(id: string, resolved: boolean) {
 }
 
 export function listPosts(discussionId: string): DiscussionPost[] {
-  return readJson<DiscussionPost[]>(POST_KEY, [])
-    .filter((p) => p.discussion_id === discussionId)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  try {
+    const raw = readJson<unknown>(POST_KEY, [])
+    return asArray<unknown>(raw)
+      .map((row, i) => normalizePost(row, i))
+      .filter((p): p is DiscussionPost => p != null && p.discussion_id === discussionId)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  } catch (err) {
+    console.warn('listPosts failed:', err)
+    return []
+  }
 }
 
 export function addPost(input: {
@@ -474,7 +553,10 @@ export function addPost(input: {
     attachment_name: input.attachment_name ?? null,
     created_at: new Date().toISOString(),
   }
-  const all = readJson<DiscussionPost[]>(POST_KEY, [])
+  const rawPosts = readJson<unknown>(POST_KEY, [])
+  const all = asArray<unknown>(rawPosts)
+    .map((row, i) => normalizePost(row, i))
+    .filter((p): p is DiscussionPost => p != null)
   all.push(post)
   writeJson(POST_KEY, all)
   const discs = listDiscussions().map((d) =>
@@ -504,9 +586,30 @@ export function addPost(input: {
 }
 
 export function listAssignmentComments(code: string): AssignmentComment[] {
-  return readJson<AssignmentComment[]>(ACOMM_KEY, [])
-    .filter((c) => c.assignment_code === code)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  try {
+    const raw = readJson<unknown>(ACOMM_KEY, [])
+    return asArray<unknown>(raw)
+      .filter((c): c is AssignmentComment => {
+        if (!c || typeof c !== 'object') return false
+        const row = c as Partial<AssignmentComment>
+        return (
+          typeof row.id === 'string' &&
+          typeof row.assignment_code === 'string' &&
+          row.assignment_code === code &&
+          typeof row.author_id === 'string' &&
+          typeof row.body_md === 'string'
+        )
+      })
+      .map((c) => ({
+        ...c,
+        created_at: safeIso(c.created_at),
+        quote_md: typeof c.quote_md === 'string' ? c.quote_md : null,
+      }))
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  } catch (err) {
+    console.warn('listAssignmentComments failed:', err)
+    return []
+  }
 }
 
 export function addAssignmentComment(input: {
@@ -535,8 +638,15 @@ export function authorName(userId: string): string {
 }
 
 function ensureForumSeed() {
-  if (localStorage.getItem(SEEDED_KEY) === '1') {
-    if (readJson<Discussion[]>(DISC_KEY, []).length > 0) return
+  try {
+    if (localStorage.getItem(SEEDED_KEY) === '1') {
+      const existing = asArray<unknown>(readJson<unknown>(DISC_KEY, []))
+        .map((row, i) => normalizeDiscussion(row, i))
+        .filter((d): d is Discussion => d != null)
+      if (existing.length > 0) return
+    }
+  } catch {
+    // corrupt seed flag / storage — reseed below
   }
   const a = DEMO_USERS[0].profile.id
   const b = DEMO_USERS[1].profile.id
@@ -545,7 +655,7 @@ function ensureForumSeed() {
     {
       id: 'seed-debate-w1',
       week_number: 1,
-      title: 'Дебаты W1: маркетинг до 10 личных сделок?',
+      title: 'Дебаты недели 1: маркетинг до 10 личных сделок?',
       description_md:
         'Можно ли масштабировать маркетинг до того, как основатель лично закрыл 10 сделок? Аргументы с доказательствами.',
       kind: 'debate',
@@ -558,7 +668,8 @@ function ensureForumSeed() {
       id: 'seed-q-qualification',
       week_number: 3,
       title: 'Вопрос: какие критерии квалификации у вас сработали?',
-      description_md: 'Поделитесь 2–3 критериями go/no-go из практики недели 3.',
+      description_md:
+        'Поделитесь 2–3 критериями «идём / не идём» из практики недели 3.',
       kind: 'question',
       author_id: b,
       is_resolved: false,
@@ -568,8 +679,9 @@ function ensureForumSeed() {
     {
       id: 'seed-case-stakeholder',
       week_number: 2,
-      title: 'Кейс: чемпион говорит «да», CFO молчит',
-      description_md: 'Разберите план на 10 дней. Кто следующий разговор и с каким ask?',
+      title: 'Кейс: чемпион говорит «да», финдиректор молчит',
+      description_md:
+        'Разберите план на 10 дней. Кто следующий разговор и с какой конкретной просьбой?',
       kind: 'case',
       author_id: a,
       is_resolved: false,
@@ -579,7 +691,7 @@ function ensureForumSeed() {
     {
       id: 'seed-source-yc-sales',
       week_number: 1,
-      title: 'Источник: YC Sales Playbook — что вынесли?',
+      title: 'Источник: руководство YC по продажам — что вынесли?',
       description_md:
         'После чтения https://www.ycombinator.com/library/Mo-the-sales-playbook-for-founders — один инсайт и один следующий шаг.',
       kind: 'source',
@@ -594,7 +706,8 @@ function ensureForumSeed() {
       id: 'seed-post-1',
       discussion_id: 'seed-debate-w1',
       author_id: b,
-      body_md: 'Считаю, что без личных сделок маркетинг оптимизирует тщеславие. Сначала 10 разговоров с CTA.',
+      body_md:
+        'Считаю, что без личных сделок маркетинг оптимизирует тщеславие. Сначала 10 разговоров с явным следующим шагом.',
       parent_id: null,
       quote_md: null,
       attachment_name: null,
@@ -604,9 +717,10 @@ function ensureForumSeed() {
       id: 'seed-post-2',
       discussion_id: 'seed-debate-w1',
       author_id: a,
-      body_md: 'Согласна частично: контент можно, но KPI должен быть «разговор», не просмотры.',
+      body_md:
+        'Согласна частично: контент можно, но метрика должна быть «разговор», не просмотры.',
       parent_id: 'seed-post-1',
-      quote_md: 'Сначала 10 разговоров с CTA.',
+      quote_md: 'Сначала 10 разговоров с явным следующим шагом.',
       attachment_name: null,
       created_at: new Date(now - 86400000 * 2 + 3600000).toISOString(),
     },
@@ -614,7 +728,8 @@ function ensureForumSeed() {
       id: 'seed-post-3',
       discussion_id: 'seed-source-yc-sales',
       author_id: a,
-      body_md: 'Инсайт: следующий шаг сделки важнее идеального питча. Шаг: 5 касаний с явным CTA.',
+      body_md:
+        'Инсайт: следующий шаг сделки важнее идеального питча. Шаг: 5 касаний с явной просьбой о встрече.',
       parent_id: null,
       quote_md: null,
       attachment_name: null,
