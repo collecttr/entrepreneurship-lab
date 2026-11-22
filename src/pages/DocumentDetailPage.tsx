@@ -26,11 +26,11 @@ import {
 function aiStatusLabel(status: DocumentGroup['ai_status']): string {
   switch (status) {
     case 'pending_ai':
-      return 'ожидает AI-проверку'
+      return 'нужна ручная оценка'
     case 'manual_only':
-      return 'только ручная оценка (платный AI отключён)'
+      return 'только ручная оценка'
     case 'completed':
-      return 'AI-проверка завершена'
+      return 'проверка завершена'
     default:
       return 'нет оценки'
   }
@@ -144,7 +144,7 @@ export function DocumentDetailPage() {
         <p className="mt-2 text-xs text-slate">
           Владелец: {authorName(group.owner_id)} · обновлено {group.updated_at.slice(0, 16).replace('T', ' ')}
         </p>
-        <p className="mt-3 rounded-xl bg-amber-soft/50 px-3 py-2 text-xs text-ink">{privacyBannerText()}</p>
+        <p className="mt-3 text-xs text-slate">{privacyBannerText()}</p>
       </header>
 
       <section className="surface rounded-3xl p-5">
@@ -207,10 +207,9 @@ export function DocumentDetailPage() {
 
       <section className="surface rounded-3xl p-5 space-y-3">
         <h2 className="font-display text-xl text-ink">Оценка</h2>
-        <p className="rounded-xl bg-mist px-3 py-2 text-sm text-ink">
-          AI: <strong>{aiStatusLabel(group.ai_status)}</strong>
-          {group.ai_status === 'pending_ai' &&
-            ' — платный AI отключён, автоматическая оценка не создаётся. Поставьте балл вручную.'}
+        <p className="text-sm text-slate">
+          Статус: <strong className="text-ink">{aiStatusLabel(group.ai_status)}</strong>
+          {group.ai_status === 'pending_ai' && ' — поставьте балл вручную (автооценка не используется).'}
         </p>
         {group.manual_score != null && (
           <p className="text-sm text-slate">

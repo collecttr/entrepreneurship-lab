@@ -106,7 +106,7 @@ export function DialogueSimPanel({
         <div className="space-y-3">
           <p className="text-sm text-slate">
             {kind === 'sales'
-              ? 'Выберите тип собеседника, затем пишите по одной фразе — «клиент» отвечает по правилам (без платного AI).'
+              ? 'Выберите тип собеседника, затем пишите по одной фразе — «клиент» отвечает по правилам курса.'
               : 'Выберите тип контрагента и ведите раунд фраза за фразой. Оценка — по процессу, не «кто победил».'}
           </p>
           <fieldset className="space-y-2">
@@ -140,7 +140,7 @@ export function DialogueSimPanel({
           <button
             type="button"
             onClick={startChat}
-            className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+            className="min-h-11 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
           >
             Начать диалог
           </button>
@@ -200,14 +200,14 @@ export function DialogueSimPanel({
                   rows={2}
                   disabled={typing}
                   placeholder="Одна реплика — затем ответ клиента…"
-                  className="field mt-1.5 w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+                  className="field mt-1.5 min-h-11 w-full rounded-xl border border-ink/10 px-3 py-2.5 text-base md:text-sm"
                 />
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <button
                   type="submit"
                   disabled={typing || !draft.trim()}
-                  className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-40"
+                  className="min-h-11 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-40"
                 >
                   Отправить
                 </button>
@@ -215,7 +215,7 @@ export function DialogueSimPanel({
                   type="button"
                   onClick={endByUser}
                   disabled={typing || messages.length < 2}
-                  className="rounded-xl border border-ink/15 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-mist disabled:opacity-40"
+                  className="min-h-11 rounded-xl border border-ink/15 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-mist disabled:opacity-40"
                 >
                   Завершить и получить итог
                 </button>

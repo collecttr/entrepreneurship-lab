@@ -15,8 +15,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { subscribeCollab, unreadCount } from '@/lib/collab-store'
-import { AiDownBanner } from './AiDownBanner'
+import { getLastForumPath, subscribeCollab, unreadCount } from '@/lib/collab-store'
+import { isDemoAuth } from '@/lib/supabase'
 import { DemoBanner } from './DemoBanner'
 
 const NAV = [
@@ -26,7 +26,7 @@ const NAV = [
   { to: '/assignments', label: 'Задания', icon: FileText },
   { to: '/skills', label: 'Навыки', icon: Sparkles },
   { to: '/chat', label: 'Чат', icon: MessageSquare, chat: true },
-  { to: '/forum', label: 'Форум', icon: MessagesSquare },
+  { to: '/forum', label: 'Форум', icon: MessagesSquare, forum: true },
   { to: '/documents', label: 'Документы', icon: FileText },
   { to: '/ai', label: 'Тренажёры', icon: Bot },
   { to: '/admin', label: 'Админ', icon: Shield, adminOnly: true },
@@ -36,10 +36,14 @@ export function AppShell() {
   const { profile, signOut } = useAuth()
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
+  const [forumTo, setForumTo] = useState('/forum')
 
   useEffect(() => {
     if (!profile) return
-    const refresh = () => setUnread(unreadCount(profile.id))
+    const refresh = () => {
+      setUnread(unreadCount(profile.id))
+      setForumTo(getLastForumPath(profile.id))
+    }
     refresh()
     return subscribeCollab(refresh)
   }, [profile])
@@ -47,18 +51,17 @@ export function AppShell() {
   const items = NAV.filter((item) => !item.adminOnly || profile?.role === 'admin')
 
   return (
-    <div className="min-h-screen">
-      <DemoBanner />
-      <AiDownBanner />
-      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-7xl gap-0 md:gap-6 md:px-4 md:py-4">
+    <div className="min-h-screen overflow-x-hidden">
+      {isDemoAuth && <DemoBanner />}
+      <div className="mx-auto flex min-h-screen max-w-7xl gap-0 md:min-h-[calc(100vh-0.5rem)] md:gap-6 md:px-4 md:py-4">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-72 transform surface transition md:static md:translate-x-0 md:rounded-2xl ${
+          className={`fixed inset-y-0 left-0 z-40 w-[min(18rem,88vw)] transform surface transition md:static md:w-72 md:translate-x-0 md:rounded-2xl ${
             open ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="flex h-full flex-col p-5">
-            <div className="mb-8">
-              <p className="font-display text-[22px] leading-snug tracking-tight text-ink">
+          <div className="flex h-full flex-col p-4 md:p-5">
+            <div className="mb-6 md:mb-8">
+              <p className="font-display text-[20px] leading-snug tracking-tight text-ink md:text-[22px]">
                 Лаборатория
                 <br />
                 предпринимательства
@@ -67,28 +70,32 @@ export function AppShell() {
             </div>
 
             <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-              {items.map(({ to, label, icon: Icon, chat }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-xl px-3 py-[10px] text-[15px] ${
-                      isActive
-                        ? 'bg-teal text-on-accent shadow-sm'
-                        : 'text-ink-soft hover:bg-mist'
-                    }`
-                  }
-                >
-                  <Icon size={18} strokeWidth={1.75} />
-                  <span className="flex-1">{label}</span>
-                  {chat && unread > 0 && (
-                    <span className="rounded-full bg-mist px-1.5 py-0.5 text-[10px] font-bold text-ink border border-ink/10">
-                      {unread}
-                    </span>
-                  )}
-                </NavLink>
-              ))}
+              {items.map(({ to, label, icon: Icon, chat, forum }) => {
+                const href = forum ? forumTo : to
+                return (
+                  <NavLink
+                    key={to}
+                    to={href}
+                    end={forum ? href === '/forum' : undefined}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] ${
+                        isActive
+                          ? 'bg-teal text-on-accent shadow-sm'
+                          : 'text-ink-soft hover:bg-mist'
+                      }`
+                    }
+                  >
+                    <Icon size={18} strokeWidth={1.75} />
+                    <span className="flex-1">{label}</span>
+                    {chat && unread > 0 && (
+                      <span className="rounded-full border border-ink/10 bg-mist px-1.5 py-0.5 text-[10px] font-bold text-ink">
+                        {unread}
+                      </span>
+                    )}
+                  </NavLink>
+                )
+              })}
             </nav>
 
             <div className="mt-4 border-t border-ink/10 pt-4">
@@ -102,7 +109,7 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={() => void signOut()}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate hover:bg-mist"
+                className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate hover:bg-mist"
               >
                 <LogOut size={16} />
                 Выйти
@@ -121,19 +128,19 @@ export function AppShell() {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center justify-between px-4 py-3 md:hidden">
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-ink/5 bg-paper/90 px-3 py-2 backdrop-blur-md md:hidden">
             <button
               type="button"
-              className="rounded-xl surface p-2"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl surface"
               onClick={() => setOpen(true)}
               aria-label="Открыть меню"
             >
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <p className="font-display text-lg">Лаб. предпринимательства</p>
-            <span className="w-9" />
+            <p className="truncate px-2 font-display text-base">Лаб. предпринимательства</p>
+            <span className="min-w-11" />
           </header>
-          <main className="flex-1 px-4 pb-8 md:px-0 md:pb-4">
+          <main className="flex-1 px-3 pb-8 pt-3 md:px-0 md:pb-4 md:pt-0">
             <Outlet />
           </main>
         </div>
