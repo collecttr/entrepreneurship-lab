@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "icons": "node scripts/generate-pwa-icons.mjs"
+    "icons": "node scripts/generate-pwa-icons.mjs",
+    "test:claims": "node scripts/test-claim-sources.mjs && npx --yes vite-node src/ai/local-evidence.selftest.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",

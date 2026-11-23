@@ -57,8 +57,36 @@ export function ExaminerResultPanel({
         ))}
       </ul>
 
-      {result.strengths.length > 0 && (
+      {result.claim_rows && result.claim_rows.length > 0 && (
         <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 2 }}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal">
+            Тезисы vs источники
+          </p>
+          <ul className="mt-2 space-y-2">
+            {result.claim_rows.map((c, i) => (
+              <li key={`${c.status_ru}-${i}`} className="rounded-xl bg-paper/80 px-3 py-2 text-sm text-ink">
+                <span
+                  className={
+                    c.status_ru === 'поддержка'
+                      ? 'font-semibold text-teal-deep'
+                      : c.status_ru === 'противоречие'
+                        ? 'font-semibold text-danger'
+                        : 'font-semibold text-slate'
+                  }
+                >
+                  {c.status_ru}
+                </span>
+                <span className="text-slate"> · </span>
+                <span>{c.excerpt}</span>
+                <p className="mt-1 text-xs text-slate">{c.note_ru}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {result.strengths.length > 0 && (
+        <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 3 }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">Сильные стороны</p>
           <ul className="mt-1 space-y-1">
             {result.strengths.map((g, i) => (
@@ -78,7 +106,7 @@ export function ExaminerResultPanel({
       )}
 
       {result.gaps.length > 0 && (
-        <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 3 }}>
+        <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 4 }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">Проблемы</p>
           <ul className="mt-1 space-y-1">
             {result.gaps.map((g, i) => (
@@ -98,7 +126,7 @@ export function ExaminerResultPanel({
       )}
 
       {result.next_actions.length > 0 && (
-        <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 4 }}>
+        <div className="result-item" style={{ ['--i' as string]: result.rubrics.length + 5 }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">Что потренировать</p>
           <ul className="mt-1 space-y-1">
             {result.next_actions.map((g, i) => (
@@ -119,13 +147,13 @@ export function ExaminerResultPanel({
 
       <div
         className="result-item rounded-2xl bg-paper/80 p-3 text-sm whitespace-pre-wrap text-slate"
-        style={{ ['--i' as string]: result.rubrics.length + 5 }}
+        style={{ ['--i' as string]: result.rubrics.length + 6 }}
       >
         {result.reply_md}
       </div>
-      <p className="result-item text-xs text-slate" style={{ ['--i' as string]: result.rubrics.length + 6 }}>
-        Балл обновляет карту навыков. Локальный разбор на устройстве — не ChatGPT; платный API не
-        вызывался.
+      <p className="result-item text-xs text-slate" style={{ ['--i' as string]: result.rubrics.length + 7 }}>
+        {result.honesty_note_ru ??
+          'Балл обновляет карту навыков. Локальный разбор на устройстве — не ChatGPT; платный API не вызывался.'}
       </p>
     </section>
   )
