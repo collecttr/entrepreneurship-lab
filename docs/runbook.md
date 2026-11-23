@@ -93,7 +93,15 @@ npm run dev -- --host 127.0.0.1 --port 5173
 
 ### 2.3c. Сессия (~24ч)
 
-Клиент: `persistSession` + `autoRefreshToken` + `localStorage` (`elab-auth`). Access JWT ~1ч, обновляется автоматически. Срок refresh-токена — в Supabase Dashboard → Authentication → Settings (по умолчанию обычно **больше** 24ч; cookieOptions на plain JS-клиенте нет).
+Клиент: `persistSession` + `autoRefreshToken` + безопасный `localStorage` (`elab-auth`). Access JWT ~1ч, обновляется автоматически. Срок refresh-токена — в Supabase Dashboard → Authentication → Settings (по умолчанию обычно **больше** 24ч; cookieOptions на plain JS-клиенте нет).
+
+Auth boot fail-open ≈ **2с**: если `getSession` / сеть зависает (Safari / PWA / VPN), всегда показывается форма входа. Аварийный URL: `/login?skip_restore=1`.
+
+### 2.3d. iPhone / «На экран Домой» — зависает загрузка
+
+1. Safari → **aA** / настройки сайта → **Очистить данные сайта** для `entrepreneurship-lab.vercel.app` (или Настройки → Safari → Дополнения → данные сайтов).
+2. Удалите иконку с Домой → откройте сайт **в Safari** → войдите → снова **Поделиться → На экран «Домой»**.
+3. Если снова крутится: откройте `https://entrepreneurship-lab.vercel.app/login?skip_restore=1` и войдите заново.
 
 ### 2.4. Storage (private documents)
 
