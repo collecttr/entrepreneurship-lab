@@ -37,8 +37,8 @@ export function EntryToasts() {
       {toasts.map((toast, index) => (
         <div
           key={toast.id}
-          className="pointer-events-auto w-full animate-[elab-toast-in_320ms_var(--ease-apple)] rounded-2xl border border-ink/10 bg-paper shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
-          style={{ animationDelay: `${index * 60}ms` }}
+          className="toast-enter pointer-events-auto w-full rounded-2xl border border-ink/10 bg-paper/95 shadow-[0_12px_40px_rgba(60,70,90,0.14)] backdrop-blur-md"
+          style={{ animationDelay: `${index * 70}ms` }}
         >
           <div className="flex items-start gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">

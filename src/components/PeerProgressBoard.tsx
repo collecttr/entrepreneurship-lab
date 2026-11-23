@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import {
   COURSE_START_DATE,
   TOTAL_COURSE_WEEKS,
@@ -19,12 +19,15 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
-function LearnerColumn({ card }: { card: LearnerProgressCard }) {
+function LearnerColumn({ card, index }: { card: LearnerProgressCard; index: number }) {
   return (
     <div
-      className={`rounded-2xl px-4 py-4 ${
-        card.is_you ? 'bg-ink text-on-accent' : 'bg-mist/80 text-ink'
+      className={`board-col rounded-2xl px-4 py-4 ${
+        card.is_you
+          ? 'bg-gradient-to-br from-[#4a5560] to-[#3a424c] text-on-accent shadow-[0_8px_24px_rgba(60,70,90,0.18)]'
+          : 'bg-mist/90 text-ink ring-1 ring-ink/5'
       }`}
+      style={{ ['--i' as string]: index } as CSSProperties}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h3 className={`font-display text-2xl tracking-tight ${card.is_you ? 'text-on-accent' : 'text-ink'}`}>
@@ -107,7 +110,10 @@ export function PeerProgressBoard({ profile }: { profile: Profile }) {
   const deadline = weekDeadlineDate(calendarWeek, COURSE_START_DATE)
 
   return (
-    <section className="surface rounded-3xl p-5 md:p-6" aria-labelledby="peer-progress-heading">
+    <section
+      className="board-enter surface rounded-3xl p-5 md:p-6"
+      aria-labelledby="peer-progress-heading"
+    >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">Два участника</p>
@@ -127,8 +133,8 @@ export function PeerProgressBoard({ profile }: { profile: Profile }) {
         <p className="mt-5 text-sm text-slate">Считаем прогресс…</p>
       ) : (
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {cards.map((card) => (
-            <LearnerColumn key={card.key} card={card} />
+          {cards.map((card, index) => (
+            <LearnerColumn key={card.key} card={card} index={index} />
           ))}
         </div>
       )}
