@@ -19,6 +19,7 @@ import { getLastForumPath, subscribeCollab, unreadCount } from '@/lib/collab-sto
 import { canonicalDisplayName } from '@/lib/learners'
 import { isDemoAuth } from '@/lib/supabase'
 import { DemoBanner } from './DemoBanner'
+import { UiPrefsSync } from './UiPrefsSync'
 
 /** Entry toasts pull peer-progress + curriculum — defer off the shell critical path. */
 const EntryToasts = lazy(() =>
@@ -59,6 +60,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <UiPrefsSync />
       {isDemoAuth && <DemoBanner />}
       <div className="mx-auto flex min-h-screen max-w-7xl gap-0 md:min-h-[calc(100vh-0.5rem)] md:gap-6 md:px-4 md:py-4">
         <aside

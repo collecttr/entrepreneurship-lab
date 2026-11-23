@@ -5,6 +5,20 @@ import { useAuth } from '@/context/AuthContext'
 import { DEMO_USERS } from '@/lib/demo-data'
 import { shouldSkipAuthRestore } from '@/lib/safe-storage'
 import { isDemoAuth } from '@/lib/supabase'
+import { getLastPath, isRestorablePath, pullAndMergeUiPrefs } from '@/lib/ui-prefs-store'
+
+async function resolvePostLoginPath(userId: string | undefined, from: string): Promise<string> {
+  const explicit = from !== '/dashboard' && isRestorablePath(from) ? from : null
+  if (explicit) return explicit
+  if (!userId) return from || '/dashboard'
+  try {
+    await pullAndMergeUiPrefs(userId)
+  } catch {
+    // local cache only
+  }
+  const last = getLastPath(userId)
+  return last && isRestorablePath(last) ? last : from || '/dashboard'
+}
 
 export function LoginPage() {
   const { profile, loading, signIn, isDemo, authError, hasSession, retryProfile } = useAuth()
@@ -25,7 +39,9 @@ export function LoginPage() {
 
   // skip_restore: always show the form even if a stale session flag is mid-flight
   if (!loading && profile && !skipRestore) {
-    return <Navigate to={from} replace />
+    const target =
+      from !== '/dashboard' && isRestorablePath(from) ? from : getLastPath(profile.id) ?? from
+    return <Navigate to={target} replace />
   }
 
   // Session restored but profile stuck — stay here with retry, do not look "logged out"
@@ -54,12 +70,14 @@ export function LoginPage() {
     setError(null)
     setSubmitting(true)
     const result = await signIn(email, password)
-    setSubmitting(false)
     if (result.error) {
+      setSubmitting(false)
       setError(result.error)
       return
     }
-    navigate(from, { replace: true })
+    const target = await resolvePostLoginPath(result.userId, from)
+    setSubmitting(false)
+    navigate(target, { replace: true })
   }
 
   return (
