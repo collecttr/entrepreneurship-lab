@@ -124,7 +124,8 @@ export function ExaminerResultPanel({
         {result.reply_md}
       </div>
       <p className="result-item text-xs text-slate" style={{ ['--i' as string]: result.rubrics.length + 6 }}>
-        Балл обновляет карту навыков (скользящая оценка). Платный AI не вызывался.
+        Балл обновляет карту навыков. Локальный разбор на устройстве — не ChatGPT; платный API не
+        вызывался.
       </p>
     </section>
   )

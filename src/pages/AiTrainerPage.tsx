@@ -14,6 +14,7 @@ import {
   examineWriting,
   type ExaminerResult,
 } from '@/ai/examiners'
+import { fetchWeekSourceSnippets } from '@/ai/local-evidence'
 import { DialogueSimPanel } from '@/components/DialogueSimPanel'
 import { ExaminerResultPanel } from '@/components/ExaminerResultPanel'
 import { useAuth } from '@/context/AuthContext'
@@ -65,6 +66,7 @@ export function AiTrainerPage() {
   const [recommendation, setRecommendation] = useState('')
   const [docId, setDocId] = useState('')
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('dialogue')
+  const [busy, setBusy] = useState(false)
 
   const docs = useMemo(
     () => (profile ? listDocumentGroups().filter((g) => g.owner_id === profile.id) : []),
@@ -77,55 +79,73 @@ export function AiTrainerPage() {
   const slug = trainerSlug as TrainerSlug
   const usesDialogue = slug === 'sales' || slug === 'negotiation'
 
-  function run(e: FormEvent) {
+  async function run(e: FormEvent) {
     e.preventDefault()
     setResult(null)
-    let r: ExaminerResult
-    switch (slug) {
-      case 'sales':
-        r = examineSales(profile!.id, { clientType, transcript: text, weekNumber: week?.week_number })
-        break
-      case 'negotiation':
-        r = examineNegotiation(profile!.id, {
-          goal,
-          reservation,
-          batna,
-          interests,
-          concessions,
-          roundNotes: text,
-          weekNumber: week?.week_number,
-        })
-        break
-      case 'presentation':
-        r = examinePresentation(profile!.id, { script: text, weekNumber: week?.week_number })
-        break
-      case 'socratic':
-        r = examineSocratic(profile!.id, { answer: text, weekNumber: week?.week_number })
-        break
-      case 'business-case':
-        r = examineBusinessCase(profile!.id, {
-          diagnosis,
-          options,
-          recommendation,
-          weekNumber: week?.week_number,
-        })
-        break
-      case 'writing-evaluator':
-        r = examineWriting(profile!.id, { text, documentGroupId: docId || undefined })
-        break
-      case 'voice-practice':
-        r = examineVoice(profile!.id, { transcript: text })
-        break
-      case 'skill-map':
-        r = examineSkillMap(profile!.id)
-        break
-      case 'adaptive':
-        r = examineAdaptive(profile!.id, { notes: text })
-        break
-      default:
-        return
+    setBusy(true)
+    try {
+      const needsGrounding = slug === 'socratic' || slug === 'writing-evaluator'
+      const pageSnippets =
+        needsGrounding && week ? await fetchWeekSourceSnippets(week, 3) : undefined
+
+      let r: ExaminerResult
+      switch (slug) {
+        case 'sales':
+          r = examineSales(profile!.id, { clientType, transcript: text, weekNumber: week?.week_number })
+          break
+        case 'negotiation':
+          r = examineNegotiation(profile!.id, {
+            goal,
+            reservation,
+            batna,
+            interests,
+            concessions,
+            roundNotes: text,
+            weekNumber: week?.week_number,
+          })
+          break
+        case 'presentation':
+          r = examinePresentation(profile!.id, { script: text, weekNumber: week?.week_number })
+          break
+        case 'socratic':
+          r = examineSocratic(profile!.id, {
+            answer: text,
+            weekNumber: week?.week_number,
+            pageSnippets,
+          })
+          break
+        case 'business-case':
+          r = examineBusinessCase(profile!.id, {
+            diagnosis,
+            options,
+            recommendation,
+            weekNumber: week?.week_number,
+          })
+          break
+        case 'writing-evaluator':
+          r = examineWriting(profile!.id, {
+            text,
+            documentGroupId: docId || undefined,
+            weekNumber: week?.week_number,
+            pageSnippets,
+          })
+          break
+        case 'voice-practice':
+          r = examineVoice(profile!.id, { transcript: text })
+          break
+        case 'skill-map':
+          r = examineSkillMap(profile!.id)
+          break
+        case 'adaptive':
+          r = examineAdaptive(profile!.id, { notes: text })
+          break
+        default:
+          return
+      }
+      setResult(r)
+    } finally {
+      setBusy(false)
     }
-    setResult(r)
   }
 
   const adaptivePreview = slug === 'adaptive' ? buildAdaptiveExercises(profile.id) : []
@@ -317,9 +337,10 @@ export function AiTrainerPage() {
               </Field>
               <button
                 type="submit"
-                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+                disabled={busy}
+                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-60"
               >
-                Проверить
+                {busy ? 'Сверяю…' : 'Проверить'}
               </button>
             </form>
           )}
@@ -342,9 +363,10 @@ export function AiTrainerPage() {
               </Field>
               <button
                 type="submit"
-                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+                disabled={busy}
+                className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-60"
               >
-                Проверить
+                {busy ? 'Сверяю…' : 'Проверить'}
               </button>
             </form>
           )}
@@ -512,9 +534,10 @@ export function AiTrainerPage() {
 
           <button
             type="submit"
-            className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+            disabled={busy}
+            className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-60"
           >
-            {slug === 'skill-map' ? 'Разобрать карту' : 'Проверить'}
+            {busy ? 'Сверяю с источниками…' : slug === 'skill-map' ? 'Разобрать карту' : 'Проверить'}
           </button>
         </form>
       )}
