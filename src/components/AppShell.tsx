@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   BookOpen,
   Bot,
@@ -36,6 +36,7 @@ const NAV = [
 
 export function AppShell() {
   const { profile, signOut } = useAuth()
+  const location = useLocation()
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   const [forumTo, setForumTo] = useState('/forum')
@@ -145,7 +146,9 @@ export function AppShell() {
             <span className="min-w-11" />
           </header>
           <main className="flex-1 px-3 pb-8 pt-3 md:px-0 md:pb-4 md:pt-0">
-            <Outlet />
+            <div key={location.pathname} className="page-enter">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

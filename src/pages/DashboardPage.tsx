@@ -74,7 +74,7 @@ export function DashboardPage() {
             className="pointer-events-none absolute inset-0 opacity-90"
             style={{
               background:
-                'linear-gradient(120deg, rgba(0,0,0,0.06) 0%, transparent 45%), linear-gradient(220deg, rgba(0,0,0,0.03) 0%, transparent 40%)',
+                'linear-gradient(120deg, rgba(100,110,130,0.10) 0%, transparent 48%), linear-gradient(220deg, rgba(140,150,165,0.08) 0%, transparent 42%)',
             }}
           />
           <div className="relative">
