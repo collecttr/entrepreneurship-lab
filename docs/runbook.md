@@ -161,14 +161,13 @@ node scripts/bootstrap-users.mjs
 | Netlify | `npm run build` | `dist` | `/* /index.html 200` |
 | Render Static | `npm run build` | `dist` | rewrite → `/index.html` |
 
-## 4. AI / spend lock
+## 4. AI / spend lock · эксперт (LLM)
 
-- По умолчанию spend lock **включён** → ответы от `src/ai/examiners.ts` (`mode: local_examiner`).
-- Доклад/разбор (`writing-evaluator`, `socratic`, `presentation`, `business-case`) сверяют **тезисы** ученика с карточками источников недели + методичкой (`src/ai/local-evidence.ts`). Статусы: **поддержка / противоречие / недостаточно**. Опциональный `fetch` публичных URL; при CORS/таймауте — только метаданные.
-- Это **не** ChatGPT и не проверка «всех фактов интернета». Платный API не вызывается.
-- Глобальный баннер в shell / `/ai` говорит об этом прямо.
-- Dashboard / чат / документы / навыки / аттестации работают при AI off.
-- Внешний LLM: выключить lock в env **и** server secrets (не `VITE_*` ключ провайдера).
+- По умолчанию spend lock **включён** → платный AI заблокирован. Локальные ответы: `src/ai/examiners.ts` (`mode: local_examiner`).
+- Доклад/разбор (`writing-evaluator`, `socratic`, `presentation`, `business-case`) сверяют **тезисы** с источниками недели (`src/ai/local-evidence.ts`): **поддержка / противоречие / недостаточно**.
+- **Экспертная проверка** (опционально): Vercel function `api/expert-exam.mjs` — free chain Gemini → Groq → OpenRouter. UI: «локально» vs «эксперт (LLM)». Ключи **только** серверные (`GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`), не `VITE_*` и не anon Supabase.
+- Клиентские флаги после настройки ключей: `VITE_AI_LIVE_CONFIGURED=true`, `VITE_AI_EXPERT_ENABLED=true`. Лимиты: `AI_MONTHLY_REQUEST_CAP`, `AI_MONTHLY_TOKEN_BUDGET`.
+- Полная инструкция для Петрa: store `docs/expert-exam-keys.md` (и обновление honesty-дока).
 
 ## 5. QA
 

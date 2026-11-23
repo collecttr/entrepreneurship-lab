@@ -114,15 +114,19 @@ export function AdminPage() {
       </section>
 
       <section className="surface rounded-3xl p-5">
-        <h2 className="font-display text-xl">Блокировка платного AI</h2>
+        <h2 className="font-display text-xl">Блокировка платного AI · эксперт free-tier</h2>
         <p className="mt-2 text-sm text-slate">
-          Сейчас:{' '}
+          Spend lock:{' '}
           <strong className="text-ink">
             {isSpendLockOn() ? 'ON (платный AI заблокирован)' : 'OFF'}
           </strong>
-          . Локальные экзаменаторы работают всегда. Снятие блокировки — только через env (
-          `VITE_AI_SPEND_LOCK=false` + `VITE_AI_LIVE_UNLOCK=true`) и серверные секреты; ключ провайдера
-          не в клиенте.
+          . Локальные экзаменаторы работают всегда. Эксперт (Gemini/Groq/OpenRouter free) идёт через{' '}
+          <code className="text-xs">/api/expert-exam</code> — ключи только серверные (
+          <code className="text-xs">GEMINI_API_KEY</code> и т.д.), в браузере лишь флаги{' '}
+          <code className="text-xs">VITE_AI_LIVE_CONFIGURED</code> +{' '}
+          <code className="text-xs">VITE_AI_EXPERT_ENABLED</code>. Месячные лимиты:{' '}
+          <code className="text-xs">AI_MONTHLY_REQUEST_CAP</code>,{' '}
+          <code className="text-xs">AI_MONTHLY_TOKEN_BUDGET</code>.
         </p>
       </section>
 

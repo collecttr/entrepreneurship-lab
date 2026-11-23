@@ -18,7 +18,14 @@ import { fetchWeekSourceSnippets } from '@/ai/local-evidence'
 import { DialogueSimPanel } from '@/components/DialogueSimPanel'
 import { ExaminerResultPanel } from '@/components/ExaminerResultPanel'
 import { useAuth } from '@/context/AuthContext'
-import { TRAINERS, examinerBanner, type TrainerSlug } from '@/lib/ai-config'
+import {
+  TRAINERS,
+  examinerBanner,
+  isExpertExamConfigured,
+  trainerSupportsExpert,
+  type TrainerSlug,
+} from '@/lib/ai-config'
+import { requestExpertExam } from '@/lib/expert-exam-client'
 import { listDocumentGroups } from '@/lib/document-store'
 import { getUnlockedWeek } from '@/lib/progress-store'
 
@@ -67,6 +74,8 @@ export function AiTrainerPage() {
   const [docId, setDocId] = useState('')
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('dialogue')
   const [busy, setBusy] = useState(false)
+  const [expertBusy, setExpertBusy] = useState(false)
+  const [expertError, setExpertError] = useState<string | null>(null)
 
   const docs = useMemo(
     () => (profile ? listDocumentGroups().filter((g) => g.owner_id === profile.id) : []),
@@ -78,10 +87,44 @@ export function AiTrainerPage() {
 
   const slug = trainerSlug as TrainerSlug
   const usesDialogue = slug === 'sales' || slug === 'negotiation'
+  const canExpert = trainerSupportsExpert(slug) && isExpertExamConfigured()
+
+  function learnerPayloadForExpert(): { text: string; extra?: Record<string, string> } {
+    if (slug === 'business-case') {
+      return {
+        text: `Диагноз:\n${diagnosis}\n\nВарианты:\n${options}\n\nРекомендация:\n${recommendation}`,
+        extra: { diagnosis, options, recommendation },
+      }
+    }
+    return { text }
+  }
+
+  async function runExpert() {
+    setExpertError(null)
+    const payload = learnerPayloadForExpert()
+    setExpertBusy(true)
+    try {
+      const outcome = await requestExpertExam({
+        userId: profile!.id,
+        trainerSlug: slug,
+        learnerText: payload.text,
+        weekNumber: week?.week_number,
+        extraFields: payload.extra,
+      })
+      if (!outcome.ok) {
+        setExpertError(outcome.message_ru)
+        return
+      }
+      setResult(outcome.result)
+    } finally {
+      setExpertBusy(false)
+    }
+  }
 
   async function run(e: FormEvent) {
     e.preventDefault()
     setResult(null)
+    setExpertError(null)
     setBusy(true)
     try {
       const needsGrounding =
@@ -235,11 +278,17 @@ export function AiTrainerPage() {
           ← К списку тренажёров
         </Link>
         <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-teal">
-          локальная проверка
+          {canExpert ? 'локально · эксперт (LLM)' : 'локально'}
         </p>
         <h1 className="mt-1 font-display text-2xl text-ink md:text-3xl">{meta.title_ru}</h1>
         <p className="mt-2 text-sm text-slate">{meta.blurb_ru}</p>
         <p className="mt-3 text-xs text-slate">{banner.text}</p>
+        {meta.supports_expert && !canExpert && (
+          <p className="mt-2 text-xs text-slate">
+            Экспертная проверка (free LLM) появится после настройки ключей на Vercel — до тех пор
+            работает только локальный гейт.
+          </p>
+        )}
         {week && (
           <div className="mt-3 rounded-2xl bg-paper/80 p-3 text-xs text-slate">
             <p className="font-semibold text-ink">
@@ -541,13 +590,37 @@ export function AiTrainerPage() {
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={busy}
-            className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-60"
-          >
-            {busy ? 'Сверяю с источниками…' : slug === 'skill-map' ? 'Разобрать карту' : 'Проверить'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="submit"
+              disabled={busy || expertBusy}
+              className="rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-60"
+            >
+              {busy
+                ? 'Сверяю с источниками…'
+                : slug === 'skill-map'
+                  ? 'Разобрать карту'
+                  : 'Проверить локально'}
+            </button>
+            {canExpert && (
+              <button
+                type="button"
+                disabled={busy || expertBusy}
+                onClick={() => void runExpert()}
+                className="rounded-xl border border-ink/15 bg-paper px-4 py-2.5 text-sm font-semibold text-ink hover:bg-mist disabled:opacity-60"
+              >
+                {expertBusy ? 'Эксперт думает…' : 'Экспертная проверка'}
+              </button>
+            )}
+          </div>
+          {canExpert && (
+            <p className="text-xs text-slate">
+              «Локально» — быстрый гейт и сверка с источниками недели. «Экспертная проверка» —
+              free-tier LLM-ментор (продажи / переговоры / предпринимательство), русский разбор, с
+              месячным лимитом.
+            </p>
+          )}
+          {expertError && <p className="text-sm text-danger">{expertError}</p>}
         </form>
       )}
 

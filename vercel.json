@@ -1,5 +1,12 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/expert-exam.mjs": {
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/",
