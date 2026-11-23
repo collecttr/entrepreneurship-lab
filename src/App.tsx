@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/context/AuthContext'
@@ -26,6 +27,13 @@ import { NotFoundPage } from '@/pages/stubs'
 
 const queryClient = new QueryClient()
 
+function MarkAppReady() {
+  useEffect(() => {
+    document.getElementById('root')?.setAttribute('data-elab-ready', '1')
+  }, [])
+  return null
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,6 +43,7 @@ export default function App() {
           hint="Произошла ошибка интерфейса. Нажмите «Повторить». Если не поможет — обновите страницу."
         >
           <BrowserRouter>
+            <MarkAppReady />
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route element={<ProtectedRoute />}>

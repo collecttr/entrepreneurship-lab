@@ -11,13 +11,17 @@ import {
 import { DEMO_USERS } from '@/lib/demo-data'
 import { canonicalDisplayName, learnerByEmail } from '@/lib/learners'
 import { ensureCleanCourseStart, refreshUnlockedWeekFromSupabase } from '@/lib/progress-store'
+import {
+  clearSkipAuthRestore,
+  shouldSkipAuthRestore,
+} from '@/lib/safe-storage'
 import { isDemoAuth, supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
 const DEMO_SESSION_KEY = 'elab_demo_session'
 const PROFILE_RETRY_DELAYS_MS = [0, 400, 1000]
-/** Never block first paint longer than this — Russia/VPN / blocked Supabase Auth. */
-const AUTH_BOOT_TIMEOUT_MS = 4000
+/** Hard fail-open: never leave ProtectedRoute spinning longer than this. */
+const AUTH_BOOT_TIMEOUT_MS = 2000
 const SLOW_AUTH_HINT =
   'Сеть медленная или Auth недоступен. Форма входа доступна — профиль подтянется в фоне.'
 
@@ -186,7 +190,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null)
   const [hasSession, setHasSession] = useState(false)
   const profileRef = useRef<Profile | null>(null)
+  const loadingRef = useRef(true)
   profileRef.current = profile
+
+  const finishBoot = useCallback((opts?: { slow?: boolean }) => {
+    if (!loadingRef.current) {
+      if (opts?.slow) {
+        setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
+      }
+      return
+    }
+    loadingRef.current = false
+    setLoading(false)
+    if (opts?.slow) {
+      setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
+    }
+  }, [])
 
   const applyProfileLoad = useCallback(async (userId: string, email: string) => {
     const result = await loadProfileWithRetry(userId, email)
@@ -205,6 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const retryProfile = useCallback(async () => {
     if (!supabase || isDemoAuth) return
+    clearSkipAuthRestore()
     setAuthError(null)
     const timed = await withTimeout(supabase.auth.getSession(), AUTH_BOOT_TIMEOUT_MS)
     const user = timed?.data.session?.user
@@ -222,13 +242,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     let unsub: (() => void) | undefined
 
-    function finishBoot(opts?: { slow?: boolean }) {
-      if (cancelled) return
-      setLoading(false)
-      if (opts?.slow) {
-        setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
-      }
-    }
+    // Absolute fail-open even if init never reaches finally (Safari timer quirks).
+    const hardTimer = window.setTimeout(() => {
+      if (!cancelled) finishBoot({ slow: true })
+    }, AUTH_BOOT_TIMEOUT_MS)
 
     async function init() {
       // Live course restart: clear stale local % / fake skill EMA (sync, never network).
@@ -253,13 +270,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const bootTimer = window.setTimeout(() => finishBoot({ slow: true }), AUTH_BOOT_TIMEOUT_MS)
+      const skipRestore = shouldSkipAuthRestore()
+      if (skipRestore) {
+        setAuthError(
+          'Восстановление сессии пропущено (?skip_restore=1). Войдите заново или нажмите «Повторить».',
+        )
+        finishBoot()
+        // Still subscribe for post-login events; do not await getSession.
+      }
 
       try {
-        const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-          // Logout only on explicit sign-out / real auth invalidation
+        // Sync callback only — async onAuthStateChange can deadlock GoTrue's auth lock
+        // with getSession() on Safari (intermittent infinite loading).
+        const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+          if (cancelled) return
+
           if (event === 'SIGNED_OUT' || !session?.user) {
-            // Ignore empty INITIAL_SESSION while getSession is still racing
             if (event === 'INITIAL_SESSION' && !session) return
             if (event === 'SIGNED_OUT') {
               setHasSession(false)
@@ -269,38 +295,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return
           }
 
+          if (event === 'INITIAL_SESSION' && skipRestore) {
+            // Intentionally ignore stored session so login UI is never trapped.
+            return
+          }
+
           setHasSession(true)
 
           if (event === 'TOKEN_REFRESHED' && profileRef.current) {
             void loadProfileOnce(session.user.id, session.user.email ?? '').then((r) => {
+              if (cancelled) return
               if (r.ok) {
                 setProfile(r.profile)
                 setAuthError(null)
               }
-              // On failure: keep existing profile — do not clear
             })
             return
           }
 
           const before = profileRef.current
-          await applyProfileLoad(session.user.id, session.user.email ?? '')
-          // If load failed and we cleared nothing in applyProfileLoad on ok:false — restore guard
-          if (!profileRef.current && before) {
-            setProfile(before)
-          }
+          void applyProfileLoad(session.user.id, session.user.email ?? '').then(() => {
+            if (cancelled) return
+            if (!profileRef.current && before) {
+              setProfile(before)
+            }
+          })
         })
         unsub = () => sub.subscription.unsubscribe()
 
-        const sessionResult = await withTimeout(supabase.auth.getSession(), AUTH_BOOT_TIMEOUT_MS)
-        if (sessionResult?.data.session?.user && !cancelled) {
-          setHasSession(true)
-          // Profile in background — never block first paint / login form
-          void applyProfileLoad(
-            sessionResult.data.session.user.id,
-            sessionResult.data.session.user.email ?? '',
+        if (!skipRestore) {
+          const sessionResult = await withTimeout(
+            supabase.auth.getSession(),
+            AUTH_BOOT_TIMEOUT_MS,
           )
-        } else if (!sessionResult && !cancelled) {
-          setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
+          if (sessionResult?.data.session?.user && !cancelled) {
+            setHasSession(true)
+            // Profile in background — never block first paint / login form
+            void applyProfileLoad(
+              sessionResult.data.session.user.id,
+              sessionResult.data.session.user.email ?? '',
+            )
+          } else if (!sessionResult && !cancelled) {
+            setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
+          }
         }
 
         void refreshUnlockedWeekFromSupabase()
@@ -308,21 +345,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn('auth boot failed:', err)
         if (!cancelled) setAuthError((prev) => prev ?? SLOW_AUTH_HINT)
       } finally {
-        window.clearTimeout(bootTimer)
-        finishBoot()
+        if (!cancelled) finishBoot()
       }
     }
 
     void init()
+
+    // bfcache / PWA resume: if we somehow stayed on loading, force open.
+    const onPageShow = (ev: PageTransitionEvent) => {
+      if (ev.persisted && loadingRef.current) {
+        finishBoot({ slow: true })
+      }
+    }
+    window.addEventListener('pageshow', onPageShow)
+
     return () => {
       cancelled = true
+      window.clearTimeout(hardTimer)
+      window.removeEventListener('pageshow', onPageShow)
       unsub?.()
     }
-  }, [applyProfileLoad])
+  }, [applyProfileLoad, finishBoot])
 
   const signIn = useCallback(
     async (email: string, password: string) => {
       const normalized = email.trim().toLowerCase()
+      clearSkipAuthRestore()
 
       if (isDemoAuth) {
         const match = DEMO_USERS.find(

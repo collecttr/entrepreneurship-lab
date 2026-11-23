@@ -18,30 +18,73 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Лаборатория" />
     <meta name="application-name" content="Лаборатория" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-    <link rel="manifest" href="/site.webmanifest?v=12" />
+    <link rel="manifest" href="/site.webmanifest?v=13" />
     <title>Лаборатория предпринимательства</title>
+    <style>
+      #elab-boot {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #5c5c66;
+        background: #ebebef;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      #elab-boot a {
+        color: #1a1a1a;
+        font-weight: 600;
+        text-decoration: underline;
+      }
+      #elab-boot-fallback {
+        display: none;
+        font-size: 0.9rem;
+        max-width: 22rem;
+        line-height: 1.4;
+      }
+    </style>
   </head>
   <body>
     <div id="root">
-      <p
-        style="
-          margin: 0;
-          min-height: 100dvh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: system-ui, sans-serif;
-          color: #5c5c66;
-          background: #ebebef;
-          padding: 1.5rem;
-          text-align: center;
-        "
-      >
-        Загрузка Лаборатории…
-      </p>
+      <div id="elab-boot">
+        <p style="margin: 0">Загрузка Лаборатории…</p>
+        <p id="elab-boot-fallback">
+          Долго нет ответа.
+          <a href="/login?skip_restore=1">Открыть вход</a>
+          · при зависании на iPhone очистите данные сайта и заново «На экран Домой».
+        </p>
+      </div>
     </div>
+    <script>
+      /* Fail-open if the JS bundle never paints (slow parse / network from RU). */
+      (function () {
+        var shown = false
+        function showFallback() {
+          if (shown) return
+          var root = document.getElementById('root')
+          if (!root || root.getAttribute('data-elab-ready') === '1') return
+          if (root.querySelector('[data-reactroot], [data-react-root]') || root.children.length > 1) {
+            return
+          }
+          var boot = document.getElementById('elab-boot')
+          if (!boot || !root.contains(boot)) return
+          var fb = document.getElementById('elab-boot-fallback')
+          if (fb) {
+            fb.style.display = 'block'
+            shown = true
+          }
+        }
+        setTimeout(showFallback, 2000)
+        setTimeout(showFallback, 5000)
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

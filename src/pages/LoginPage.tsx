@@ -1,27 +1,35 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { DemoBanner } from '@/components/DemoBanner'
 import { useAuth } from '@/context/AuthContext'
 import { DEMO_USERS } from '@/lib/demo-data'
+import { shouldSkipAuthRestore } from '@/lib/safe-storage'
 import { isDemoAuth } from '@/lib/supabase'
 
 export function LoginPage() {
   const { profile, loading, signIn, isDemo, authError, hasSession, retryProfile } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
+  const search = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const fromQuery = search.get('from')
+  const from =
+    (fromQuery && fromQuery.startsWith('/') ? fromQuery : null) ??
+    (location.state as { from?: string } | null)?.from ??
+    '/dashboard'
+  const skipRestore = shouldSkipAuthRestore()
 
   const [email, setEmail] = useState(isDemoAuth ? DEMO_USERS[0].email : '')
   const [password, setPassword] = useState(isDemoAuth ? DEMO_USERS[0].password : '')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (!loading && profile) {
+  // skip_restore: always show the form even if a stale session flag is mid-flight
+  if (!loading && profile && !skipRestore) {
     return <Navigate to={from} replace />
   }
 
   // Session restored but profile stuck — stay here with retry, do not look "logged out"
-  if (!loading && hasSession && !profile) {
+  if (!loading && hasSession && !profile && !skipRestore) {
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-slate" role="alert">
@@ -34,6 +42,9 @@ export function LoginPage() {
         >
           Повторить загрузку профиля
         </button>
+        <a href="/login?skip_restore=1" className="text-sm font-medium text-teal hover:underline">
+          Показать форму входа
+        </a>
       </div>
     )
   }
@@ -70,9 +81,14 @@ export function LoginPage() {
           <h2 className="font-display text-2xl tracking-tight text-ink">Вход</h2>
           <p className="mt-1.5 text-[15px] text-slate">Email и пароль, выданные администратором.</p>
 
-          {loading ? (
+          {loading && !skipRestore ? (
             <p className="mt-3 rounded-xl bg-mist/80 px-3 py-2 text-sm text-slate" role="status">
               Восстанавливаем сессию… форма уже доступна.
+            </p>
+          ) : null}
+          {skipRestore ? (
+            <p className="mt-3 rounded-xl bg-mist/80 px-3 py-2 text-sm text-slate" role="status">
+              Быстрый вход без восстановления прошлой сессии. После входа сессия снова сохранится.
             </p>
           ) : null}
           {authError && !hasSession ? (
