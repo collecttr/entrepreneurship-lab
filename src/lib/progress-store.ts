@@ -1,5 +1,6 @@
 import { WEEKS, type AssignmentDef } from '@/data/curriculum'
 import { SKILLS } from '@/data/skills'
+import { COURSE_START_DATE } from '@/lib/course-calendar'
 import { isDemoAuth, supabase, supabaseConfigured } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
@@ -7,6 +8,17 @@ const UNLOCK_KEY = 'elab_unlocked_week'
 const SUBMISSIONS_KEY = 'elab_submissions'
 const SKILL_KEY = 'elab_skill_progress'
 const EVIDENCE_KEY = 'elab_skill_evidence'
+/** One-time client migrate for course restart 2026-11-23 (clears stale demo %). */
+const COURSE_RESET_KEY = 'elab_course_start_reset_v1_2026-11-23'
+
+function emptySkillScores(): SkillScore[] {
+  return SKILLS.map((s) => ({
+    skill_id: s.id,
+    score_ema: 0,
+    evidence_count: 0,
+    last_updated: '—',
+  }))
+}
 
 export type SubmissionStatus = 'draft' | 'submitted' | 'returned' | 'graded'
 
@@ -175,10 +187,8 @@ function bumpSkills(
   evidence?: { source: SkillEvidence['source']; label: string },
 ) {
   const map = readJson<Record<string, SkillScore[]>>(SKILL_KEY, {})
-  const list = map[authorId] ?? SKILLS.map((s) => ({
-    skill_id: s.id,
-    score_ema: 25,
-    evidence_count: 0,
+  const list = map[authorId] ?? emptySkillScores().map((s) => ({
+    ...s,
     last_updated: new Date().toISOString().slice(0, 10),
   }))
   const clamped = Math.max(0, Math.min(100, signal))
@@ -225,14 +235,97 @@ export function listSkillEvidence(userId: string, skillId?: string): SkillEviden
 }
 
 export function getSkillProgress(authorId: string): SkillScore[] {
+  ensureCleanCourseStart()
   const map = readJson<Record<string, SkillScore[]>>(SKILL_KEY, {})
-  if (map[authorId]) return map[authorId]
-  return SKILLS.map((s) => ({
-    skill_id: s.id,
-    score_ema: 28,
-    evidence_count: 0,
-    last_updated: '—',
-  }))
+  const rows = map[authorId]
+  if (!rows) return emptySkillScores()
+  // No evidence → always show 0 (never fake 25/28/42 starter scores).
+  return rows.map((s) =>
+    s.evidence_count > 0
+      ? s
+      : { ...s, score_ema: 0, evidence_count: 0 },
+  )
+}
+
+function hasSubmittedOnOrAfterCourseStart(rows: SubmissionRecord[]): boolean {
+  return rows.some((s) => {
+    if (s.status !== 'submitted' && s.status !== 'graded') return false
+    const at = (s.submitted_at ?? '').slice(0, 10)
+    return !at || at >= COURSE_START_DATE
+  })
+}
+
+/** Zero skill EMAs that have no evidence (safe anytime). */
+export function zeroUnevidencedSkillScores(): void {
+  const map = readJson<Record<string, SkillScore[]>>(SKILL_KEY, {})
+  let changed = false
+  for (const authorId of Object.keys(map)) {
+    map[authorId] = (map[authorId] ?? []).map((s) => {
+      if (s.evidence_count > 0) return s
+      if (s.score_ema === 0) return s
+      changed = true
+      return { ...s, score_ema: 0, evidence_count: 0 }
+    })
+  }
+  if (changed) writeJson(SKILL_KEY, map)
+}
+
+/**
+ * Clear local submissions + skill EMA/evidence.
+ * Used by admin reset and one-time course-start migrate when there is no real work.
+ */
+export function clearLocalProgressStores(): void {
+  localStorage.removeItem(SUBMISSIONS_KEY)
+  localStorage.removeItem(SKILL_KEY)
+  localStorage.removeItem(EVIDENCE_KEY)
+  window.dispatchEvent(new CustomEvent('elab-progress-reset'))
+}
+
+/**
+ * One-time migrate for live course start (2026-11-23):
+ * - If no submitted/graded work on/after course start → wipe stale local progress (→ clean 0%).
+ * - Always zero skill bars with no evidence.
+ * Demo auth is left alone (labeled demo fixtures may keep sample scores elsewhere).
+ */
+export function ensureCleanCourseStart(): { cleared: boolean } {
+  if (typeof window === 'undefined') return { cleared: false }
+  try {
+    if (localStorage.getItem(COURSE_RESET_KEY) === '1') {
+      zeroUnevidencedSkillScores()
+      return { cleared: false }
+    }
+
+    zeroUnevidencedSkillScores()
+
+    if (isDemoAuth) {
+      localStorage.setItem(COURSE_RESET_KEY, '1')
+      return { cleared: false }
+    }
+
+    const all = listSubmissions()
+    const realWork = hasSubmittedOnOrAfterCourseStart(all)
+    if (!realWork) {
+      clearLocalProgressStores()
+      localStorage.setItem(COURSE_RESET_KEY, '1')
+      return { cleared: true }
+    }
+
+    localStorage.setItem(COURSE_RESET_KEY, '1')
+    return { cleared: false }
+  } catch (err) {
+    console.warn('course start progress migrate skipped:', err)
+    return { cleared: false }
+  }
+}
+
+/**
+ * Admin / explicit clear: wipe local progress and allow migrate to re-run.
+ * Does not delete remote `progress_snapshots` (see SQL in migration 011).
+ */
+export function adminClearLocalProgress(): void {
+  clearLocalProgressStores()
+  localStorage.removeItem(COURSE_RESET_KEY)
+  ensureCleanCourseStart()
 }
 
 /** Progress from submitted/graded assignments only — not page views. */

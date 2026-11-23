@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { WEEKS } from '@/data/curriculum'
+import { useAuth } from '@/context/AuthContext'
 import { isSpendLockOn } from '@/lib/ai-config'
+import { syncOwnProgressSnapshot } from '@/lib/peer-progress'
 import {
+  adminClearLocalProgress,
   getUnlockedWeek,
   refreshUnlockedWeekFromSupabase,
   setUnlockedWeek,
@@ -9,8 +12,10 @@ import {
 import { isDemoAuth, supabaseConfigured } from '@/lib/supabase'
 
 export function AdminPage() {
+  const { profile } = useAuth()
   const [unlocked, setUnlocked] = useState(getUnlockedWeek())
   const [saved, setSaved] = useState<string | null>(null)
+  const [resetMsg, setResetMsg] = useState<string | null>(null)
 
   useEffect(() => {
     void refreshUnlockedWeekFromSupabase().then(setUnlocked)
@@ -24,6 +29,16 @@ export function AdminPage() {
         ? `Открыто до недели ${week} (синхронизация с program_settings)`
         : `Открыто до недели ${week} (в этом браузере; на сервере — общий доступ для всех)`,
     )
+  }
+
+  async function clearStarterProgress() {
+    const ok = window.confirm(
+      'Сбросить локальный прогресс в этом браузере (сдачи, навыки) до 0%? Реальная работа после сдачи заданий будет удалена только здесь. Снимки на сервере обнулятся для вашего аккаунта при синхронизации; для обоих участников см. SQL миграции 011.',
+    )
+    if (!ok) return
+    adminClearLocalProgress()
+    if (profile) await syncOwnProgressSnapshot(profile)
+    setResetMsg('Локальный прогресс обнулён. Обновите страницу «Обзор».')
   }
 
   return (
@@ -79,6 +94,23 @@ export function AdminPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="surface rounded-3xl p-5">
+        <h2 className="font-display text-xl">Старт курса · чистый ноль</h2>
+        <p className="mt-2 text-sm text-slate">
+          Если полоски прогресса показывают ~4% или навыки «28» без сдач — сбросьте локальные данные.
+          Для Саши и Платона на сервере выполните SQL из{' '}
+          <code className="text-xs">supabase/migrations/011_zero_starter_progress_snapshots.sql</code>.
+        </p>
+        <button
+          type="button"
+          onClick={() => void clearStarterProgress()}
+          className="mt-4 rounded-xl bg-mist px-4 py-2 text-sm font-semibold text-ink hover:bg-teal-soft"
+        >
+          Сбросить локальный прогресс до 0%
+        </button>
+        {resetMsg && <p className="mt-3 text-sm text-teal-deep">{resetMsg}</p>}
       </section>
 
       <section className="surface rounded-3xl p-5">

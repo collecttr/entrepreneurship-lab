@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { DEMO_USERS } from '@/lib/demo-data'
 import { canonicalDisplayName, learnerByEmail } from '@/lib/learners'
-import { refreshUnlockedWeekFromSupabase } from '@/lib/progress-store'
+import { ensureCleanCourseStart, refreshUnlockedWeekFromSupabase } from '@/lib/progress-store'
 import { isDemoAuth, supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
@@ -202,6 +202,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false
 
     async function init() {
+      // Live course restart: clear stale local % / fake skill EMA before UI paints.
+      ensureCleanCourseStart()
+
       if (isDemoAuth) {
         if (!cancelled) {
           const demo = readDemoSession()

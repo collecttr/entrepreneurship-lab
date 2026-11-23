@@ -11,6 +11,7 @@ import {
 import { loadDashboard } from '@/lib/dashboard'
 import { canonicalDisplayName } from '@/lib/learners'
 import { syncOwnProgressSnapshot } from '@/lib/peer-progress'
+import { ensureCleanCourseStart } from '@/lib/progress-store'
 import type { DashboardData } from '@/lib/types'
 
 function DemoLabel({ show }: { show: boolean }) {
@@ -38,14 +39,17 @@ export function DashboardPage() {
   useEffect(() => {
     if (!profile) return
     let cancelled = false
-    void loadDashboard(profile)
-      .then((d) => {
+    void (async () => {
+      try {
+        // Migrate → push zeros to progress_snapshots → then paint dashboard.
+        ensureCleanCourseStart()
+        await syncOwnProgressSnapshot(profile)
+        const d = await loadDashboard(profile)
         if (!cancelled) setData(d)
-      })
-      .catch((err: unknown) => {
+      } catch (err: unknown) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Ошибка загрузки')
-      })
-    void syncOwnProgressSnapshot(profile)
+      }
+    })()
     return () => {
       cancelled = true
     }

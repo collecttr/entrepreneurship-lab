@@ -55,7 +55,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 4. **Authentication** → **Settings** (или **Sign In / Providers**): отключите **Allow new users to sign up** / Sign ups = **OFF**.
 5. OAuth / Magic link — не включать на MVP.
 
-### 2.3. Применить миграции 001–009
+### 2.3. Применить миграции 001–011
 
 1. **SQL Editor** → **New query**.
 2. По порядку вставьте и **Run** содержимое файлов из репо:
@@ -69,10 +69,18 @@ npm run dev -- --host 127.0.0.1 --port 5173
    - `supabase/migrations/007_auth_allowlist_fix.sql` (JWT allowlist + own-profile SELECT; fixes login bounce)
    - `supabase/migrations/008_exam_attempts_body.sql` (body_md + updated_at для live slug↔UUID sync аттестаций)
    - `supabase/migrations/009_search_allowlisted_users.sql` (поиск собеседника по email среди allowlist + profiles)
+   - `supabase/migrations/010_course_start_progress_snapshots.sql` (старт курса 2026-11-23 + `progress_snapshots` + имена Саша/Платон)
+   - `supabase/migrations/011_zero_starter_progress_snapshots.sql` (**обязательно при ложных ~4%**: обнуляет снимки прогресса Саши и Платона)
 3. Затем seed (если нужно контент в БД):
    - `supabase/seed.sql`
    - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте; таблица `exams` обязательна для UUID map)
 4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts` в publication (миграция 004 добавляет).
+
+### 2.3a. Ложные ~4% / навыки «28» без сдач
+
+Клиент после деплоя сам: (1) обнуляет skill EMA без доказательств; (2) один раз чистит `elab_submissions` / skill keys, если нет сдач с даты старта курса `2026-11-23`; (3) пишет 0% в свой `progress_snapshots`.
+
+Петр в Supabase SQL Editor — выполнить `011_zero_starter_progress_snapshots.sql` (оба участника). Админ в UI: **Админ → «Сбросить локальный прогресс до 0%»**.
 
 ### 2.3b. Профиль отсутствует (bounce / soft profile)
 
