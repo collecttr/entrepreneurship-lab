@@ -11,6 +11,7 @@ import {
   listPosts,
   rememberProfile,
   setDiscussionResolved,
+  setLastForumDiscussion,
   subscribeCollab,
   type Discussion,
   type DiscussionPost,
@@ -42,6 +43,9 @@ function ForumTopicPageInner() {
 
   useEffect(() => {
     if (!discussionId) return
+    if (profile) {
+      setLastForumDiscussion(profile.id, discussionId)
+    }
     const refresh = () => {
       try {
         const d = getDiscussion(discussionId) ?? null
@@ -57,7 +61,7 @@ function ForumTopicPageInner() {
     }
     refresh()
     return subscribeCollab(refresh)
-  }, [discussionId])
+  }, [discussionId, profile])
 
   if (!discussionId) return <Navigate to="/forum" replace />
 
@@ -106,29 +110,32 @@ function ForumTopicPageInner() {
 
   return (
     <div className="space-y-4">
-      <header className="surface rounded-3xl p-6">
-        <Link to="/forum" className="text-sm font-semibold text-teal">
+      <header className="surface rounded-2xl p-4 md:rounded-3xl md:p-6">
+        <Link to="/forum" className="inline-flex min-h-11 items-center text-sm font-semibold text-teal">
           ← Все темы
         </Link>
-        <h1 className="mt-2 font-display text-3xl text-ink">{topic.title || 'Без названия'}</h1>
-        <p className="mt-2 whitespace-pre-wrap text-sm text-slate">{topic.description_md}</p>
+        <h1 className="mt-2 font-display text-2xl text-ink md:text-3xl">{topic.title || 'Без названия'}</h1>
+        <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate">{topic.description_md}</p>
         {loadError && (
           <p className="mt-2 text-xs text-slate" role="status">
             {loadError}
           </p>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate md:gap-3">
           <span>{authorName(topic.author_id)}</span>
           {isDemoAuth && isDemoForumSeedId(topic.id) && <span className="font-semibold">демо</span>}
           {topic.week_number && (
-            <Link to={`/program/weeks/${topic.week_number}`} className="font-semibold text-teal">
+            <Link
+              to={`/program/weeks/${topic.week_number}`}
+              className="inline-flex min-h-11 items-center font-semibold text-teal"
+            >
               Неделя {topic.week_number}
             </Link>
           )}
           <span>{topic.is_resolved ? 'Решено' : 'Открыто'}</span>
           <button
             type="button"
-            className="rounded-lg bg-mist px-2 py-1 font-semibold text-ink"
+            className="min-h-11 rounded-lg bg-mist px-3 py-2 font-semibold text-ink"
             onClick={() => {
               try {
                 setDiscussionResolved(topic.id, !topic.is_resolved)
@@ -186,14 +193,14 @@ function ForumTopicPageInner() {
         ))}
       </ul>
 
-      <form onSubmit={onReply} className="surface space-y-3 rounded-3xl p-5">
+      <form onSubmit={onReply} className="surface space-y-3 rounded-2xl p-4 md:rounded-3xl md:p-5">
         <h2 className="font-display text-xl text-ink">Комментарий</h2>
         {quote && (
           <div className="rounded-xl bg-mist px-3 py-2 text-xs text-slate">
             Цитата: {quote}{' '}
             <button
               type="button"
-              className="text-teal"
+              className="min-h-11 px-1 text-teal"
               onClick={() => {
                 setQuote(null)
                 setParentId(null)
@@ -208,11 +215,11 @@ function ForumTopicPageInner() {
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={4}
-          className="w-full rounded-xl border border-ink/10 px-3 py-2 text-sm"
+          className="field w-full rounded-xl border border-ink/10 px-3 py-2.5 text-base md:text-sm"
           placeholder="Ваш ответ…"
         />
-        <div className="flex flex-wrap gap-2">
-          <label className="cursor-pointer rounded-xl border border-ink/10 px-3 py-2 text-sm text-slate">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-ink/10 px-3 text-sm text-slate">
             Вложение (только имя файла)
             <input
               type="file"
@@ -224,8 +231,11 @@ function ForumTopicPageInner() {
               }}
             />
           </label>
-          {attach && <span className="self-center text-xs text-slate">{attach}</span>}
-          <button type="submit" className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent">
+          {attach && <span className="text-xs text-slate">{attach}</span>}
+          <button
+            type="submit"
+            className="min-h-11 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent"
+          >
             Отправить
           </button>
         </div>

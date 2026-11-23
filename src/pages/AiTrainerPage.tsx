@@ -206,15 +206,11 @@ export function AiTrainerPage() {
           ← К списку тренажёров
         </Link>
         <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-teal">
-          проверка без платного AI
+          локальная проверка
         </p>
-        <h1 className="mt-1 font-display text-3xl text-ink">{meta.title_ru}</h1>
+        <h1 className="mt-1 font-display text-2xl text-ink md:text-3xl">{meta.title_ru}</h1>
         <p className="mt-2 text-sm text-slate">{meta.blurb_ru}</p>
-        <p
-          className={`mt-3 rounded-xl px-3 py-2 text-xs ${banner.tone === 'warn' ? 'bg-amber-soft/60' : 'bg-teal-soft/50'} text-ink`}
-        >
-          {banner.text}
-        </p>
+        <p className="mt-3 text-xs text-slate">{banner.text}</p>
         {week && (
           <div className="mt-3 rounded-2xl bg-paper/80 p-3 text-xs text-slate">
             <p className="font-semibold text-ink">

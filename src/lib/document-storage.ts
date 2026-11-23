@@ -57,7 +57,7 @@ export async function uploadPrivateDocument(params: {
 
 export function privacyBannerText(): string {
   if (isDemoAuth || !supabaseConfigured) {
-    return 'Приватность (демо): файлы в IndexedDB на этом устройстве, без публичных URL. Object URL создаётся только на время скачивания и отзывается. Это не production Storage.'
+    return 'Файлы хранятся на этом устройстве, без публичных ссылок.'
   }
-  return 'Приватность: bucket documents private; скачивание только через короткий signed URL после проверки доступа.'
+  return 'Файлы в закрытом хранилище; скачивание по короткой личной ссылке.'
 }

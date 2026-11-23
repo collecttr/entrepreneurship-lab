@@ -11,7 +11,17 @@ const ACOMM_KEY = 'elab_assignment_comments'
 const READ_KEY = 'elab_chat_last_read'
 const SEEDED_KEY = 'elab_forum_seeded_v1'
 const PEER_KEY = 'elab_chat_peer_v1'
+const PEER_BY_USER_PREFIX = 'elab_chat_peer_v2:'
+const FORUM_CTX_PREFIX = 'elab_forum_ctx_v1:'
 const PROFILE_CACHE_KEY = 'elab_profile_cache_v1'
+
+function peerStorageKey(userId: string) {
+  return `${PEER_BY_USER_PREFIX}${userId}`
+}
+
+function forumCtxKey(userId: string) {
+  return `${FORUM_CTX_PREFIX}${userId}`
+}
 
 /** Lightweight contact used for 1:1 chat peer + author labels. */
 export type PeerContact = Pick<Profile, 'id' | 'email' | 'display_name'>
@@ -30,6 +40,12 @@ export function isDemoForumSeedId(id: string): boolean {
 }
 
 export type ForumKind = 'debate' | 'question' | 'case' | 'source' | 'general'
+
+export type ForumListContext = {
+  kind: ForumKind | 'all'
+  q: string
+  lastDiscussionId: string | null
+}
 
 export interface ChatMessage {
   id: string
@@ -380,31 +396,59 @@ export function rememberProfile(contact: PeerContact) {
   }
 }
 
-function readStoredPeer(): PeerContact | null {
+function normalizePeerContact(raw: unknown): PeerContact | null {
+  if (!raw || typeof raw !== 'object') return null
+  const row = raw as Partial<PeerContact>
+  if (typeof row.id !== 'string' || !row.id) return null
+  if (typeof row.email !== 'string' || !row.email) return null
+  return {
+    id: row.id,
+    email: row.email,
+    display_name:
+      typeof row.display_name === 'string' && row.display_name
+        ? row.display_name
+        : row.email.split('@')[0] ?? 'Участник',
+  }
+}
+
+function readStoredPeer(myId: string): PeerContact | null {
   try {
-    const raw = readJson<unknown>(PEER_KEY, null)
-    if (!raw || typeof raw !== 'object') return null
-    const row = raw as Partial<PeerContact>
-    if (typeof row.id !== 'string' || !row.id) return null
-    if (typeof row.email !== 'string' || !row.email) return null
-    return {
-      id: row.id,
-      email: row.email,
-      display_name:
-        typeof row.display_name === 'string' && row.display_name
-          ? row.display_name
-          : row.email.split('@')[0] ?? 'Участник',
+    const keyed = normalizePeerContact(readJson<unknown>(peerStorageKey(myId), null))
+    if (keyed) return keyed
+
+    // Migrate legacy global peer key into per-user storage once.
+    const legacy = normalizePeerContact(readJson<unknown>(PEER_KEY, null))
+    if (legacy && legacy.id !== myId) {
+      writeJson(peerStorageKey(myId), legacy)
+      try {
+        localStorage.removeItem(PEER_KEY)
+      } catch {
+        // ignore
+      }
+      return legacy
     }
+    return null
   } catch {
     return null
   }
 }
 
-/** Persist the single 1:1 chat contact (closed course = one peer). */
-export function setChatPeer(contact: PeerContact | null) {
+/** Persist the 1:1 chat contact per learner (survives reload). Pass myId of the signed-in user. */
+export function setChatPeer(contact: PeerContact | null, myId?: string) {
   try {
     if (!contact) {
-      localStorage.removeItem(PEER_KEY)
+      if (myId) {
+        try {
+          localStorage.removeItem(peerStorageKey(myId))
+        } catch {
+          // ignore
+        }
+      }
+      try {
+        localStorage.removeItem(PEER_KEY)
+      } catch {
+        // ignore
+      }
       broadcast({ type: 'read' })
       return
     }
@@ -413,7 +457,11 @@ export function setChatPeer(contact: PeerContact | null) {
       email: contact.email.trim().toLowerCase(),
       display_name: contact.display_name.trim() || contact.email.split('@')[0] || 'Участник',
     }
-    writeJson(PEER_KEY, normalized)
+    if (myId) {
+      writeJson(peerStorageKey(myId), normalized)
+    } else {
+      writeJson(PEER_KEY, normalized)
+    }
     rememberProfile(normalized)
     broadcast({ type: 'read' })
   } catch (err) {
@@ -432,19 +480,75 @@ function demoPeerFor(myId: string): PeerContact | null {
 }
 
 export function getPeerProfile(myId: string): PeerContact | null {
-  const stored = readStoredPeer()
+  const stored = readStoredPeer(myId)
   if (stored && stored.id !== myId) return stored
 
   if (isDemoAuth) {
     const demo = demoPeerFor(myId)
     if (demo) {
       // Auto-wire demo peer so two-tab demos keep working without search.
-      if (!stored) setChatPeer(demo)
+      if (!stored) setChatPeer(demo, myId)
       return demo
     }
   }
 
   return null
+}
+
+const DEFAULT_FORUM_CTX: ForumListContext = {
+  kind: 'all',
+  q: '',
+  lastDiscussionId: null,
+}
+
+export function getForumContext(userId: string): ForumListContext {
+  const raw = readJson<unknown>(forumCtxKey(userId), null)
+  if (!raw || typeof raw !== 'object') return { ...DEFAULT_FORUM_CTX }
+  const row = raw as Partial<ForumListContext>
+  const kind =
+    row.kind === 'all' ||
+    row.kind === 'debate' ||
+    row.kind === 'question' ||
+    row.kind === 'case' ||
+    row.kind === 'source' ||
+    row.kind === 'general'
+      ? row.kind
+      : 'all'
+  return {
+    kind,
+    q: typeof row.q === 'string' ? row.q : '',
+    lastDiscussionId: typeof row.lastDiscussionId === 'string' && row.lastDiscussionId ? row.lastDiscussionId : null,
+  }
+}
+
+export function setForumListFilters(userId: string, filters: { kind: ForumKind | 'all'; q: string }) {
+  const prev = getForumContext(userId)
+  writeJson(forumCtxKey(userId), {
+    ...prev,
+    kind: filters.kind,
+    q: filters.q,
+  })
+}
+
+/** Remember last opened forum thread for this learner (survives reload). */
+export function setLastForumDiscussion(userId: string, discussionId: string | null) {
+  const prev = getForumContext(userId)
+  writeJson(forumCtxKey(userId), {
+    ...prev,
+    lastDiscussionId: discussionId,
+  })
+  broadcast({ type: 'discussions' })
+}
+
+export function getLastForumPath(userId: string): string {
+  const { lastDiscussionId } = getForumContext(userId)
+  if (!lastDiscussionId) return '/forum'
+  try {
+    if (getDiscussion(lastDiscussionId)) return `/forum/${lastDiscussionId}`
+  } catch {
+    // fall through
+  }
+  return '/forum'
 }
 
 function peerId(myId: string): string | null {

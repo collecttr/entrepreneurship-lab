@@ -125,24 +125,24 @@ function ChatPageInner() {
   }
 
   function selectPeer(hit: AllowlistedSearchHit) {
-    setChatPeer(hit)
+    if (!profile) return
+    setChatPeer(hit, profile.id)
     setPeer(hit)
     setSearchHits([])
     setEmailQuery('')
     setSearchedOnce(false)
     setSearchError(null)
-    if (profile) {
-      try {
-        markChatRead(profile.id)
-        setUnread(unreadCount(profile.id))
-      } catch {
-        // ignore
-      }
+    try {
+      markChatRead(profile.id)
+      setUnread(unreadCount(profile.id))
+    } catch {
+      // ignore
     }
   }
 
   function clearPeer() {
-    setChatPeer(null)
+    if (profile) setChatPeer(null, profile.id)
+    else setChatPeer(null)
     setPeer(null)
   }
 
@@ -172,10 +172,10 @@ function ChatPageInner() {
     'Собеседник ещё не добавлен — найдите по email'
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col gap-3 md:h-[calc(100vh-5rem)]">
-      <header className="surface shrink-0 rounded-3xl p-5">
+    <div className="flex h-[min(100dvh,100vh)] max-h-[min(100dvh,100vh)] flex-col gap-3 overflow-hidden md:h-[calc(100vh-5rem)] md:max-h-none">
+      <header className="surface shrink-0 rounded-2xl p-4 md:rounded-3xl md:p-5">
         <p className="text-[13px] font-medium text-teal">Чат 1:1</p>
-        <h1 className="mt-1 font-display text-2xl tracking-tight text-ink md:text-3xl">
+        <h1 className="mt-1 font-display text-xl tracking-tight text-ink md:text-3xl">
           {peer ? `${profile.display_name} ↔ ${peer.display_name}` : 'Личные сообщения'}
         </h1>
         <p className="mt-2 text-xs text-slate">{demoTransportLabel()}</p>
@@ -185,7 +185,11 @@ function ChatPageInner() {
             {!isDemoAuth && (
               <>
                 {' · '}
-                <button type="button" className="font-semibold text-teal underline" onClick={clearPeer}>
+                <button
+                  type="button"
+                  className="min-h-11 px-1 font-semibold text-teal underline"
+                  onClick={clearPeer}
+                >
                   сменить
                 </button>
               </>
@@ -193,7 +197,7 @@ function ChatPageInner() {
           </p>
         )}
         {isDemoAuth && (
-          <p className="mt-1 text-xs rounded-xl bg-mist px-2 py-1 text-ink border border-ink/10">
+          <p className="mt-1 text-xs text-slate">
             Демо: второй участник — из демо-аккаунтов. Откройте вторую вкладку с другим email.
             {unread > 0 ? ` Непрочитанных до открытия: ${unread}.` : ''}
           </p>
@@ -206,11 +210,10 @@ function ChatPageInner() {
       </header>
 
       {!peer && (
-        <section className="surface shrink-0 rounded-3xl p-5">
+        <section className="surface shrink-0 rounded-2xl p-4 md:rounded-3xl md:p-5">
           <p className="text-sm text-ink">{emptyPeerHint}</p>
           <p className="mt-1 text-xs text-slate">
-            Поиск только среди допущенных и уже зарегистрированных участников курса (не боты и не
-            демо-персонажи).
+            Поиск только среди допущенных и уже зарегистрированных участников курса.
           </p>
           <form onSubmit={runSearch} className="mt-4 flex flex-col gap-2 sm:flex-row">
             <input
@@ -219,12 +222,12 @@ function ChatPageInner() {
               onChange={(e) => setEmailQuery(e.target.value)}
               placeholder="email участника"
               autoComplete="off"
-              className="field flex-1 rounded-xl border border-ink/10 px-3 py-2 text-sm outline-none ring-ink focus:ring-2"
+              className="field min-h-11 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-sm outline-none ring-ink focus:ring-2"
             />
             <button
               type="submit"
               disabled={searching}
-              className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50"
+              className="min-h-11 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50"
             >
               {searching ? 'Ищем…' : 'Найти'}
             </button>
@@ -259,8 +262,8 @@ function ChatPageInner() {
         </section>
       )}
 
-      <div className="surface flex min-h-0 flex-1 flex-col rounded-3xl">
-        <div className="flex-1 space-y-3 overflow-y-auto p-4 md:p-5">
+      <div className="surface flex min-h-0 flex-1 flex-col rounded-2xl md:rounded-3xl">
+        <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-3 md:p-5">
           {!peer && (
             <p className="text-sm text-slate">{emptyPeerHint}</p>
           )}
@@ -273,14 +276,14 @@ function ChatPageInner() {
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm md:max-w-[70%] ${
+                    className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm md:max-w-[70%] ${
                       mine ? 'bg-teal text-on-accent' : 'bg-mist text-ink'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{m.body_md || '—'}</p>
+                    <p className="whitespace-pre-wrap break-words">{m.body_md || '—'}</p>
                     {m.attachment_stub && m.attachment_name && (
                       <p className={`mt-1 text-xs ${mine ? 'text-on-accent/80' : 'text-slate'}`}>
-                        📎 {m.attachment_name} (имя файла; сам файл — через раздел «Документы»)
+                        {m.attachment_name} (имя файла; сам файл — через раздел «Документы»)
                       </p>
                     )}
                     <p className={`mt-1 text-[10px] ${mine ? 'text-on-accent/70' : 'text-slate'}`}>
@@ -294,30 +297,33 @@ function ChatPageInner() {
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={onSend} className="shrink-0 border-t border-ink/5 p-3 md:p-4">
+        <form
+          onSubmit={onSend}
+          className="shrink-0 border-t border-ink/5 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4"
+        >
           {!peer && (
             <p className="mb-2 text-xs text-slate">Сначала добавьте собеседника по email.</p>
           )}
           {attachName && (
             <p className="mb-2 text-xs text-slate">
               Вложение (имя): {attachName}{' '}
-              <button type="button" className="text-teal" onClick={() => setAttachName(null)}>
+              <button type="button" className="min-h-11 px-1 text-teal" onClick={() => setAttachName(null)}>
                 убрать
               </button>
             </p>
           )}
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={2}
               disabled={!peer}
               placeholder={peer ? 'Сообщение партнёру…' : emptyPeerHint}
-              className="field min-h-[2.75rem] flex-1 rounded-xl border border-ink/10 px-3 py-2 text-sm outline-none ring-ink focus:ring-2 disabled:opacity-50"
+              className="field min-h-11 flex-1 rounded-xl border border-ink/10 px-3 py-2.5 text-base outline-none ring-ink focus:ring-2 disabled:opacity-50 md:text-sm"
             />
             <div className="flex gap-2">
               <label
-                className={`cursor-pointer rounded-xl border border-ink/10 px-3 py-2 text-sm text-slate hover:bg-mist ${
+                className={`inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-ink/10 px-3 text-sm text-slate hover:bg-mist ${
                   !peer ? 'pointer-events-none opacity-50' : ''
                 }`}
               >
@@ -336,7 +342,7 @@ function ChatPageInner() {
               <button
                 type="submit"
                 disabled={!peer}
-                className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50"
+                className="min-h-11 flex-1 rounded-xl bg-teal px-4 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50 sm:flex-none"
               >
                 Отправить
               </button>

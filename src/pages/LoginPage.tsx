@@ -52,21 +52,21 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <DemoBanner />
-      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col justify-center gap-10 px-4 py-10 lg:flex-row lg:items-center lg:gap-16">
+    <div className="min-h-screen overflow-x-hidden">
+      {isDemo && <DemoBanner />}
+      <div className="mx-auto flex min-h-[calc(100dvh-0px)] max-w-6xl flex-col justify-center gap-8 px-4 py-8 sm:gap-10 sm:py-10 lg:flex-row lg:items-center lg:gap-16">
         <section className="max-w-xl">
           <p className="mb-3 text-sm font-medium text-teal">Закрытая академия</p>
-          <h1 className="font-display text-4xl leading-tight tracking-tight text-ink md:text-5xl">
+          <h1 className="font-display text-3xl leading-tight tracking-tight text-ink sm:text-4xl md:text-5xl">
             Лаборатория предпринимательства
           </h1>
-          <p className="mt-5 max-w-md text-[17px] leading-relaxed text-slate">
+          <p className="mt-4 max-w-md text-[16px] leading-relaxed text-slate sm:mt-5 sm:text-[17px]">
             26 недель практики: продажи, переговоры, презентации и предпринимательское мышление.
             Вход только для участников из списка допуска — публичной регистрации нет.
           </p>
         </section>
 
-        <section className="w-full max-w-md surface rounded-3xl p-7 md:p-9">
+        <section className="w-full max-w-md surface rounded-2xl p-5 sm:rounded-3xl sm:p-7 md:p-9">
           <h2 className="font-display text-2xl tracking-tight text-ink">Вход</h2>
           <p className="mt-1.5 text-[15px] text-slate">Email и пароль, выданные администратором.</p>
 
@@ -80,7 +80,7 @@ export function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="field w-full rounded-xl border border-ink/10 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
+                className="field min-h-11 w-full rounded-xl border border-ink/10 px-3.5 py-3 text-base outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25 md:text-[15px]"
               />
             </label>
             <label className="block text-sm">
@@ -92,12 +92,12 @@ export function LoginPage() {
                 placeholder="Пароль"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="field w-full rounded-xl border border-ink/10 px-3.5 py-3 outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25"
+                className="field min-h-11 w-full rounded-xl border border-ink/10 px-3.5 py-3 text-base outline-none focus:border-ink/25 focus:ring-2 focus:ring-ink/25 md:text-[15px]"
               />
             </label>
 
             {error && (
-              <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">
+              <p className="rounded-xl bg-mist px-3 py-2 text-sm text-ink" role="alert">
                 {error}
               </p>
             )}
@@ -105,15 +105,15 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={submitting || loading}
-              className="w-full rounded-xl bg-teal px-4 py-3.5 text-[15px] font-semibold text-on-accent hover:bg-teal-deep active:scale-[0.99] disabled:opacity-60"
+              className="min-h-11 w-full rounded-xl bg-teal px-4 py-3.5 text-[15px] font-semibold text-on-accent hover:bg-teal-deep active:scale-[0.99] disabled:opacity-60"
             >
               {submitting ? 'Входим…' : 'Войти'}
             </button>
           </form>
 
           {isDemo && (
-            <div className="mt-5 rounded-2xl border border-ink/15 bg-amber-soft/50 p-3 text-xs leading-relaxed text-ink-soft">
-              <p className="font-semibold text-ink">Демо-аккаунты из списка допуска:</p>
+            <div className="mt-5 rounded-2xl border border-ink/10 bg-mist/60 p-3 text-xs leading-relaxed text-ink-soft">
+              <p className="font-semibold text-ink">Демо-аккаунты:</p>
               <ul className="mt-2 space-y-1">
                 {DEMO_USERS.map((u) => (
                   <li key={u.email}>
@@ -122,10 +122,6 @@ export function LoginPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-slate">
-                Любой другой email не войдёт — публичной регистрации нет. Для боевого Supabase Auth см.
-                docs/deploy-stage2.md и bootstrap.
-              </p>
             </div>
           )}
         </section>

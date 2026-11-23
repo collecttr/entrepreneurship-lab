@@ -53,8 +53,8 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-5">
-      <header className="surface overflow-hidden rounded-3xl">
-        <div className="relative px-6 py-7 md:px-8">
+      <header className="surface overflow-hidden rounded-2xl md:rounded-3xl">
+        <div className="relative px-4 py-6 md:px-8 md:py-7">
           <div
             className="pointer-events-none absolute inset-0 opacity-90"
             style={{
@@ -102,8 +102,7 @@ export function DashboardPage() {
           <p className="mt-3 text-sm leading-relaxed text-slate">{currentWeek.summary_ru}</p>
           <p className="mt-3 text-xs text-slate">
             Открыто до недели {settings.current_unlocked_week} · цель {settings.hours_per_week_target}{' '}
-            мин/нед · платный AI:{' '}
-            {settings.ai_spend_lock ? 'отключён' : 'разрешён'}
+            мин/нед
             <DemoLabel show={isDemoData} />
           </p>
           <Link to="/program" className="mt-4 inline-block text-sm font-semibold text-teal hover:underline">

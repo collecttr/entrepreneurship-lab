@@ -154,13 +154,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await loadProfileWithRetry(userId, email)
     if (result.ok) {
       setProfile(result.profile)
+      // Soft synthetic profile still means login works — no learner-facing scare banner.
       if (result.missingDbRow) {
-        setAuthError(
-          'Профиль в БД не найден — используется временный. Выполните SQL из docs/runbook.md («Профиль отсутствует») или supabase/snippets/ensure-profile-standkill25.sql, затем «Повторить».',
-        )
-      } else {
-        setAuthError(null)
+        console.info('profile row missing; using temporary client profile until DB sync')
       }
+      setAuthError(null)
       return
     }
     // Transient failure: keep prior profile + session; never signOut here

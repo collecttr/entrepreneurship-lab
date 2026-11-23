@@ -24,17 +24,10 @@ export function AiPage() {
         <h1 className="mt-2 font-display text-3xl text-ink">Тренажёры и разбор практики</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate">
           {isSpendLockOn()
-            ? 'Платные AI-сервисы отключены. Разбор идёт по правилам курса на вашем устройстве — без списаний.'
-            : 'Доступна расширенная проверка; при сбое остаётся локальный разбор по правилам курса.'}{' '}
-          Контекст — текущая неделя программы.
+            ? 'Разбор идёт по правилам курса на устройстве. Контекст — текущая неделя программы.'
+            : 'Доступна расширенная проверка; при сбое остаётся локальный разбор. Контекст — текущая неделя.'}
         </p>
-        <p
-          className={`mt-3 rounded-xl px-3 py-2 text-xs ${
-            banner.tone === 'warn' ? 'bg-amber-soft/60 text-ink' : 'bg-teal-soft/50 text-ink'
-          }`}
-        >
-          {banner.text}
-        </p>
+        <p className="mt-3 text-xs text-slate">{banner.text}</p>
         {week && (
           <p className="mt-3 text-sm text-slate">
             Контекст: неделя {week.week_number} — <strong className="text-ink">{week.title_ru}</strong>

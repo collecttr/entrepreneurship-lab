@@ -64,11 +64,11 @@ export function WeekPage() {
 
   return (
     <div className="space-y-4">
-      <header className="surface rounded-3xl p-6">
+      <header className="surface rounded-2xl p-4 md:rounded-3xl md:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal">
           {mod.title_ru} · неделя {n}
         </p>
-        <h1 className="mt-2 font-display text-3xl text-ink">{week.title_ru}</h1>
+        <h1 className="mt-2 font-display text-2xl text-ink md:text-3xl">{week.title_ru}</h1>
         <p className="mt-2 text-sm text-slate">
           Обязательная нагрузка (вариант {slot}): <strong className="text-ink">{mins} мин</strong> /{' '}
           {STUDY_MINUTES_CAP} (~4 ч)

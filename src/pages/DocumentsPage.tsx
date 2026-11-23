@@ -98,11 +98,11 @@ export function DocumentsPage() {
           PDF / DOCX / PPTX ≤ {Math.round(MAX_FILE_BYTES / (1024 * 1024))} МБ. Версии, привязка к неделе и
           заданию, комментарии. Без публичных ссылок.
         </p>
-        <p className="mt-3 rounded-xl bg-amber-soft/50 px-3 py-2 text-xs text-ink">{privacyBannerText()}</p>
+        <p className="mt-3 text-xs text-slate">{privacyBannerText()}</p>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="mt-4 rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep"
+          className="mt-4 min-h-11 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-on-accent hover:bg-teal-deep"
         >
           {showForm ? 'Закрыть форму' : 'Загрузить документ'}
         </button>
