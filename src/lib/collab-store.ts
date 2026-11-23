@@ -434,6 +434,15 @@ function readStoredPeer(myId: string): PeerContact | null {
   }
 }
 
+function bumpCloudUiPrefs(userId: string | undefined) {
+  if (!userId) return
+  void import('@/lib/ui-prefs-store')
+    .then((m) => m.noteCollabUiChange(userId))
+    .catch(() => {
+      // optional module
+    })
+}
+
 /** Persist the 1:1 chat contact per learner (survives reload). Pass myId of the signed-in user. */
 export function setChatPeer(contact: PeerContact | null, myId?: string) {
   try {
@@ -451,6 +460,7 @@ export function setChatPeer(contact: PeerContact | null, myId?: string) {
         // ignore
       }
       broadcast({ type: 'read' })
+      bumpCloudUiPrefs(myId)
       return
     }
     const normalized: PeerContact = {
@@ -465,6 +475,7 @@ export function setChatPeer(contact: PeerContact | null, myId?: string) {
     }
     rememberProfile(normalized)
     broadcast({ type: 'read' })
+    bumpCloudUiPrefs(myId)
   } catch (err) {
     console.warn('setChatPeer failed:', err)
   }
@@ -529,6 +540,7 @@ export function setForumListFilters(userId: string, filters: { kind: ForumKind |
     kind: filters.kind,
     q: filters.q,
   })
+  bumpCloudUiPrefs(userId)
 }
 
 /** Remember last opened forum thread for this learner (survives reload). */
@@ -539,6 +551,7 @@ export function setLastForumDiscussion(userId: string, discussionId: string | nu
     lastDiscussionId: discussionId,
   })
   broadcast({ type: 'discussions' })
+  bumpCloudUiPrefs(userId)
 }
 
 export function getLastForumPath(userId: string): string {

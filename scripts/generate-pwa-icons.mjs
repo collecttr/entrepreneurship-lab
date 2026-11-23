@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
  * Rasterize public/favicon.svg → apple-touch / PWA PNGs.
+ * Opaque RGB (no alpha) — iOS Home Screen often falls back to a letter when the
+ * touch icon is missing, HTML, or has awkward transparency at the corners.
  * Run: node scripts/generate-pwa-icons.mjs
  */
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -11,11 +13,18 @@ import sharp from 'sharp'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const svg = readFileSync(join(root, 'public/favicon.svg'))
 
-/** Full-bleed icon (SVG already has rounded graphite plate). */
+/** Graphite plate — matches SVG gradient end / maskable bg. */
+const PLATE = { r: 58, g: 58, b: 62 }
+
+/** Full-bleed icon flattened to opaque RGB PNG (iOS-safe). */
 async function writeFull(size, name) {
-  const out = await sharp(svg).resize(size, size).png().toBuffer()
+  const out = await sharp(svg)
+    .resize(size, size)
+    .flatten({ background: PLATE })
+    .png({ palette: false })
+    .toBuffer()
   writeFileSync(join(root, 'public', name), out)
-  console.log('wrote', name, `${size}x${size}`)
+  console.log('wrote', name, `${size}x${size}`, 'opaque-rgb')
 }
 
 /**
@@ -25,20 +34,25 @@ async function writeFull(size, name) {
 async function writeMaskable(size, name, padRatio = 0.18) {
   const pad = Math.round(size * padRatio)
   const inner = size - pad * 2
-  const mark = await sharp(svg).resize(inner, inner).png().toBuffer()
+  const mark = await sharp(svg)
+    .resize(inner, inner)
+    .flatten({ background: PLATE })
+    .png()
+    .toBuffer()
   const out = await sharp({
     create: {
       width: size,
       height: size,
       channels: 3,
-      background: { r: 58, g: 58, b: 62 },
+      background: PLATE,
     },
   })
     .composite([{ input: mark, left: pad, top: pad }])
-    .png()
+    .flatten({ background: PLATE })
+    .png({ palette: false })
     .toBuffer()
   writeFileSync(join(root, 'public', name), out)
-  console.log('wrote', name, `${size}x${size}`)
+  console.log('wrote', name, `${size}x${size}`, 'maskable opaque-rgb')
 }
 
 await writeFull(180, 'apple-touch-icon.png')

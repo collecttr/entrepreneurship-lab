@@ -34,7 +34,7 @@ interface AuthContextValue {
   authError: string | null
   hasSession: boolean
   retryProfile: () => Promise<void>
-  signIn: (email: string, password: string) => Promise<{ error?: string }>
+  signIn: (email: string, password: string) => Promise<{ error?: string; userId?: string }>
   signOut: () => Promise<void>
 }
 
@@ -397,7 +397,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(match.profile)
         setHasSession(true)
         setAuthError(null)
-        return {}
+        return { userId: match.profile.id }
       }
 
       if (!supabase) {
@@ -440,7 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setHasSession(true)
       // Resume profile in background so submit never hangs on slow DB
       void applyProfileLoad(data.user.id, data.user.email ?? normalized)
-      return {}
+      return { userId: data.user.id }
     },
     [applyProfileLoad],
   )

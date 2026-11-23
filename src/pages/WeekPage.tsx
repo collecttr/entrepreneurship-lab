@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useEffect, type ReactNode } from 'react'
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import { ConceptPopover } from '@/components/ConceptPopover'
 import { HowtoCollapse } from '@/components/HowtoCollapse'
 import { getModule, getWeek, mandatoryMinutesForSlot } from '@/data/curriculum'
@@ -22,18 +22,21 @@ import {
 } from '@/data/study-guide'
 import { useAuth } from '@/context/AuthContext'
 import { getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
+import { getLastWeekSection, rememberWeekSection } from '@/lib/ui-prefs-store'
 
 function Block({
+  id,
   title,
   step,
   children,
 }: {
+  id?: string
   title: string
   step?: string
   children: ReactNode
 }) {
   return (
-    <section className="surface rounded-3xl p-5 md:p-6">
+    <section id={id} className="surface scroll-mt-20 rounded-3xl p-5 md:p-6">
       {step ? (
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate">{step}</p>
       ) : null}
@@ -52,12 +55,39 @@ function Sub({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
+const WEEK_SECTIONS = ['research', 'report', 'optional'] as const
+
 export function WeekPage() {
   const { weekNumber } = useParams()
+  const location = useLocation()
   const n = Number(weekNumber)
   const week = getWeek(n)
   const { profile } = useAuth()
   const unlocked = getUnlockedWeek()
+
+  useEffect(() => {
+    if (!profile || !Number.isFinite(n) || n < 1) return
+    const hash = location.hash.replace(/^#/, '')
+    const section = WEEK_SECTIONS.includes(hash as (typeof WEEK_SECTIONS)[number]) ? hash : null
+    rememberWeekSection(profile.id, n, section)
+  }, [profile?.id, n, location.hash])
+
+  // Restore section scroll once per week visit (hash wins, else last saved section).
+  useEffect(() => {
+    if (!profile || !Number.isFinite(n) || n < 1) return
+    const hash = location.hash.replace(/^#/, '')
+    const fromHash = WEEK_SECTIONS.includes(hash as (typeof WEEK_SECTIONS)[number]) ? hash : null
+    const stored =
+      getLastWeekSection(profile.id).weekNumber === n
+        ? getLastWeekSection(profile.id).section
+        : null
+    const targetId = fromHash || stored
+    if (!targetId || !WEEK_SECTIONS.includes(targetId as (typeof WEEK_SECTIONS)[number])) return
+    const t = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    return () => window.clearTimeout(t)
+  }, [profile?.id, n])
 
   if (!week || !Number.isFinite(n)) return <Navigate to="/program" replace />
 
@@ -127,7 +157,7 @@ export function WeekPage() {
       </header>
 
       {/* 1. Evidence-first research: question → sources → own thesis (theory last) */}
-      <Block step="Блок 1" title="Исследование">
+      <Block id="research" step="Блок 1" title="Исследование">
         <Sub title="Вопрос">
           <p className="text-lg font-medium text-ink">{week.research_question_ru}</p>
           <p className="mt-2 text-slate">Готовый ответ не выдаём — его нужно собрать из доказательств.</p>
@@ -366,7 +396,7 @@ export function WeekPage() {
       </Block>
 
       {/* 2. Report + AI check */}
-      <Block step="Блок 2" title="Доклад и проверка">
+      <Block id="report" step="Блок 2" title="Доклад и проверка">
         <p className="rounded-xl bg-mist/80 px-3 py-2 text-ink">{ASSESSMENT_FAIL_RETELL_RU}</p>
 
         <Sub title={`Ваше задание (${slot}) · ${own.code}`}>
@@ -438,7 +468,7 @@ export function WeekPage() {
       </Block>
 
       {/* 3. Optional extras — one collapsed surface */}
-      <Block step="Блок 3" title="По желанию">
+      <Block id="optional" step="Блок 3" title="По желанию">
         <details className="group" open={false}>
           <summary className="cursor-pointer list-none text-sm font-semibold text-ink underline-offset-2 marker:content-none hover:underline [&::-webkit-details-marker]:hidden">
             <span className="inline-flex items-center gap-1.5">

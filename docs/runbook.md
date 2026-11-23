@@ -55,7 +55,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 4. **Authentication** → **Settings** (или **Sign In / Providers**): отключите **Allow new users to sign up** / Sign ups = **OFF**.
 5. OAuth / Magic link — не включать на MVP.
 
-### 2.3. Применить миграции 001–011
+### 2.3. Применить миграции 001–014
 
 1. **SQL Editor** → **New query**.
 2. По порядку вставьте и **Run** содержимое файлов из репо:
@@ -72,10 +72,12 @@ npm run dev -- --host 127.0.0.1 --port 5173
    - `supabase/migrations/010_course_start_progress_snapshots.sql` (старт курса 2026-11-23 + `progress_snapshots` + имена Саша/Платон)
    - `supabase/migrations/011_zero_starter_progress_snapshots.sql` (**обязательно при ложных ~4%**: обнуляет снимки прогресса Саши и Платона)
    - `supabase/migrations/012_progress_snapshots_realtime.sql` (Realtime на `progress_snapshots` — доска Саша/Платон без F5)
+   - `supabase/migrations/013_ai_usage_expert_modes.sql` (режимы expert AI usage)
+   - `supabase/migrations/014_ui_prefs.sql` (**синхронизация UI phone↔PC**: последний чат/форум/маршрут; RLS только своя строка)
 3. Затем seed (если нужно контент в БД):
    - `supabase/seed.sql`
    - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте; таблица `exams` обязательна для UUID map)
-4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts`, `progress_snapshots` в publication (миграции 004 и 012).
+4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts`, `progress_snapshots`, `ui_prefs` в publication (миграции 004, 012, 014).
 
 ### 2.3a. Ложные ~4% / навыки «28» без сдач
 
@@ -102,6 +104,14 @@ Auth boot fail-open ≈ **2с**: если `getSession` / сеть зависае
 1. Safari → **aA** / настройки сайта → **Очистить данные сайта** для `entrepreneurship-lab.vercel.app` (или Настройки → Safari → Дополнения → данные сайтов).
 2. Удалите иконку с Домой → откройте сайт **в Safari** → войдите → снова **Поделиться → На экран «Домой»**.
 3. Если снова крутится: откройте `https://entrepreneurship-lab.vercel.app/login?skip_restore=1` и войдите заново.
+
+### 2.3e. Иконка «Л» вместо логотипа + sync UI между устройствами
+
+**Иконка PWA (iPhone):** после деплоя с `?v=15` / opaque PNG — удалите старую иконку с Домой и добавьте снова из Safari. Имя на экране: **Лаборатория**.
+
+**SQL (обязательно для cloud sync):** в SQL Editor выполните `supabase/migrations/014_ui_prefs.sql`. Затем Database → Publications → `ui_prefs` в Realtime.
+
+Синхронизируется для одного аккаунта: последний собеседник чата, тема форума/фильтры, путь (вкл. неделя/блок `#research|#report|#optional`). localStorage остаётся кэшем; без миграции приложение работает, но без phone↔PC.
 
 ### 2.4. Storage (private documents)
 
