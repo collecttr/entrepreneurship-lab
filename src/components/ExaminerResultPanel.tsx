@@ -1,7 +1,8 @@
 import type { ExaminerResult } from '@/ai/examiners'
 
-function modeLabel(mode: ExaminerResult['mode']): string {
-  if (mode === 'local_examiner') return 'локальная проверка'
+function modeLabel(mode: ExaminerResult['mode'], provider?: string): string {
+  if (mode === 'local_examiner') return 'локально'
+  if (mode === 'expert_llm') return provider ? `эксперт (LLM · ${provider})` : 'эксперт (LLM)'
   return mode
 }
 
@@ -18,7 +19,7 @@ export function ExaminerResultPanel({
       <div className="result-item flex flex-wrap items-center justify-between gap-2" style={{ ['--i' as string]: 0 }}>
         <h2 className="font-display text-xl text-ink">{result.title}</h2>
         <span className="rounded-full bg-teal-soft px-3 py-1 text-sm font-semibold text-teal-deep">
-          {result.overall}/100 · {modeLabel(result.mode)}
+          {result.overall}/100 · {modeLabel(result.mode, result.provider)}
         </span>
       </div>
 
@@ -153,7 +154,9 @@ export function ExaminerResultPanel({
       </div>
       <p className="result-item text-xs text-slate" style={{ ['--i' as string]: result.rubrics.length + 7 }}>
         {result.honesty_note_ru ??
-          'Балл обновляет карту навыков. Локальный разбор на устройстве — не ChatGPT; платный API не вызывался.'}
+          (result.mode === 'expert_llm'
+            ? 'Эксперт (LLM, free tier): мнение ментора. Балл обновляет карту навыков.'
+            : 'Балл обновляет карту навыков. Локальный разбор на устройстве — не ChatGPT; платный API не вызывался.')}
       </p>
     </section>
   )

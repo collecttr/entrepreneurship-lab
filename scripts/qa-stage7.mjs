@@ -229,7 +229,7 @@ const browser = await chromium.launch({ headless: true })
     await page.evaluate(() => document.querySelector('form')?.requestSubmit())
     await page.waitForTimeout(700)
     const t = await page.locator('body').innerText()
-    if (/\d+\/100/.test(t) && /local_examiner/i.test(t)) scored++
+    if (/\d+\/100/.test(t) && /локальн/i.test(t)) scored++
   }
   await shotPage(page, '11-simulators.png')
   ok(8, '≥3 simulators scored debrief with spend lock on', scored >= 3, `scoredModes=${scored}`)

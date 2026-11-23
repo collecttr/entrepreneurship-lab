@@ -1,8 +1,14 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import type { ExaminerResult } from '@/ai/examiners'
+import { examineWriting } from '@/ai/examiners'
+import { fetchWeekSourceSnippets } from '@/ai/local-evidence'
 import { AssignmentComments } from '@/components/AssignmentComments'
+import { ExaminerResultPanel } from '@/components/ExaminerResultPanel'
 import { WEEKS } from '@/data/curriculum'
 import { useAuth } from '@/context/AuthContext'
+import { isExpertExamConfigured } from '@/lib/ai-config'
+import { requestExpertExam } from '@/lib/expert-exam-client'
 import {
   getSubmission,
   getUnlockedWeek,
@@ -27,6 +33,9 @@ export function AssignmentDetailPage() {
   const existing = profile && found ? getSubmission(profile.id, found.assignment.code) : undefined
   const [body, setBody] = useState(existing?.body_md ?? '')
   const [message, setMessage] = useState<string | null>(null)
+  const [examResult, setExamResult] = useState<ExaminerResult | null>(null)
+  const [examBusy, setExamBusy] = useState(false)
+  const [examError, setExamError] = useState<string | null>(null)
 
   if (!found || !profile) return <Navigate to="/assignments" replace />
 
@@ -48,6 +57,8 @@ export function AssignmentDetailPage() {
     found.assignment.participant_slot === profile.participant_slot ||
     profile.role === 'admin'
 
+  const expertOn = isExpertExamConfigured()
+
   function onSave(e: FormEvent) {
     e.preventDefault()
     saveDraft(profile!.id, found!.assignment, found!.week.week_number, body)
@@ -63,6 +74,49 @@ export function AssignmentDetailPage() {
     submitAssignment(profile!.id, found!.assignment, found!.week.week_number, body)
     void syncOwnProgressSnapshot(profile!)
     setMessage('Сдано. Прогресс обновлён (не от просмотра страницы).')
+  }
+
+  async function runLocalExam() {
+    setExamError(null)
+    setExamBusy(true)
+    try {
+      const pageSnippets = await fetchWeekSourceSnippets(found!.week, 3)
+      const r = examineWriting(profile!.id, {
+        text: body,
+        weekNumber: found!.week.week_number,
+        pageSnippets,
+      })
+      setExamResult({
+        ...r,
+        title: `Локально · отчёт · ${found!.assignment.code}`,
+      })
+    } finally {
+      setExamBusy(false)
+    }
+  }
+
+  async function runExpertExam() {
+    setExamError(null)
+    setExamBusy(true)
+    try {
+      const outcome = await requestExpertExam({
+        userId: profile!.id,
+        trainerSlug: 'week-report',
+        learnerText: body,
+        weekNumber: found!.week.week_number,
+        extraFields: {
+          assignment_code: found!.assignment.code,
+          assignment_title: found!.assignment.title_ru,
+        },
+      })
+      if (!outcome.ok) {
+        setExamError(outcome.message_ru)
+        return
+      }
+      setExamResult(outcome.result)
+    } finally {
+      setExamBusy(false)
+    }
   }
 
   return (
@@ -124,6 +178,46 @@ export function AssignmentDetailPage() {
           </p>
         )}
       </form>
+
+      {slotOk && (
+        <section className="surface space-y-3 rounded-3xl p-5">
+          <h2 className="font-display text-xl text-ink">Проверка отчёта</h2>
+          <p className="text-sm text-slate">
+            <strong className="text-ink">локально</strong> — быстрый гейт и сверка тезисов с
+            источниками недели.{' '}
+            {expertOn ? (
+              <>
+                <strong className="text-ink">эксперт (LLM)</strong> — free-tier ментор по идеям
+                (продажи / переговоры / предпринимательство), русский разбор.
+              </>
+            ) : (
+              <>Эксперт (LLM) появится после ключей free-провайдеров на Vercel.</>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={examBusy || !body.trim()}
+              onClick={() => void runLocalExam()}
+              className="rounded-xl bg-teal px-4 py-2 text-sm font-semibold text-on-accent hover:bg-teal-deep disabled:opacity-50"
+            >
+              {examBusy ? 'Проверяю…' : 'Проверить локально'}
+            </button>
+            {expertOn && (
+              <button
+                type="button"
+                disabled={examBusy || !body.trim()}
+                onClick={() => void runExpertExam()}
+                className="rounded-xl border border-ink/15 bg-paper px-4 py-2 text-sm font-semibold text-ink hover:bg-mist disabled:opacity-50"
+              >
+                {examBusy ? 'Эксперт думает…' : 'Экспертная проверка'}
+              </button>
+            )}
+          </div>
+          {examError && <p className="text-sm text-danger">{examError}</p>}
+          {examResult && <ExaminerResultPanel result={examResult} />}
+        </section>
+      )}
 
       <AssignmentComments assignmentCode={found.assignment.code} authorId={profile.id} />
     </div>

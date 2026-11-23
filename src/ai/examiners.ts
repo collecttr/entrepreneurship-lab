@@ -27,7 +27,7 @@ export interface ExaminerClaimRow {
 }
 
 export interface ExaminerResult {
-  mode: 'local_examiner'
+  mode: 'local_examiner' | 'expert_llm'
   title: string
   overall: number
   rubrics: RubricScore[]
@@ -38,6 +38,9 @@ export interface ExaminerResult {
   refused_weak_agreement?: boolean
   claim_rows?: ExaminerClaimRow[]
   honesty_note_ru?: string
+  /** Free-tier provider id when mode === expert_llm */
+  provider?: string
+  model?: string
 }
 
 function claimRowsFrom(g: SourceGroundingResult): ExaminerClaimRow[] {

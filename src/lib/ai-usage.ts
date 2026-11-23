@@ -41,3 +41,11 @@ export function monthlyCostUnits(userId: string): number {
     .filter((r) => r.created_at.startsWith(month))
     .reduce((s, r) => s + r.cost_units, 0)
 }
+
+/** Client soft-cap helper for free-tier expert (live_proxy) calls this month. */
+export function monthlyExpertRequests(userId: string): number {
+  const month = new Date().toISOString().slice(0, 7)
+  return listUsage(userId).filter(
+    (r) => r.created_at.startsWith(month) && r.mode === 'live_proxy',
+  ).length
+}

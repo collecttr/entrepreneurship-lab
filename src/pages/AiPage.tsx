@@ -1,5 +1,10 @@
 import { Link } from 'react-router-dom'
-import { TRAINERS, examinerBanner, isSpendLockOn } from '@/lib/ai-config'
+import {
+  TRAINERS,
+  examinerBanner,
+  isExpertExamConfigured,
+  isSpendLockOn,
+} from '@/lib/ai-config'
 import { getUnlockedWeek } from '@/lib/progress-store'
 import { getWeek } from '@/data/curriculum'
 
@@ -23,9 +28,11 @@ export function AiPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Бизнес-симуляторы</p>
         <h1 className="mt-2 font-display text-3xl text-ink">Тренажёры и разбор практики</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate">
-          {isSpendLockOn()
-            ? 'Free tier: локальный разбор на устройстве сверяет мысль с доверенными источниками недели. Облачный ChatGPT без ключа не обещаем.'
-            : 'Локальная сверка с источниками всегда есть; облачный LLM — только при ключе. Контекст — текущая неделя.'}
+          {isExpertExamConfigured()
+            ? 'Два режима: локально (быстрый гейт / источники недели) и эксперт (LLM, free tier) — ментор по идеям через серверный proxy.'
+            : isSpendLockOn()
+              ? 'Free tier: локальный разбор на устройстве сверяет мысль с источниками недели. Эксперт (LLM) — после ключей на Vercel.'
+              : 'Локальная сверка с источниками всегда есть; облачный эксперт — только при ключе на сервере.'}
         </p>
         <p className="mt-3 text-xs text-slate">{banner.text}</p>
         {week && (
@@ -44,8 +51,10 @@ export function AiPage() {
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-teal">
               {t.slug === 'sales' || t.slug === 'negotiation'
-                ? 'диалог · локальная проверка'
-                : 'локальная проверка'}
+                ? 'диалог · локально'
+                : t.supports_expert && isExpertExamConfigured()
+                  ? 'локально · эксперт (LLM)'
+                  : 'локально'}
             </p>
             <h2 className="mt-1 font-display text-xl text-ink">{t.title_ru}</h2>
             <p className="mt-2 text-sm text-slate">{t.blurb_ru}</p>
