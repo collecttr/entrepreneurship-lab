@@ -117,6 +117,8 @@ export function LoginPage() {
               <ul className="mt-2 space-y-1">
                 {DEMO_USERS.map((u) => (
                   <li key={u.email}>
+                    <span className="font-medium text-ink">{u.profile.display_name}</span>
+                    {' · '}
                     <code>{u.email}</code> / <code>{u.password}</code>
                     {u.profile.role === 'admin' ? ' · админ + слот B' : ' · слот A'}
                   </li>

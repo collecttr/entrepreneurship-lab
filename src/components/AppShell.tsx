@@ -16,8 +16,10 @@ import {
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { getLastForumPath, subscribeCollab, unreadCount } from '@/lib/collab-store'
+import { canonicalDisplayName } from '@/lib/learners'
 import { isDemoAuth } from '@/lib/supabase'
 import { DemoBanner } from './DemoBanner'
+import { EntryToasts } from './EntryToasts'
 
 const NAV = [
   { to: '/dashboard', label: 'Обзор', icon: LayoutDashboard },
@@ -100,7 +102,9 @@ export function AppShell() {
 
             <div className="mt-4 border-t border-ink/10 pt-4">
               <div className="mb-3">
-                <p className="font-medium text-ink">{profile?.display_name}</p>
+                <p className="font-medium text-ink">
+                  {profile ? canonicalDisplayName(profile) : ''}
+                </p>
                 <p className="text-xs text-slate">
                   {profile?.role === 'admin' ? 'Админ' : 'Участник'}
                   {profile?.participant_slot ? ` · вариант заданий ${profile.participant_slot}` : ''}
@@ -145,6 +149,7 @@ export function AppShell() {
           </main>
         </div>
       </div>
+      <EntryToasts />
     </div>
   )
 }

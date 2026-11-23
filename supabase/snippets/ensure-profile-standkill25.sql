@@ -10,7 +10,7 @@ insert into public.profiles (id, email, display_name, role, participant_slot, ti
 select
   u.id,
   lower(u.email),
-  coalesce(u.raw_user_meta_data->>'display_name', split_part(u.email, '@', 1)),
+  'Саша',
   'admin'::public.user_role,
   'B'::public.participant_slot,
   'Europe/Moscow'
@@ -19,7 +19,9 @@ where lower(u.email) = 'standkill25@gmail.com'
 on conflict (id) do update
 set
   email = excluded.email,
-  display_name = coalesce(public.profiles.display_name, excluded.display_name),
+  display_name = 'Саша',
+  role = 'admin'::public.user_role,
+  participant_slot = coalesce(public.profiles.participant_slot, 'B'::public.participant_slot),
   updated_at = now();
 
 -- Verify

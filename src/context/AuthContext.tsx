@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { DEMO_USERS } from '@/lib/demo-data'
+import { canonicalDisplayName, learnerByEmail } from '@/lib/learners'
 import { refreshUnlockedWeekFromSupabase } from '@/lib/progress-store'
 import { isDemoAuth, supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
@@ -56,12 +57,13 @@ function writeDemoSession(profile: Profile | null) {
 }
 
 function syntheticProfile(userId: string, email: string): Profile {
+  const learner = learnerByEmail(email)
   return {
     id: userId,
     email,
-    display_name: email.split('@')[0] ?? email,
-    role: 'learner',
-    participant_slot: null,
+    display_name: learner?.display_name ?? email.split('@')[0] ?? email,
+    role: learner?.role ?? 'learner',
+    participant_slot: learner?.participant_slot ?? null,
     avatar_path: null,
     timezone: 'Europe/Moscow',
     created_at: new Date().toISOString(),
@@ -71,11 +73,15 @@ function syntheticProfile(userId: string, email: string): Profile {
 
 async function upsertOwnProfile(userId: string, email: string): Promise<Profile | null> {
   if (!supabase) return null
+  const learner = learnerByEmail(email)
   const payload = {
     id: userId,
     email: email.toLowerCase(),
-    display_name: email.split('@')[0] || email,
+    display_name: learner?.display_name ?? (email.split('@')[0] || email),
     timezone: 'Europe/Moscow',
+    ...(learner
+      ? { role: learner.role, participant_slot: learner.participant_slot }
+      : {}),
   }
   const { data, error } = await supabase
     .from('profiles')
@@ -107,7 +113,20 @@ async function loadProfileOnce(userId: string, email: string): Promise<LoadProfi
     }
   }
   if (data) {
-    return { ok: true, profile: data as Profile }
+    const row = data as Profile
+    const learner = learnerByEmail(row.email)
+    if (learner && row.display_name !== learner.display_name) {
+      return {
+        ok: true,
+        profile: {
+          ...row,
+          display_name: learner.display_name,
+          role: row.role === 'admin' ? row.role : learner.role,
+          participant_slot: row.participant_slot ?? learner.participant_slot,
+        },
+      }
+    }
+    return { ok: true, profile: { ...row, display_name: canonicalDisplayName(row) } }
   }
 
   // Missing row: try client upsert (RLS allows own insert when allowlisted after migration 007)

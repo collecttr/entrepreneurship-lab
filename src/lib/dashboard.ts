@@ -91,7 +91,7 @@ function buildFromCurriculum(profile: Profile): DashboardData {
   const settings: ProgramSettings = {
     id: 1,
     current_unlocked_week: unlocked,
-    program_start_date: '2026-11-17',
+    program_start_date: '2026-11-23',
     hours_per_week_target: 240,
     ai_spend_lock: true,
     ai_monthly_budget_tokens: 0,

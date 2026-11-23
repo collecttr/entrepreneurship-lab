@@ -10,6 +10,7 @@ import {
   saveDraft,
   submitAssignment,
 } from '@/lib/progress-store'
+import { syncOwnProgressSnapshot } from '@/lib/peer-progress'
 
 export function AssignmentDetailPage() {
   const { id } = useParams()
@@ -60,6 +61,7 @@ export function AssignmentDetailPage() {
       return
     }
     submitAssignment(profile!.id, found!.assignment, found!.week.week_number, body)
+    void syncOwnProgressSnapshot(profile!)
     setMessage('Сдано. Прогресс обновлён (не от просмотра страницы).')
   }
 

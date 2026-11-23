@@ -1,4 +1,5 @@
 import { DEMO_USERS } from '@/lib/demo-data'
+import { canonicalDisplayName } from '@/lib/learners'
 import { isDemoAuth, supabase, supabaseConfigured } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
@@ -1008,9 +1009,16 @@ export function addAssignmentComment(input: {
 
 export function authorName(userId: string): string {
   const cached = readProfileCache()[userId]
-  if (cached?.display_name) return cached.display_name
-  const demo = DEMO_USERS.find((u) => u.profile.id === userId)?.profile.display_name
-  if (demo) return isDemoAuth ? `${demo} (демо)` : demo
+  if (cached) {
+    const name = canonicalDisplayName(cached)
+    if (name !== 'Участник') return name
+    if (cached.display_name) return cached.display_name
+  }
+  const demo = DEMO_USERS.find((u) => u.profile.id === userId)?.profile
+  if (demo) {
+    const name = canonicalDisplayName(demo)
+    return isDemoAuth ? `${name} (демо)` : name
+  }
   return 'Участник'
 }
 
