@@ -5,7 +5,12 @@ import {
   formatRuDate,
   weekDeadlineDate,
 } from '@/lib/course-calendar'
-import { loadPeerProgressBoard, type LearnerProgressCard } from '@/lib/peer-progress'
+import {
+  loadPeerProgressBoard,
+  syncOwnProgressSnapshot,
+  type LearnerProgressCard,
+} from '@/lib/peer-progress'
+import { ensureCleanCourseStart } from '@/lib/progress-store'
 import type { Profile } from '@/lib/types'
 
 function ProgressBar({ value }: { value: number }) {
@@ -98,9 +103,12 @@ export function PeerProgressBoard({ profile }: { profile: Profile }) {
 
   useEffect(() => {
     let cancelled = false
-    void loadPeerProgressBoard(profile).then((rows) => {
+    void (async () => {
+      ensureCleanCourseStart()
+      await syncOwnProgressSnapshot(profile)
+      const rows = await loadPeerProgressBoard(profile)
       if (!cancelled) setCards(rows)
-    })
+    })()
     return () => {
       cancelled = true
     }

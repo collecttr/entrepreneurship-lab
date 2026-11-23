@@ -8,6 +8,7 @@ import {
 } from '@/lib/course-calendar'
 import { LEARNERS, canonicalDisplayName, learnerByEmail, type LearnerDef } from '@/lib/learners'
 import {
+  ensureCleanCourseStart,
   getUnlockedWeek,
   listSubmissions,
   progressPercent,
@@ -199,22 +200,35 @@ function cardFromSnapshot(row: ProgressSnapshotRow, me: Profile): LearnerProgres
     (s) => s.status === 'submitted' || s.status === 'graded',
   ).length
   if (localDone > 0) return { ...base, source: 'local' }
+
+  // Stale / seeded remote rows with 0 assignments must never paint a fake bar.
+  const assignmentsCompleted = Math.max(0, row.assignments_completed ?? 0)
+  const progressPct =
+    assignmentsCompleted === 0 ? 0 : Math.max(0, Math.min(100, row.progress_pct ?? 0))
+  const weeksCompleted = assignmentsCompleted === 0 ? 0 : row.weeks_completed
+  const stagesCompleted = assignmentsCompleted === 0 ? 0 : row.stages_completed
+
   return {
     ...base,
-    weeks_completed: row.weeks_completed,
-    weeks_remaining: row.weeks_remaining,
-    stages_completed: row.stages_completed,
-    current_week: row.current_week,
-    assignments_completed: row.assignments_completed,
-    assignments_total: row.assignments_total,
-    assignments_remaining: Math.max(0, row.assignments_total - row.assignments_completed),
-    progress_pct: row.progress_pct,
+    weeks_completed: weeksCompleted,
+    weeks_remaining:
+      assignmentsCompleted === 0 ? TOTAL_COURSE_WEEKS : row.weeks_remaining,
+    stages_completed: stagesCompleted,
+    current_week: row.current_week || 1,
+    assignments_completed: assignmentsCompleted,
+    assignments_total: row.assignments_total || base.assignments_total,
+    assignments_remaining: Math.max(
+      0,
+      (row.assignments_total || base.assignments_total) - assignmentsCompleted,
+    ),
+    progress_pct: progressPct,
     source: 'remote',
   }
 }
 
 /** Build Саша vs Платон cards from local submissions + optional remote snapshots. */
 export async function loadPeerProgressBoard(me: Profile): Promise<LearnerProgressCard[]> {
+  ensureCleanCourseStart()
   const remote = await fetchProgressSnapshots()
 
   const cards = LEARNERS.map((learner) => {
@@ -265,6 +279,7 @@ async function fetchProgressSnapshots(): Promise<ProgressSnapshotRow[]> {
 
 /** Persist own progress for the peer board (cross-device). Safe no-op if table missing. */
 export async function syncOwnProgressSnapshot(profile: Profile): Promise<void> {
+  ensureCleanCourseStart()
   const card = computeLearnerProgress({
     userId: profile.id,
     email: profile.email,

@@ -3,6 +3,7 @@ import { SKILLS } from '@/data/skills'
 import { authorName, listDiscussions, listMessages } from '@/lib/collab-store'
 import {
   assignmentsForProfile,
+  ensureCleanCourseStart,
   getSkillProgress,
   getUnlockedWeek,
   listSubmissions,
@@ -52,6 +53,7 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
 }
 
 function buildFromCurriculum(profile: Profile): DashboardData {
+  ensureCleanCourseStart()
   const unlocked = getUnlockedWeek()
   const week = getWeek(unlocked) ?? getWeek(1)!
   const mod = getModule(week.week_number)
