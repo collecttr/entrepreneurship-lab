@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { assignmentsForProfile, getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
+import { assignmentsForProfile } from '@/lib/progress-assignments'
+import { getUnlockedWeek, isWeekUnlocked } from '@/lib/progress-store'
 
 export function AssignmentsPage() {
   const { profile } = useAuth()

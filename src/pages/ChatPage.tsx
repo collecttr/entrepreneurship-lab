@@ -55,10 +55,19 @@ function ChatPageInner() {
       email: profile.email,
       display_name: profile.display_name,
     })
+    // Local peer first — paint before network hydrate
     setPeer(getPeerProfile(profile.id))
-    void hydrateAllowlistedProfiles(profile.id).then(() => {
-      setPeer(getPeerProfile(profile.id))
-    })
+    const runHydrate = () => {
+      void hydrateAllowlistedProfiles(profile.id).then(() => {
+        setPeer(getPeerProfile(profile.id))
+      })
+    }
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(runHydrate, { timeout: 1500 })
+      return () => cancelIdleCallback(id)
+    }
+    const t = window.setTimeout(runHydrate, 0)
+    return () => window.clearTimeout(t)
   }, [profile])
 
   useEffect(() => {
@@ -76,6 +85,7 @@ function ChatPageInner() {
         setLoadError('Не удалось загрузить сообщения. Показан пустой чат.')
       }
     }
+    // One local read for first paint; mark-read + subscribe after
     refresh()
     try {
       markingRead.current = true
@@ -83,7 +93,12 @@ function ChatPageInner() {
     } finally {
       markingRead.current = false
     }
-    refresh()
+    // Second refresh only if unread cleared (avoid duplicate work on empty inbox)
+    if (unreadCount(profile.id) === 0) {
+      setUnread(0)
+    } else {
+      refresh()
+    }
     return subscribeCollab((event) => {
       refresh()
       if (event.type === 'messages' && !markingRead.current) {
@@ -102,7 +117,8 @@ function ChatPageInner() {
   }, [profile])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Instant jump on first paint; smooth only for later messages
+    bottomRef.current?.scrollIntoView({ behavior: messages.length > 8 ? 'smooth' : 'auto' })
   }, [messages.length])
 
   async function runSearch(e?: FormEvent) {

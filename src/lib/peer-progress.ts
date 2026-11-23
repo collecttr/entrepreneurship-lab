@@ -7,11 +7,11 @@ import {
   moscowDateString,
 } from '@/lib/course-calendar'
 import { LEARNERS, canonicalDisplayName, learnerByEmail, type LearnerDef } from '@/lib/learners'
+import { progressPercent } from '@/lib/progress-assignments'
 import {
   ensureCleanCourseStart,
   getUnlockedWeek,
   listSubmissions,
-  progressPercent,
   type SubmissionRecord,
 } from '@/lib/progress-store'
 import { DEMO_USERS } from '@/lib/demo-data'

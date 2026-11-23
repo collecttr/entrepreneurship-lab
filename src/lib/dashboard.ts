@@ -1,13 +1,12 @@
 import { getModule, getWeek, WEEKS } from '@/data/curriculum'
 import { SKILLS } from '@/data/skills'
 import { authorName, listDiscussions, listMessages } from '@/lib/collab-store'
+import { assignmentsForProfile, progressPercent } from '@/lib/progress-assignments'
 import {
-  assignmentsForProfile,
   ensureCleanCourseStart,
   getSkillProgress,
   getUnlockedWeek,
   listSubmissions,
-  progressPercent,
 } from '@/lib/progress-store'
 import { isDemoAuth, supabase } from './supabase'
 import type { DashboardData, Profile, ProgramSettings } from './types'

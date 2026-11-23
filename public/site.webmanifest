@@ -4,7 +4,7 @@
   "description": "Закрытый курс: продажи, переговоры, презентации — 26 недель для двух участников.",
   "lang": "ru",
   "dir": "ltr",
-  "start_url": "/dashboard?v=13",
+  "start_url": "/dashboard?v=14",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
