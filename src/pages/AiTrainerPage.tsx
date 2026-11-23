@@ -84,7 +84,11 @@ export function AiTrainerPage() {
     setResult(null)
     setBusy(true)
     try {
-      const needsGrounding = slug === 'socratic' || slug === 'writing-evaluator'
+      const needsGrounding =
+        slug === 'socratic' ||
+        slug === 'writing-evaluator' ||
+        slug === 'presentation' ||
+        slug === 'business-case'
       const pageSnippets =
         needsGrounding && week ? await fetchWeekSourceSnippets(week, 3) : undefined
 
@@ -105,7 +109,11 @@ export function AiTrainerPage() {
           })
           break
         case 'presentation':
-          r = examinePresentation(profile!.id, { script: text, weekNumber: week?.week_number })
+          r = examinePresentation(profile!.id, {
+            script: text,
+            weekNumber: week?.week_number,
+            pageSnippets,
+          })
           break
         case 'socratic':
           r = examineSocratic(profile!.id, {
@@ -120,6 +128,7 @@ export function AiTrainerPage() {
             options,
             recommendation,
             weekNumber: week?.week_number,
+            pageSnippets,
           })
           break
         case 'writing-evaluator':

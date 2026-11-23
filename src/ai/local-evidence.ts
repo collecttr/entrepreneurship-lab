@@ -7,7 +7,17 @@ export type ClaimVerdict =
   | 'partial'
   | 'unsupported'
   | 'insufficient_data'
+  | 'contradict'
   | 'retell_risk'
+
+/** Compact RU status for UI: поддержка / противоречие / недостаточно */
+export type ClaimStatusRu = 'поддержка' | 'противоречие' | 'недостаточно'
+
+export function claimStatusRu(v: ClaimVerdict): ClaimStatusRu {
+  if (v === 'supported' || v === 'partial') return 'поддержка'
+  if (v === 'contradict') return 'противоречие'
+  return 'недостаточно'
+}
 
 export interface MatchedSource {
   id: string
@@ -125,7 +135,7 @@ const STOP = new Set([
 ])
 
 const HONESTY_RU =
-  'Локальный разбор (free tier, без платного API): сверяет ваш текст с карточками доверенных источников недели (название, «зачем», «что извлечь», вопросы) и с URL из списка недели. Это не ChatGPT и не полная проверка «всех публичных фактов в интернете». Живые страницы из браузера часто недоступны из‑за CORS — если страница не подтянулась, вердикт строится только по встроенной карточке. Спорные утверждения без опоры помечаются как «недостаточно данных».'
+  'Локальный разбор (free tier, без платного API): выделяет тезисы и сверяет их с карточками источников недели (название, «зачем», «что извлечь», вопросы), методичкой и списком типичных ошибок. Статусы: поддержка / противоречие / недостаточно. Это не ChatGPT и не полная проверка «всех публичных фактов в интернете». Живые страницы часто недоступны из‑за CORS — тогда вердикт только по карточке. Платный LLM не вызывается.'
 
 function normalize(s: string): string {
   return s
@@ -173,6 +183,7 @@ function buildWeekCorpus(
   sources: CorpusEntry[]
   questionTerms: string[]
   theoryTerms: string[]
+  errorTerms: { text: string; terms: string[] }[]
   live_pages_used: number
 } {
   const sources: CorpusEntry[] = []
@@ -215,8 +226,13 @@ function buildWeekCorpus(
 
   return {
     sources,
-    questionTerms: unique(tokens(`${week.research_question_ru} ${week.practical_task_ru} ${week.compare_prompt_ru}`)),
+    questionTerms: unique(
+      tokens(
+        `${week.research_question_ru} ${week.practical_task_ru} ${week.compare_prompt_ru} ${week.concepts.join(' ')} ${week.case_ru}`,
+      ),
+    ),
     theoryTerms: unique(tokens(week.theory_short_ru)),
+    errorTerms: week.error_watchlist.map((e) => ({ text: e, terms: unique(tokens(e)) })),
     live_pages_used,
   }
 }
@@ -292,6 +308,11 @@ export function analyzeAgainstWeekSources(
       .sort((a, b) => b.hits - a.hits)
 
     const best = related[0]
+    const errorHit = corpus.errorTerms
+      .map((e) => ({ text: e.text, hits: overlapTerms(e.terms, stSet).length }))
+      .filter((x) => x.hits >= 2)
+      .sort((a, b) => b.hits - a.hits)[0]
+
     const isEpistemicOnly =
       /(недостаточно|гипотеза|возможно|неизвестно)/i.test(excerpt) && related.length === 0
     const looksLikeRetell =
@@ -299,25 +320,36 @@ export function analyzeAgainstWeekSources(
       !/(вывод|поэтому|значит|применя|для нас|для сделки|для оффера)/i.test(excerpt) &&
       st.length < 14
 
+    const rejectsErrorPattern =
+      /а не\b|не с\b|не дела|избег|вместо питч|не питч|не начина|ошибк/i.test(excerpt)
+
     let verdict: ClaimVerdict
     let note_ru: string
-    if (isEpistemicOnly) {
+    if (
+      errorHit &&
+      !rejectsErrorPattern &&
+      errorHit.hits >= 2 &&
+      errorHit.hits >= (best?.hits ?? 0) + (best ? 1 : 0)
+    ) {
+      verdict = 'contradict'
+      note_ru = `Противоречие типичной ошибке недели: «${errorHit.text.slice(0, 90)}${errorHit.text.length > 90 ? '…' : ''}».`
+    } else if (isEpistemicOnly) {
       verdict = 'insufficient_data'
       note_ru = 'Честно отмечен пробел — хорошо; укажите, какой источник закрыл бы его.'
     } else if (!best) {
       verdict = epistemic.marks_insufficient ? 'insufficient_data' : 'unsupported'
       note_ru = epistemic.marks_insufficient
-        ? 'Утверждение без опоры на источники недели — помечено как недостаточно данных.'
-        : 'Не видно пересечения с доверенными источниками недели. Добавьте цитату/URL или снизьте уверенность.'
+        ? 'Утверждение без опоры на источники недели — статус «недостаточно».'
+        : 'Недостаточно опоры на источники недели. Добавьте цитату/URL или снизьте уверенность.'
     } else if (looksLikeRetell) {
       verdict = 'retell_risk'
-      note_ru = `Похоже на пересказ «${best.title_ru}» без вывода к вопросу недели.`
+      note_ru = `Похоже на пересказ «${best.title_ru}» без вывода к вопросу недели (недостаточно как ответ).`
     } else if (best.hits >= 4) {
       verdict = 'supported'
-      note_ru = `Согласуется с карточкой источника недели (${best.hits} пересечений терминов).`
+      note_ru = `Поддержка: согласуется с карточкой «${best.title_ru}» (${best.hits} пересечений).`
     } else {
       verdict = 'partial'
-      note_ru = `Частичное пересечение с источником недели — усильте ссылкой или цитатой.`
+      note_ru = `Поддержка частичная — пересечение с источником недели; усильте ссылкой или цитатой.`
     }
 
     return {
@@ -330,14 +362,19 @@ export function analyzeAgainstWeekSources(
 
   const supported = claims.filter((c) => c.verdict === 'supported' || c.verdict === 'partial').length
   const unsupported = claims.filter((c) => c.verdict === 'unsupported').length
+  const contradict = claims.filter((c) => c.verdict === 'contradict').length
   const retell = claims.filter((c) => c.verdict === 'retell_risk').length
   const retell_without_answer = retell >= 2 && !answers_research_question
 
-  const grounding = Math.min(
-    40,
-    matched_sources.slice(0, 3).reduce((acc, m) => acc + Math.min(14, Math.round(m.overlap / 5)), 0) +
-      citedWeek.length * 8 +
-      Math.min(10, supported * 4),
+  const grounding = Math.max(
+    0,
+    Math.min(
+      40,
+      matched_sources.slice(0, 3).reduce((acc, m) => acc + Math.min(14, Math.round(m.overlap / 5)), 0) +
+        citedWeek.length * 8 +
+        Math.min(10, supported * 4) -
+        contradict * 6,
+    ),
   )
 
   const answer = retell_without_answer
@@ -372,8 +409,11 @@ export function analyzeAgainstWeekSources(
     matched_sources.length === 0
       ? 'Нет явной сверки с доверенными источниками недели (термины/URL карточек)'
       : '',
+    contradict > 0
+      ? `${contradict} тезис(ов) противоречат типичным ошибкам / анти-паттернам недели`
+      : '',
     unsupported > 0
-      ? `${unsupported} фрагмент(ов) без опоры на источники недели — снизьте уверенность или добавьте доказательство`
+      ? `${unsupported} фрагмент(ов) со статусом «недостаточно» — снизьте уверенность или добавьте доказательство`
       : '',
     retell_without_answer
       ? 'Риск пересказа материалов без ответа на вопрос недели'
@@ -409,7 +449,10 @@ export function analyzeAgainstWeekSources(
 
   const claimLines = claims
     .slice(0, 6)
-    .map((c) => `- _${c.excerpt}_\n  → **${verdictLabel(c.verdict)}**: ${c.note_ru}`)
+    .map(
+      (c) =>
+        `- **${claimStatusRu(c.verdict)}** (${verdictLabel(c.verdict)}) — _${c.excerpt}_\n  ${c.note_ru}`,
+    )
     .join('\n')
 
   const liveNote =
@@ -467,6 +510,8 @@ function verdictLabel(v: ClaimVerdict): string {
       return 'без опоры'
     case 'insufficient_data':
       return 'недостаточно данных'
+    case 'contradict':
+      return 'противоречие ошибке недели'
     case 'retell_risk':
       return 'риск пересказа'
   }
