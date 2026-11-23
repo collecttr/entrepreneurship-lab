@@ -70,6 +70,17 @@ export function LoginPage() {
           <h2 className="font-display text-2xl tracking-tight text-ink">Вход</h2>
           <p className="mt-1.5 text-[15px] text-slate">Email и пароль, выданные администратором.</p>
 
+          {loading ? (
+            <p className="mt-3 rounded-xl bg-mist/80 px-3 py-2 text-sm text-slate" role="status">
+              Восстанавливаем сессию… форма уже доступна.
+            </p>
+          ) : null}
+          {authError && !hasSession ? (
+            <p className="mt-3 rounded-xl bg-mist px-3 py-2 text-sm text-ink" role="status">
+              {authError}
+            </p>
+          ) : null}
+
           <form className="mt-6 space-y-4" onSubmit={(e) => void onSubmit(e)}>
             <label className="block text-sm">
               <span className="mb-1.5 block text-slate">Email</span>
@@ -104,7 +115,7 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={submitting || loading}
+              disabled={submitting}
               className="min-h-11 w-full rounded-xl bg-teal px-4 py-3.5 text-[15px] font-semibold text-on-accent hover:bg-teal-deep active:scale-[0.99] disabled:opacity-60"
             >
               {submitting ? 'Входим…' : 'Войти'}

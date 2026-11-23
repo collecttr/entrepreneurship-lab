@@ -58,6 +58,14 @@ export interface ProgressSnapshotRow {
   updated_at: string
 }
 
+/** Same-tab + multi-tab signal after submit / sync / reset. */
+export const PROGRESS_CHANGED_EVENT = 'elab-progress'
+
+export function notifyProgressChanged(reason = 'update') {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(PROGRESS_CHANGED_EVENT, { detail: { reason } }))
+}
+
 function doneStatuses(s: SubmissionRecord | undefined): boolean {
   return Boolean(s && (s.status === 'submitted' || s.status === 'graded'))
 }
@@ -288,6 +296,9 @@ export async function syncOwnProgressSnapshot(profile: Profile): Promise<void> {
     isYou: true,
   })
 
+  // Local board / other tabs update immediately even in demo or offline.
+  notifyProgressChanged('local-sync')
+
   if (isDemoAuth || !supabaseConfigured || !supabase) return
 
   try {
@@ -309,8 +320,88 @@ export async function syncOwnProgressSnapshot(profile: Profile): Promise<void> {
       onConflict: 'user_id',
     })
     if (error) console.warn('progress_snapshots upsert:', error.message)
+    else notifyProgressChanged('remote-sync')
   } catch (err) {
     console.warn('progress_snapshots upsert failed:', err)
+  }
+}
+
+/**
+ * Live peer board: Realtime on progress_snapshots + local custom/storage events.
+ * Free-tier friendly — one shared channel, refcounted.
+ */
+let progressRealtimeRefCount = 0
+let progressRealtimeCleanup: (() => void) | null = null
+
+export function subscribePeerProgress(onChange: () => void): () => void {
+  const refresh = () => {
+    try {
+      onChange()
+    } catch (err) {
+      console.warn('peer progress listener failed:', err)
+    }
+  }
+
+  const onCustom = () => refresh()
+  const onStorage = (e: StorageEvent) => {
+    if (
+      e.key === 'elab_submissions' ||
+      e.key === 'elab_unlocked_week' ||
+      e.key === 'elab_skill_progress' ||
+      e.key === null
+    ) {
+      refresh()
+    }
+  }
+
+  window.addEventListener(PROGRESS_CHANGED_EVENT, onCustom)
+  window.addEventListener('elab-progress-reset', onCustom)
+  window.addEventListener('elab-unlock', onCustom)
+  window.addEventListener('storage', onStorage)
+
+  if (!isDemoAuth && supabaseConfigured && supabase) {
+    const live = supabase
+    progressRealtimeRefCount += 1
+    if (progressRealtimeRefCount === 1 || !progressRealtimeCleanup) {
+      try {
+        const channel = live
+          .channel('elab-progress-live')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'progress_snapshots' },
+            () => refresh(),
+          )
+          .subscribe((status, err) => {
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.warn('realtime progress_snapshots:', err?.message ?? status)
+            }
+          })
+        progressRealtimeCleanup = () => {
+          try {
+            void live.removeChannel(channel)
+          } catch (removeErr) {
+            console.warn('realtime progress remove failed:', removeErr)
+          }
+          progressRealtimeCleanup = null
+        }
+      } catch (err) {
+        console.warn('realtime progress subscribe failed:', err)
+        progressRealtimeCleanup = null
+      }
+    }
+  }
+
+  return () => {
+    window.removeEventListener(PROGRESS_CHANGED_EVENT, onCustom)
+    window.removeEventListener('elab-progress-reset', onCustom)
+    window.removeEventListener('elab-unlock', onCustom)
+    window.removeEventListener('storage', onStorage)
+    if (!isDemoAuth && supabaseConfigured && supabase) {
+      progressRealtimeRefCount = Math.max(0, progressRealtimeRefCount - 1)
+      if (progressRealtimeRefCount === 0) {
+        progressRealtimeCleanup?.()
+      }
+    }
   }
 }
 
