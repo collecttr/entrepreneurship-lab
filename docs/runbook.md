@@ -71,10 +71,11 @@ npm run dev -- --host 127.0.0.1 --port 5173
    - `supabase/migrations/009_search_allowlisted_users.sql` (поиск собеседника по email среди allowlist + profiles)
    - `supabase/migrations/010_course_start_progress_snapshots.sql` (старт курса 2026-11-23 + `progress_snapshots` + имена Саша/Платон)
    - `supabase/migrations/011_zero_starter_progress_snapshots.sql` (**обязательно при ложных ~4%**: обнуляет снимки прогресса Саши и Платона)
+   - `supabase/migrations/012_progress_snapshots_realtime.sql` (Realtime на `progress_snapshots` — доска Саша/Платон без F5)
 3. Затем seed (если нужно контент в БД):
    - `supabase/seed.sql`
    - `supabase/seed_curriculum.sql` (большой — можно частями при таймауте; таблица `exams` обязательна для UUID map)
-4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts` в publication (миграция 004 добавляет).
+4. **Database** → **Publications** / Realtime: убедитесь, что таблицы `messages`, `discussions`, `discussion_posts`, `progress_snapshots` в publication (миграции 004 и 012).
 
 ### 2.3a. Ложные ~4% / навыки «28» без сдач
 

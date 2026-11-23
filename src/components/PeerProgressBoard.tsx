@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import {
   COURSE_START_DATE,
   TOTAL_COURSE_WEEKS,
@@ -7,6 +7,7 @@ import {
 } from '@/lib/course-calendar'
 import {
   loadPeerProgressBoard,
+  subscribePeerProgress,
   syncOwnProgressSnapshot,
   type LearnerProgressCard,
 } from '@/lib/peer-progress'
@@ -100,19 +101,41 @@ function LearnerColumn({ card, index }: { card: LearnerProgressCard; index: numb
 
 export function PeerProgressBoard({ profile }: { profile: Profile }) {
   const [cards, setCards] = useState<LearnerProgressCard[] | null>(null)
+  const profileRef = useRef(profile)
+  profileRef.current = profile
+  const reloadTimer = useRef<number | null>(null)
+
+  const reload = useCallback(async (opts?: { syncOwn?: boolean }) => {
+    const me = profileRef.current
+    try {
+      ensureCleanCourseStart()
+      if (opts?.syncOwn !== false) {
+        // Do not await forever — paint from local/remote fetch in parallel
+        void syncOwnProgressSnapshot(me)
+      }
+      const rows = await loadPeerProgressBoard(me)
+      setCards(rows)
+    } catch (err) {
+      console.warn('peer board reload failed:', err)
+    }
+  }, [])
+
+  const scheduleReload = useCallback(() => {
+    if (reloadTimer.current) window.clearTimeout(reloadTimer.current)
+    // Debounce Realtime + local bursts (free-tier friendly)
+    reloadTimer.current = window.setTimeout(() => {
+      void reload({ syncOwn: false })
+    }, 250)
+  }, [reload])
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      ensureCleanCourseStart()
-      await syncOwnProgressSnapshot(profile)
-      const rows = await loadPeerProgressBoard(profile)
-      if (!cancelled) setCards(rows)
-    })()
+    void reload({ syncOwn: true })
+    const unsub = subscribePeerProgress(scheduleReload)
     return () => {
-      cancelled = true
+      unsub()
+      if (reloadTimer.current) window.clearTimeout(reloadTimer.current)
     }
-  }, [profile])
+  }, [profile.id, reload, scheduleReload])
 
   const calendarWeek = cards?.[0]?.calendar_week ?? 1
   const deadline = weekDeadlineDate(calendarWeek, COURSE_START_DATE)
@@ -130,6 +153,7 @@ export function PeerProgressBoard({ profile }: { profile: Profile }) {
           </h2>
           <p className="mt-1 text-sm text-slate">
             Сравнение по закрытым неделям и сдачам · старт курса {formatRuDate(COURSE_START_DATE)} (МСК)
+            · обновляется сразу после сдачи
           </p>
         </div>
         <p className="text-xs text-slate">

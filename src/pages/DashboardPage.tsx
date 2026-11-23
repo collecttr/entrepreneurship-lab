@@ -41,9 +41,9 @@ export function DashboardPage() {
     let cancelled = false
     void (async () => {
       try {
-        // Migrate → push zeros to progress_snapshots → then paint dashboard.
+        // Migrate locally, paint dashboard; snapshot sync must not block first paint.
         ensureCleanCourseStart()
-        await syncOwnProgressSnapshot(profile)
+        void syncOwnProgressSnapshot(profile)
         const d = await loadDashboard(profile)
         if (!cancelled) setData(d)
       } catch (err: unknown) {

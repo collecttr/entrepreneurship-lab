@@ -177,6 +177,7 @@ export function submitAssignment(
     source: 'assignment',
     label: `Сдача ${assignment.code}`,
   })
+  window.dispatchEvent(new CustomEvent('elab-progress', { detail: { reason: 'submit' } }))
   return row
 }
 
