@@ -13,7 +13,7 @@ export const DEMO_USERS = [
     profile: {
       id: 'demo-user-a',
       email: 'learner.a@lab.local',
-      display_name: 'Анна Петрова',
+      display_name: 'Платон',
       role: 'learner' as const,
       participant_slot: 'A' as const,
       avatar_path: null,
@@ -28,7 +28,7 @@ export const DEMO_USERS = [
     profile: {
       id: 'demo-user-b',
       email: 'learner.b@lab.local',
-      display_name: 'Игорь Смирнов',
+      display_name: 'Саша',
       role: 'admin' as const,
       participant_slot: 'B' as const,
       avatar_path: null,
@@ -42,11 +42,11 @@ export const DEMO_USERS = [
 export const DEMO_SETTINGS: ProgramSettings = {
   id: 1,
   current_unlocked_week: 1,
-  program_start_date: '2026-11-17',
+  program_start_date: '2026-11-23',
   hours_per_week_target: 240,
   ai_spend_lock: true,
   ai_monthly_budget_tokens: 0,
-  updated_at: '2026-11-17T08:00:00Z',
+  updated_at: '2026-11-23T08:00:00Z',
 }
 
 export const DEMO_WEEK: WeekStub = {

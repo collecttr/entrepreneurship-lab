@@ -90,7 +90,9 @@ export function listDocumentComments(groupId: string): DocumentComment[] {
 }
 
 export function authorName(userId: string): string {
-  return DEMO_USERS.find((u) => u.profile.id === userId)?.profile.display_name ?? 'Участник'
+  const demo = DEMO_USERS.find((u) => u.profile.id === userId)?.profile
+  if (demo) return demo.display_name
+  return 'Участник'
 }
 
 export async function createDocumentWithUpload(input: {

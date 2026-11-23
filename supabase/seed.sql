@@ -41,6 +41,7 @@ on conflict (slug) do nothing;
 
 update public.program_settings
 set current_unlocked_week = 1,
+    program_start_date = '2026-11-23',
     ai_spend_lock = true,
     hours_per_week_target = 240
 where id = 1;

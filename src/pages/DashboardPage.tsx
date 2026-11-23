@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PeerProgressBoard } from '@/components/PeerProgressBoard'
 import { useAuth } from '@/context/AuthContext'
+import {
+  COURSE_START_DATE,
+  courseWeekNumber,
+  formatRuDate,
+  weekDeadlineDate,
+} from '@/lib/course-calendar'
 import { loadDashboard } from '@/lib/dashboard'
+import { canonicalDisplayName } from '@/lib/learners'
+import { syncOwnProgressSnapshot } from '@/lib/peer-progress'
 import type { DashboardData } from '@/lib/types'
 
 function DemoLabel({ show }: { show: boolean }) {
@@ -36,6 +45,7 @@ export function DashboardPage() {
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Ошибка загрузки')
       })
+    void syncOwnProgressSnapshot(profile)
     return () => {
       cancelled = true
     }
@@ -50,6 +60,11 @@ export function DashboardPage() {
   }
 
   const { profile: p, settings, currentWeek, isDemoData } = data
+  const calendarWeek = courseWeekNumber()
+  const weekDeadline = weekDeadlineDate(
+    calendarWeek,
+    settings.program_start_date || COURSE_START_DATE,
+  )
 
   return (
     <div className="space-y-5">
@@ -65,15 +80,21 @@ export function DashboardPage() {
           <div className="relative">
             <p className="text-sm text-slate">Добро пожаловать</p>
             <h1 className="mt-1 font-display text-3xl tracking-tight text-ink md:text-4xl">
-              {p.display_name}
+              {canonicalDisplayName(p)}
             </h1>
             <p className="mt-2 text-sm text-slate">
               {p.email} · {p.role === 'admin' ? 'админ' : 'участник'}
               {p.participant_slot ? ` · вариант заданий ${p.participant_slot}` : ''} · {p.timezone}
             </p>
+            <p className="mt-2 text-xs text-slate">
+              Курс с {formatRuDate(settings.program_start_date || COURSE_START_DATE)} · календарная
+              неделя {calendarWeek} · дедлайн {formatRuDate(weekDeadline)} (МСК)
+            </p>
           </div>
         </div>
       </header>
+
+      <PeerProgressBoard profile={p} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="surface rounded-3xl p-5 lg:col-span-2">
