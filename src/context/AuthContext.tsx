@@ -19,7 +19,8 @@ import { isDemoAuth, supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 
 const DEMO_SESSION_KEY = 'elab_demo_session'
-const PROFILE_RETRY_DELAYS_MS = [0, 400, 1000]
+/** Fewer retries on mobile — first paint / login must not wait on profile waterfall. */
+const PROFILE_RETRY_DELAYS_MS = [0, 500]
 /** Hard fail-open: never leave ProtectedRoute spinning longer than this. */
 const AUTH_BOOT_TIMEOUT_MS = 2000
 const SLOW_AUTH_HINT =
@@ -119,7 +120,7 @@ async function upsertOwnProfile(userId: string, email: string): Promise<Profile 
 }
 
 type LoadProfileResult =
-  | { ok: true; profile: Profile }
+  | { ok: true; profile: Profile; fromDb: boolean }
   | { ok: false; message: string }
 
 async function loadProfileOnce(userId: string, email: string): Promise<LoadProfileResult> {
@@ -141,6 +142,7 @@ async function loadProfileOnce(userId: string, email: string): Promise<LoadProfi
     if (learner && row.display_name !== learner.display_name) {
       return {
         ok: true,
+        fromDb: true,
         profile: {
           ...row,
           display_name: learner.display_name,
@@ -149,18 +151,23 @@ async function loadProfileOnce(userId: string, email: string): Promise<LoadProfi
         },
       }
     }
-    return { ok: true, profile: { ...row, display_name: canonicalDisplayName(row) } }
+    return {
+      ok: true,
+      fromDb: true,
+      profile: { ...row, display_name: canonicalDisplayName(row) },
+    }
   }
 
   // Missing row: try client upsert (RLS allows own insert when allowlisted after migration 007)
   const created = await upsertOwnProfile(userId, email)
   if (created) {
-    return { ok: true, profile: created }
+    return { ok: true, fromDb: true, profile: created }
   }
 
   // Soft fallback so login does not bounce; show SQL hint
   return {
     ok: true,
+    fromDb: false,
     profile: syntheticProfile(userId, email),
   }
 }
@@ -174,11 +181,7 @@ async function loadProfileWithRetry(
     if (delay) await sleep(delay)
     last = await loadProfileOnce(userId, email)
     if (last.ok) {
-      // Detect soft synthetic (no created_at from DB race — use upsert miss flag via second select)
-      const { data } = supabase
-        ? await supabase.from('profiles').select('id').eq('id', userId).maybeSingle()
-        : { data: null }
-      return { ...last, missingDbRow: !data }
+      return { ...last, missingDbRow: !last.fromDb }
     }
   }
   return last!
@@ -340,7 +343,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        void refreshUnlockedWeekFromSupabase()
+        // Defer unlock sync — not needed for login / first paint
+        const deferUnlock = () => {
+          void refreshUnlockedWeekFromSupabase()
+        }
+        if (typeof requestIdleCallback === 'function') {
+          requestIdleCallback(deferUnlock, { timeout: 2500 })
+        } else {
+          window.setTimeout(deferUnlock, 0)
+        }
       } catch (err) {
         console.warn('auth boot failed:', err)
         if (!cancelled) setAuthError((prev) => prev ?? SLOW_AUTH_HINT)

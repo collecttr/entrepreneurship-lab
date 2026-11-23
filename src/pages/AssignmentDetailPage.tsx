@@ -1,8 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import type { ExaminerResult } from '@/ai/examiners'
-import { examineWriting } from '@/ai/examiners'
-import { fetchWeekSourceSnippets } from '@/ai/local-evidence'
 import { AssignmentComments } from '@/components/AssignmentComments'
 import { ExaminerResultPanel } from '@/components/ExaminerResultPanel'
 import { WEEKS } from '@/data/curriculum'
@@ -80,6 +78,10 @@ export function AssignmentDetailPage() {
     setExamError(null)
     setExamBusy(true)
     try {
+      const [{ fetchWeekSourceSnippets }, { examineWriting }] = await Promise.all([
+        import('@/ai/local-evidence'),
+        import('@/ai/examiners'),
+      ])
       const pageSnippets = await fetchWeekSourceSnippets(found!.week, 3)
       const r = examineWriting(profile!.id, {
         text: body,

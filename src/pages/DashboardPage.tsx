@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PeerProgressBoard } from '@/components/PeerProgressBoard'
 import { useAuth } from '@/context/AuthContext'
+
+const PeerProgressBoard = lazy(() =>
+  import('@/components/PeerProgressBoard').then((m) => ({ default: m.PeerProgressBoard })),
+)
 import {
   COURSE_START_DATE,
   courseWeekNumber,
@@ -98,7 +101,11 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <PeerProgressBoard profile={p} />
+      <Suspense
+        fallback={<p className="text-sm text-slate">Загружаем доску прогресса…</p>}
+      >
+        <PeerProgressBoard profile={p} />
+      </Suspense>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="surface rounded-3xl p-5 lg:col-span-2">

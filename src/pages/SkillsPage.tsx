@@ -1,5 +1,5 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { buildAdaptiveExercises } from '@/ai/examiners'
 import { SKILLS, type SkillCategory } from '@/data/skills'
 import { useAuth } from '@/context/AuthContext'
 import { getSkillProgress, listSkillEvidence } from '@/lib/progress-store'
@@ -15,6 +15,12 @@ const CATEGORY_RU: Record<SkillCategory, string> = {
   speaking: 'выступления',
 }
 
+type AdaptiveExercise = {
+  skill: string
+  exercise: string
+  replaces_optional_work?: boolean
+}
+
 function Bar({ value }: { value: number }) {
   return (
     <div className="h-2 overflow-hidden rounded-full bg-mist">
@@ -25,11 +31,23 @@ function Bar({ value }: { value: number }) {
 
 export function SkillsPage() {
   const { profile } = useAuth()
+  const [adaptive, setAdaptive] = useState<AdaptiveExercise[]>([])
+
+  useEffect(() => {
+    if (!profile) return
+    let cancelled = false
+    void import('@/ai/examiners').then(({ buildAdaptiveExercises }) => {
+      if (!cancelled) setAdaptive(buildAdaptiveExercises(profile.id))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [profile])
+
   if (!profile) return null
   const progress = getSkillProgress(profile.id)
   const weak = [...progress].sort((a, b) => a.score_ema - b.score_ema).slice(0, 3)
   const evidence = listSkillEvidence(profile.id).slice(0, 12)
-  const adaptive = buildAdaptiveExercises(profile.id)
 
   return (
     <div className="space-y-5">
@@ -72,19 +90,23 @@ export function SkillsPage() {
             Открыть тренажёр →
           </Link>
         </div>
-        <ul className="mt-3 space-y-2">
-          {adaptive.map((a, i) => (
-            <li key={`${a.skill}-${i}`} className="rounded-2xl bg-paper/80 px-3 py-2.5 text-sm">
-              <p className="font-medium text-ink">
-                {a.skill}
-                <span className="ml-2 text-xs font-normal text-slate">
-                  {a.replaces_optional_work ? 'замена необязательной работы' : 'по желанию'}
-                </span>
-              </p>
-              <p className="mt-1 text-slate">{a.exercise}</p>
-            </li>
-          ))}
-        </ul>
+        {adaptive.length === 0 ? (
+          <p className="mt-3 text-sm text-slate">Подбираем упражнения…</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {adaptive.map((a, i) => (
+              <li key={`${a.skill}-${i}`} className="rounded-2xl bg-paper/80 px-3 py-2.5 text-sm">
+                <p className="font-medium text-ink">
+                  {a.skill}
+                  <span className="ml-2 text-xs font-normal text-slate">
+                    {a.replaces_optional_work ? 'замена необязательной работы' : 'по желанию'}
+                  </span>
+                </p>
+                <p className="mt-1 text-slate">{a.exercise}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="surface rounded-3xl p-5">
@@ -105,7 +127,11 @@ export function SkillsPage() {
                     <p className="font-medium text-ink">{e.label}</p>
                     <p className="text-xs text-slate">
                       {meta?.title_ru ?? e.skill_id} · сигнал {e.signal} ·{' '}
-                      {e.source === 'assignment' ? 'задание' : e.source === 'trainer' ? 'тренажёр' : 'аттестация'}
+                      {e.source === 'assignment'
+                        ? 'задание'
+                        : e.source === 'trainer'
+                          ? 'тренажёр'
+                          : 'аттестация'}
                     </p>
                   </div>
                   <span className="text-xs text-slate">{e.at.slice(0, 10)}</span>

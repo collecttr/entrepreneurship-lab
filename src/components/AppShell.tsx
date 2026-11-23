@@ -13,13 +13,17 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { getLastForumPath, subscribeCollab, unreadCount } from '@/lib/collab-store'
 import { canonicalDisplayName } from '@/lib/learners'
 import { isDemoAuth } from '@/lib/supabase'
 import { DemoBanner } from './DemoBanner'
-import { EntryToasts } from './EntryToasts'
+
+/** Entry toasts pull peer-progress + curriculum — defer off the shell critical path. */
+const EntryToasts = lazy(() =>
+  import('./EntryToasts').then((m) => ({ default: m.EntryToasts })),
+)
 
 const NAV = [
   { to: '/dashboard', label: 'Обзор', icon: LayoutDashboard },
@@ -152,7 +156,9 @@ export function AppShell() {
           </main>
         </div>
       </div>
-      <EntryToasts />
+      <Suspense fallback={null}>
+        <EntryToasts />
+      </Suspense>
     </div>
   )
 }
